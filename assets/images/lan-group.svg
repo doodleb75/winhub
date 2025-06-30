@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_레이어_2" data-name="레이어 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 43.1 263.02">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #474747;
+        stroke-miterlimit: 10;
+        stroke-width: 7px;
+      }
+
+      .cls-2 {
+        fill: #474747;
+      }
+    </style>
+  </defs>
+  <g id="_레이어_1-2" data-name=" 레이어 1">
+    <g id="lan-group">
+      <path id="jack" class="cls-2" d="M0,0v40.9h6.55v7.49h30v-7.49h6.55V0H0ZM13.74,17.35h-5.81V6.84h5.81v10.51ZM24.45,17.35h-5.81V6.84h5.81v10.51ZM35.16,17.35h-5.81V6.84h5.81v10.51Z"/>
+      <line id="line" class="cls-1" x1="21.55" y1="48.39" x2="21.55" y2="263.02"/>
+    </g>
+  </g>
+</svg>

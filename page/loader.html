@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG 로더 애니메이션 (완벽한 결합 최종)</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <style>
+        /* 기본 페이지 스타일 */
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f0f0;
+            overflow: hidden; /* 로딩 중 스크롤 방지 */
+        }
+
+        /* 로더 컨테이너: 화면 전체를 덮고 중앙 정렬 */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 소켓 SVG: 화면 중앙보다 약간 위에 위치 (애니메이션 기준점) */
+        #loader-socket {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -150px);
+            width: 67.42px;
+            height: 59.61px;
+            z-index: 10;
+        }
+        
+        /* 소켓 경로(path) 초기 스타일 */
+        #lan-hole-path {
+            fill: none;
+            stroke: #9d9d9d;
+            stroke-width: 2;
+        }
+        
+        /* 케이블 SVG: 화면 하단 밖에서 시작하도록 초기 위치 설정 */
+        #loader-cable {
+            position: absolute;
+            top: 100vh; /* 화면 아래에서 시작 */
+            left: 50%;
+            transform: translateX(-50%);
+            /* 케이블의 너비를 소켓의 너비와 동일하게 설정 */
+            width: 48.42px; 
+            /* 라인이 끊기지 않도록 높이를 충분히 길게 설정 */
+            height: 100vh;
+            z-index: 5;
+        }
+        
+        /* 케이블 내부 스타일 */
+        #loader-cable .line-path {
+            fill: none;
+            stroke: #6c6c6c;
+            stroke-miterlimit: 10;
+            stroke-width: 7px;
+        }
+        #loader-cable .fill-path {
+            fill: #ff9900;
+        }
+
+        /* 완료 텍스트 */
+        #loader-text {
+            position: absolute;
+            /* 소켓 아래에 위치하도록 top, transform 조정 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50px);
+            font-size: 1rem;
+            font-weight: bold;
+            color: rgb(255, 196, 0);
+            opacity: 0; /* 처음엔 숨김 */
+            white-space: nowrap;
+            z-index: 15;
+        }
+
+        /* 메인 콘텐츠 */
+        #main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #main-content h1 {
+            font-size: 3rem;
+            color: #333;
+        }
+        #loader-socket,
+#loader-cable {
+    /* 다른 속성들... */
+    shape-rendering: geometricPrecision;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+    </style>
+</head>
+<body>
+
+    <!-- 로더 HTML 구조 -->
+    <div id="loader">
+        <!-- 소켓 SVG (먼저 그려짐) -->
+        <svg xmlns="http://www.w3.org/2000/svg" id="loader-socket" viewBox="0 0 61.42 59.61">
+          <path id="lan-hole-path" d="M0,0v59.61h61.42V0H0ZM52.26,40.9h-6.55v7.49H15.71v-7.49h-6.55V6.84h7.94v10.51h5.81V6.84h4.9v10.51h5.81V6.84h4.9v10.51h5.81V6.84h7.94v34.06Z"/>
+        </svg>
+        
+        <!-- 케이블 SVG (아래에서 올라옴) -->
+        <!-- [수정] preserveAspectRatio="none"을 추가하여 가로 크기를 강제로 맞춤 -->
+        <svg xmlns="http://www.w3.org/2000/svg" id="loader-cable" viewBox="0 0 43.1 1000" preserveAspectRatio="none"> 
+          <g id="lan-group">
+            <path id="jack" class="fill-path" d="M0,0v40.9h6.55v7.49h30v-7.49h6.55V0H0ZM13.74,17.35h-5.81V6.84h5.81v10.51ZM24.45,17.35h-5.81V6.84h5.81v10.51ZM35.16,17.35h-5.81V6.84h5.81v10.51Z"/>
+            <line id="line" class="line-path" x1="21.55" y1="48.39" x2="21.55" y2="1000"/>
+          </g>
+        </svg>
+        
+        <!-- 완료 텍스트 -->
+        <div id="loader-text">Connect to complete</div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div id="main-content">
+        <div>
+            <h1>로딩 완료!</h1>
+            <p>메인 콘텐츠가 표시됩니다.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 애니메이션 대상 요소 선택
+            const loader = document.getElementById('loader');
+            const mainContent = document.getElementById('main-content');
+            const socket = document.getElementById('loader-socket');
+            const socketPath = document.getElementById('lan-hole-path');
+            const cable = document.getElementById('loader-cable');
+            const loaderText = document.getElementById('loader-text');
+
+            // --- 1. 초기 상태 및 위치 계산 ---
+            
+            // 소켓 경로의 전체 길이를 계산하여 보이지 않게 설정
+            const socketPathLength = socketPath.getTotalLength();
+            gsap.set(socketPath, {
+                strokeDasharray: socketPathLength,
+                strokeDashoffset: socketPathLength
+            });
+            
+            // 소켓의 최종 위치를 기준으로 케이블의 도착 지점을 동적으로 계산
+            const socketRect = socket.getBoundingClientRect();
+            const yOffset = 6; 
+
+            const finalCableTop = socketRect.top + yOffset;
+
+            // GSAP 타임라인 생성
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    gsap.to(loader, {
+                        opacity: 0,
+                        duration: 0.5,
+                        onComplete: () => {
+                            loader.style.visibility = 'hidden';
+                            mainContent.style.opacity = '1';
+                            mainContent.style.visibility = 'visible';
+                            document.body.style.overflow = 'auto'; // 스크롤 허용
+                        }
+                    });
+                }
+            });
+            
+            // --- 2. 애니메이션 시퀀스 정의 ---
+
+            // Step 1: 소켓 외곽선 그리기
+            tl.to(socketPath, {
+                strokeDashoffset: 0,
+                duration: 1.5,
+                ease: "power1.inOut"
+            })
+            // Step 2: 케이블이 계산된 최종 위치로 정확하게 이동
+            .to(cable, {
+                top: finalCableTop, // 계산된 최종 top 값으로 이동
+                duration: 2, // 이 시간으로 로딩 속도 조절
+                ease: "power2.inOut"
+            }, "-=1.0") // 소켓 그리기가 시작되고 0.5초 후에 시작
+            
+            // Step 3: 결합 완료 후 소켓 경로를 채우고, 텍스트 표시
+            .to(socketPath, {
+                fill: "#ffc400", // 결합 시 소켓 내부 채우기
+                stroke: "#ffc400",
+                duration: 0.3
+            }, "-=0.1") // 케이블 도착 직전에 실행
+            .to(loaderText, {
+                opacity: 1,
+                duration: 0.5
+            }, ">-0.2") // 소켓 채우기와 비슷하게 시작
+
+            // Step 4: 전체 로더 사라지기 (소켓, 케이블, 텍스트 포함)
+            .to([socket, cable, loaderText], {
+                delay: 0.5, // 텍스트 표시 후 잠시 대기
+                scale: 0.8,
+                opacity: 0,
+                duration: 0.5,
+                ease: "power1.in",
+                stagger: 0.05
+            });
+        });
+    </script>
+</body>
+</html>

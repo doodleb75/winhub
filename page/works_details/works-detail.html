@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="../../">
+    <title>WINHUB - WORKS - KT MyCare</title>
+    <!-- 공통 스타일시트 -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <!-- 상세 페이지 전용 스타일시트 -->
+    <link rel="stylesheet" href="assets/css/works-detail.css" /> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- GSAP 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body class="subpage-body works-detail-page">
+    
+    <div id="loader-placeholder"></div>
+    <!-- 헤더와 메뉴는 기존 구조를 그대로 사용합니다 -->
+    <div id="header-placeholder"></div>
+    <div id="menu-overlay-placeholder"></div>
+
+    <div class="subpage-container">
+        <!-- 상단 프로젝트 정보 섹션 -->
+        <section id="sub-hero" class="subpage-section works-detail-hero">
+            <div class="works-detail-content">
+                <h1 class="project-title">창호재/완성창 통합관리 시스템</h1>
+                <div class="project-meta">
+                    <dl>
+                        <dt>Date.</dt>
+                        <dd>2021.03</dd>
+                    </dl>
+                    <dl>
+                        <dt>Client.</dt>
+                        <dd>LX</dd>
+                    </dl>
+                    <dl>
+                        <dt>Service.</dt>
+                        <dd>APP(Android/iOS)・UI/UX Design・Publising・UX Concept Building</dd>
+                    </dl>
+                </div>
+                <div class="project-overview">
+                    <h3>Overview.</h3>
+                    <p>
+                        완성창 판매/운영 통합프로그램으로 창호재 완성창 비즈니스 사업전환 통합운영 주문/배분/생산/운송/마감 기반의 ERP 통합 시스템 입니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- [수정] 전체 화면 프로젝트 이미지 섹션 -->
+        <section id="project-showcase" class="subpage-section">
+             <!-- [수정] 이미지를 배경이 아닌 img 태그로 직접 삽입 -->
+              <img src="https://placehold.co/1200x6000/4e4b57/fff?text=Project+Image+(3000px)" alt="Project Showcase Image" class="showcase-image">
+            <!-- <img src="../assets/images/sample-list01.png" alt="Project Showcase Image" class="showcase-image"> -->
+        </section>
+
+        <!-- 이전/다음 프로젝트 네비게이션 -->
+        <section id="project-navigation" class="subpage-section">
+            <div class="nav-links">
+                <a href="#" class="prev-project">
+                    <i class="fas fa-arrow-left"></i> PREV PROJECT
+                </a>
+                <a href="page/works.html" class="back-to-list" title="목록으로">
+                    <i class="fas fa-th-large"></i>
+                </a>
+                <a href="#" class="next-project">
+                    NEXT PROJECT <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- 최상단으로 이동 버튼 -->
+        <button id="scrollToTopBtn" title="위로 가기"><i class="fas fa-arrow-up"></i></button>
+    </div>
+
+    <!-- 푸터는 기존 구조를 그대로 사용합니다 -->
+    <div id="footer-placeholder"></div>
+
+    <!-- 상세 페이지 전용 자바스크립트 -->
+    <script type="module" src="assets/js/works-detail.js"></script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WINHUB</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body class="main-page">
+    <!-- Placeholders for dynamically loaded content -->
+    <div id="loader-placeholder"></div>
+    <div id="header-placeholder"></div>
+    <div id="menu-overlay-placeholder"></div>
+
+    <!-- Background elements -->
+    <div class="bar"></div>
+    <div id="threejs-background-container"></div>
+    <div class="canvas-cont">
+      <canvas id="canvas3d"></canvas>
+    </div>
+
+    <!-- Main Content Section -->
+    <section class="part-container">
+      <div id="hero" class="flex row">
+        <div class="container">
+          <!-- MODIFIED: Wrapper for hero text elements for better positioning control -->
+          <div class="hero-text-block">
+            <div class="com-name-ani">WINHUB</div>
+            <div class="headline">
+              <div>CONNECTS</div>
+              <div>TO EMPOWER</div>
+              <div>YOUR</div>
+              <div>SUCCESS</div>
+            </div>
+          </div>
+        </div>
+        <p class="scroll-icon"><span class="scroll"></span></p>
+      </div>
+
+      <!-- Part 1: Advantage Section -->
+      <div id="part1" class="flex row">
+        <div class="part1-info flex column text">
+          <div class="sub-title">WINHUB ADVANTAGE</div>
+          <div class="advantage-cards-grid">
+            <div class="advantage-card">
+              <div class="advantage-icon"><i class="fas fa-microchip"></i></div>
+              <h2>혁신을 선도하는 기술력</h2>
+              <p>
+                WINHUB는는 AI, Cloud, Big Data 등 최신 기술 트렌드를 깊이 있게
+                이해하고, 이를 고객의 비즈니스에 실제 적용하여 복잡한 기술적
+                과제를 해결합니다. 변화하는 시장에서 고객이 항상 한발 앞서 나갈
+                수 있도록 혁신적인 기술 솔루션을 제공합니다.
+              </p>
+            </div>
+            <div class="advantage-card">
+              <div class="advantage-icon"><i class="fas fa-users-cog"></i></div>
+              <h2>고객 중심의 맞춤형 전략</h2>
+              <p>
+                단순한 솔루션 공급을 넘어, 고객의 비즈니스 목표와 고유한 환경을
+                정확히 분석하고 이해합니다. 맞춤형 컨설팅부터 시스템 구축,
+                안정적인 운영 및 지속적인 가치 창출까지, 고객 성공을 위한 최적의
+                전략을 제시하고 실행합니다.
+              </p>
+            </div>
+            <div class="advantage-card">
+              <div class="advantage-icon"><i class="fas fa-medal"></i></div>
+              <h2>신뢰할 수 있는 수행능력</h2>
+              <p>
+                다양한 산업 분야에서 축적한 풍부한 SI 프로젝트 경험과 성공
+                사례는 WINHUB의 강력한 자산입니다. 검증된 방법론과 안정적인
+                프로젝트 관리 능력을 바탕으로, 약속된 기간 내에 최고 품질의
+                결과물을 제공하여 고객의 신뢰에 보답합니다.
+              </p>
+            </div>
+          </div>
+          <div class="integrated-value-card">
+            <div class="integrated-value-icon">
+              <i class="fas fa-sitemap"></i>
+            </div>
+            <h2>통합 시너지로 완성하는 고객의 성공</h2>
+            <p>
+              WINHUB는 기술 리더십, 고객 맞춤 전략, 그리고 검증된 수행능력을
+              유기적으로 결합하여 개별 솔루션을 넘어선 강력한 통합 시너지를
+              창출합니다. 우리는 고객의 비즈니스가 디지털 시대에 지속적으로
+              성장하고 성공할 수 있도록 가장 신뢰받는 파트너가 될 것을
+              약속드립니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Part 2: Works Section -->
+      <div id="part2" class="flex row">
+        <div class="part2-info flex column">
+          <div class="sub-title">WORKS</div>
+          <div class="works-list-container">
+            <ul class="works-list">
+              <!-- Work items are populated by JS -->
+            </ul>
+          </div>
+          <button class="goto-work" onclick="location.href='page/works.html'">
+            Go To WorkList
+            <span class="menu-link-arrow">
+              <svg
+                class="menu-link-hover-svg goto-works"
+                viewBox="0 0 217.41 63.21"
+                aria-hidden="true"
+              >
+                <g>
+                  <polyline
+                    class="arrow-path"
+                    points="0 62.21 215 62.21 153.5 .71"
+                  />
+                </g>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Part 3: Outro Section -->
+      <div id="part3" class="flex row">
+        <div class="part3-info flex column text">
+          <div class="sub-title">YOUR SUCCESS PARTNER</div>
+          <div class="outro-content">
+            <h2>함께 만들어갈 디지털 혁신, <br />지금 WINHUB와 시작하세요.</h2>
+            <p>
+              WINHUB는는 단순한 시스템 구축을 넘어, 고객 비즈니스의 성공적인
+              디지털 전환을 위한 진정한 파트너십을 추구합니다. 다년간 축적된 SI
+              분야의 전문성과 끊임없는 기술 혁신을 통해 고객에게 최고의 가치를
+              제공할 것을 약속드립니다.
+            </p>
+            <p>
+              귀사의 비즈니스에 최적화된 맞춤형 솔루션이 궁금하십니까? 지금 바로
+              WINHUB의 전문가와 상담하세요. 숙련된 컨설턴트가 친절하게 안내해
+              드리며, 귀사의 성공적인 미래 설계를 위한 최적의 로드맵을 제시해
+              드립니다.
+            </p>
+            <button
+              onclick="location.href='page/contact.html'"
+              class="cta-button"
+            >
+              프로젝트 문의하기
+              <span class="menu-link-arrow">
+              <svg
+                class="menu-link-hover-svg goto-works"
+                viewBox="0 0 217.41 63.21"
+                aria-hidden="true"
+              >
+                <g>
+                  <polyline
+                    class="arrow-path"
+                    points="0 62.21 215 62.21 153.5 .71"
+                  />
+                </g>
+              </svg>
+            </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer and Scroll to Top Button -->
+    <div id="footer-placeholder"></div>
+    <button id="scrollToTopBtn" title="위로 가기">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script type="module" src="./assets/js/main-app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,209 @@
+/* assets/css/works-detail.css */
+
+/*
+  상세 페이지는 밝은 테마를 기본으로 사용하므로, 
+  body에 works-detail-page 클래스를 추가하여 배경과 텍스트 색상을 지정합니다.
+*/
+body.works-detail-page {
+    background-color: #fff !important;
+    color: #333;
+}
+
+/* 헤더의 메뉴 버튼이 흰 배경에서 보이도록 색상을 지정합니다.
+*/
+.works-detail-page .menu-icon {
+    /* color: #333 !important;
+    transition: none !important; */
+}
+
+/* [추가] 애니메이션 될 콘텐츠를 초기에 숨깁니다. (FOUC 방지) */
+.works-detail-content > .project-title,
+.works-detail-content > .project-meta,
+.works-detail-content > .project-overview,
+.works-detail-hero,
+#project-showcase,
+#project-navigation {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* 히어로 섹션 (프로젝트 정보) 높이를 60vh로 고정합니다.
+*/
+#sub-hero.works-detail-hero {
+    position: relative;
+    min-height: 60vh;
+    /* min-height: 500px; */
+    max-height: fit-content;
+    padding: 3rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    box-sizing: border-box;
+    overflow: hidden; /* 자식 요소 애니메이션을 위해 추가 */
+    box-shadow: 0 1px 13px rgba(0, 0, 0, .25);
+    z-index: 1;
+}
+.works-detail-content {
+    max-width: 900px;
+    width: 100%;
+    text-align: left;
+}
+
+.project-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+    color: #111;
+    line-height: 1.4;
+}
+.triangle-down:before {
+    content:'';
+    display: block;
+    left: 0;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid white;
+}
+
+.project-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.project-meta dl {
+    margin: 0;
+}
+
+.project-meta dt {
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.project-meta dd {
+    margin-left: 0;
+    font-size: 1rem;
+    color: #333;
+    word-break: keep-all;
+}
+
+.project-overview h3 {
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.project-overview p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #333;
+    max-width: 800px;
+}
+
+/* 쇼케이스 섹션 */
+#project-showcase {
+    display: block;
+    height: auto;
+    width: 100%;
+    padding: 0; 
+    background-color: #f0f2f5;
+    overflow: visible;
+}
+
+.showcase-image {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* 프로젝트 네비게이션 섹션 */
+#project-navigation {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    min-height: auto;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 1rem 2rem;
+    border-top: 1px solid #e0e0e04f;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.nav-links a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
+.nav-links a:hover {
+    color: #007aff;
+}
+
+.nav-links a.back-to-list {
+    font-size: 1.5rem;
+}
+.works-detail-page .menu-icon {
+    visibility: visible;
+}
+.works-detail-page #scrollToTopBtn {
+    bottom: 120px;
+    right: 2rem;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    #sub-hero.works-detail-hero {
+        height: auto;
+        min-height: 50vh;
+        max-height: fit-content;
+        padding: 6rem 1.5rem 3rem 1.5rem;
+        align-items: flex-start;
+    }
+    .project-title {
+        font-size: 1.8rem;
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+    }
+    .project-meta {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+    }
+    #project-navigation {
+        padding: 0.5rem 1rem;
+    }
+    .nav-links a {
+        font-size: 0.8rem;
+    }
+    .works-detail-page #scrollToTopBtn {
+        bottom: 90px;
+        right: 1rem;
+    }
+}

@@ -1,0 +1,301 @@
+/* ../assets/css/works-specific.css */
+
+/* Filter Section Full Width Styling */
+.filter-full-width-section {
+    padding-left: 0 !important;  /* Override .subpage-section padding */
+    padding-right: 0 !important; /* Override .subpage-section padding */
+    /* Adjust top/bottom padding if needed, or inherit from .subpage-section */
+    padding-top: 2rem; /* Example: Reduced top padding */
+    padding-bottom: 1rem; /* Example: Reduced bottom padding */
+}
+
+.filter-title-controls-container {
+    width: 90%; /* Max width for the content within the full-width section */
+    max-width: 1200px; /* Consistent with other wrapped content */
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center; /* Center the title and controls */
+    padding-bottom: 1rem;
+}
+
+.filter-section-title {
+    /* Inherits .section-title from style.css, but we might want specific margin */
+    margin-bottom: 1.5rem !important; /* Ensure spacing below title */
+    text-align: center; /* Explicitly center title */
+     /* Color will be handled by .content-class and theme switching in sub-app.js */
+}
+/* Ensure the border from .section-title in style.css is appropriate or override */
+.subpage-body:not(.scrolled-past-hero-colors) .filter-section-title {
+    border-image-source: linear-gradient(to right, #7dd3fc, rgba(255,255,255,0.4)); /* Lighter blue gradient for dark theme */
+    border-image-slice: 1;
+}
+.subpage-body.scrolled-past-hero-colors .filter-section-title {
+    border-image-source: linear-gradient(to right, #3b82f6, #9ca3af); /* Standard blue to gray for light theme */
+    border-image-slice: 1;
+}
+
+
+/* Filter Buttons Styling (already good, minor adjustments if needed for centering) */
+.filter-controls {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 1.45rem;
+    /* margin-top: 1rem; */ /* Now handled by container */
+}
+.filter-button {
+    transition: all 0.3s ease;
+    /* border: 1px solid transparent; */
+    padding: 0.5rem 1.25rem;
+    /* border-radius: 20px; */
+    border-radius: 0;
+    border: 0;
+    font-size: 1.24rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.subpage-body:not(.scrolled-past-hero-colors) .filter-button {
+    /* border-color: rgba(255, 255, 255, 0.3); */
+    color: rgba(255, 255, 255, 0.8);
+    /* background-color: transparent; */
+}
+.subpage-body:not(.scrolled-past-hero-colors) .filter-button.active,
+.subpage-body:not(.scrolled-past-hero-colors) .filter-button:hover {
+    color: #1f2937;
+    background-color: transparent;
+    /* background-color: #e0cffc;
+    border-color: #e0cffc; */
+}
+
+.subpage-body.scrolled-past-hero-colors .filter-button {
+    /* border-color: #D1D5DB; */
+    position: relative;
+    color: #4B5563;
+    text-align: left;
+    /* background-color: #F3F4F6; */
+}
+.subpage-body.scrolled-past-hero-colors .filter-button.active,
+.subpage-body.scrolled-past-hero-colors .filter-button:hover {
+    color: #002fff;
+    background-color: transparent;
+    /* background-color: #8B5CF6;
+    border-color: #8B5CF6; */
+}
+.subpage-body.scrolled-past-hero-colors .filter-button::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    transition: all .2s;
+}
+.subpage-body.scrolled-past-hero-colors .filter-button.active::before {
+    content:'';
+    position: absolute;
+    top: -8px;
+    left: 16px;
+    width: 20%;
+    height: 3px;
+    background: #002fff;
+    transition: all .2s;
+}
+
+.portfolio-full-width-section {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+/* =============================================================== */
+/* ============= 포트폴리오 썸네일 스타일 수정 영역 시작 ============= */
+/* =============================================================== */
+
+#portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    width: 100%;
+}
+
+.portfolio-item {
+    background-color: #374151;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 4 / 3;
+    opacity: 0;
+    transform: translateY(50px);
+}
+.portfolio-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+/* 호버 시 이미지를 약간 확대하여 동적인 느낌 부여 */
+.portfolio-item:hover img {
+    transform: scale(1.05);
+}
+
+.thumbnail-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    
+    /* 반투명 배경 블록 */
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(2px); /* 배경 블러 효과 추가 (선택 사항) */
+    padding: 1.25rem 1.5rem;
+    
+    /* 내부 콘텐츠 정렬 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: left;
+    
+    /* 애니메이션: 평소에는 아래에 숨겨둠 */
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 포트폴리오 아이템에 호버 시 오버레이가 위로 올라옴 */
+.portfolio-item:hover .thumbnail-overlay {
+    transform: translateY(0);
+}
+
+/* 오버레이 내부 요소들은 부모 애니메이션에 따라 움직이므로 개별 애니메이션 불필요 */
+.thumbnail-overlay h3,
+.thumbnail-overlay p,
+.thumbnail-overlay a {
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+/* 오버레이 내부 텍스트 스타일 */
+.thumbnail-overlay h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+}
+.thumbnail-overlay p {
+    font-size: 0.9rem; /* 클라이언트명 */
+    color: #E5E7EB;
+    margin-bottom: 1rem;
+}
+.thumbnail-overlay a {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.4rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 50px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.thumbnail-overlay a:hover {
+    background-color: #fff;
+    color: #1f2937;
+}
+
+/* =============================================================== */
+/* ============= 포트폴리오 썸네일 스타일 수정 영역 끝 ============= */
+/* =============================================================== */
+
+
+@media (max-width: 1024px) {
+    #portfolio-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 640px) {
+    #portfolio-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+    /* 모바일 환경의 폰트 크기 조정 */
+    .thumbnail-overlay {
+        padding: 1rem 1.25rem;
+    }
+    .thumbnail-overlay h3 { font-size: 1.1rem; }
+    .thumbnail-overlay p { font-size: 0.8rem; }
+    .thumbnail-overlay a { 
+        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+    }
+
+    .filter-title-controls-container {
+        width: 100%; /* Slightly more width on mobile */
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .filter-section-title {
+        font-size: clamp(1.6rem, 5vw, 2rem); /* Adjust title size on mobile */
+    }
+    .filter-button {
+        padding: 0.4rem 1rem;
+        font-size: 0.8rem;
+    }
+    .filter-button {
+        font-size: 1.05rem;
+        min-width: auto !important;
+    }
+}
+
+
+/* Code Viewer Styling */
+.code-toggle-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+.code-toggle-buttons button {
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    transition: background-color 0.15s ease;
+    border: none;
+}
+.toggle-css-btn { background-color: #3B82F6; }
+.toggle-css-btn:hover { background-color: #2563EB; }
+.toggle-js-btn { background-color: #10B981; }
+.toggle-js-btn:hover { background-color: #059669; }
+
+.code-display-container {
+    margin-top: 1.5rem;
+    text-align: left;
+}
+.code-display-container h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.code-viewer {
+    background-color: #1f2937;
+    color: #e5e7eb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    max-height: 400px;
+}
+.code-viewer pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+.hidden {
+    display: none !important;
+}

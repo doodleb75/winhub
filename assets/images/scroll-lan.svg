@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_레이어_2" data-name="레이어 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 81.14">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-width: 4px;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        fill: none;
+        stroke: #fff;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2 {
+        stroke-width: 3px;
+      }
+
+      .cls-3 {
+        stroke-width: 2px;
+      }
+    </style>
+  </defs>
+  <g id="cable-jack">
+    <g>
+      <path class="cls-2" d="M4.47,1.5h24.07c1.64,0,2.97,1.33,2.97,2.97v27.03H1.5V4.47c0-1.64,1.33-2.97,2.97-2.97Z"/>
+      <path class="cls-2" d="M1.5,31.5h30v5.59c0,1.7-1.38,3.08-3.08,3.08H4.58c-1.7,0-3.08-1.38-3.08-3.08v-5.59h0Z"/>
+      <rect class="cls-3" x="10.09" y="23.18" width="12.82" height="8.32"/>
+      <g>
+        <line class="cls-3" x1="8.13" y1="1.5" x2="8.13" y2="9.48"/>
+        <line class="cls-3" x1="16.5" y1="1.5" x2="16.5" y2="9.48"/>
+        <line class="cls-3" x1="24.87" y1="1.5" x2="24.87" y2="9.48"/>
+      </g>
+      <line class="cls-1" x1="16.5" y1="40.17" x2="16.5" y2="81.14"/>
+    </g>
+  </g>
+</svg>
