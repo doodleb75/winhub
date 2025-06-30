@@ -46,7 +46,7 @@ function safeSessionGet(key) {
     try {
         return sessionStorage.getItem(key);
     } catch (e) {
-        console.warn("Could not access sessionStorage. It might be disabled (e.g., in private Browse mode).", e);
+        console.warn("Could not access sessionStorage. It might be disabled (e.g., in private browsing mode).", e);
         return null;
     }
 }
@@ -251,10 +251,10 @@ export async function loadCommonUI() {
 
     try {
         await Promise.all([
-            loadHTML('header-placeholder', `${baseCommonPath}_header.html`),
-            loadHTML('menu-overlay-placeholder', `${baseCommonPath}_menu_overlay.html`),
-            loadHTML('footer-placeholder', `${baseCommonPath}_footer.html`),
-            loadHTML('loader-placeholder', `${baseCommonPath}_loader.html`)
+            loadHTML('header-placeholder', `${baseCommonPath}header.html`),
+            loadHTML('menu-overlay-placeholder', `${baseCommonPath}menu_overlay.html`),
+            loadHTML('footer-placeholder', `${baseCommonPath}footer.html`),
+            loadHTML('loader-placeholder', `${baseCommonPath}loader.html`)
         ]);
 
         if (typeof setupMenu === 'function') {
@@ -277,10 +277,12 @@ export async function loadCommonUI() {
 }
 
 /**
- * [MODIFIED FOR GITHUB PAGES] Sets the active state for the current navigation link.
- * This version correctly handles subdirectory hosting like GitHub Pages.
+ * [MODIFIED] Sets the active state for the current navigation link.
+ * It also adds hover effects to temporarily remove and restore the active state
+ * when the user interacts with any navigation link.
  */
 function activateCurrentNavLink() {
+    const currentPath = window.location.pathname;
     const menuOverlayElement = document.getElementById('menu-overlay');
     if (!menuOverlayElement) {
         console.warn("activateCurrentNavLink: Menu overlay element with ID 'menu-overlay' was not found.");
@@ -294,31 +296,23 @@ function activateCurrentNavLink() {
     }
 
     let activeLink = null;
-    // 현재 페이지의 전체 주소를 가져옵니다. (e.g., "https://user.github.io/repo/page/about.html")
-    const currentPageHref = window.location.href.replace(/\/$/, ''); // 마지막 슬래시 제거
 
-    // 가장 정확하게 일치하는 링크를 먼저 찾습니다.
+    // --- Find and set the active link based on the current URL path ---
+    const normalizedCurrentPath = currentPath.replace(/\/$/, '') || '/';
+
     navLinks.forEach(link => {
-        if (link.href.replace(/\/$/, '') === currentPageHref) {
-            activeLink = link;
+        const linkUrl = new URL(link.href, window.location.origin);
+        const linkPath = linkUrl.pathname;
+        const normalizedLinkPath = linkPath.replace(/\/$/, '') || '/';
+
+        // Condition for matching paths. Handles index page specifically.
+        const isCurrentIndex = normalizedCurrentPath === '/' || normalizedCurrentPath === '/index.html';
+        const isLinkIndex = normalizedLinkPath === '/' || normalizedLinkPath === '/index.html';
+
+        if ((isCurrentIndex && isLinkIndex) || (!isCurrentIndex && !isLinkIndex && normalizedCurrentPath === normalizedLinkPath)) {
+            activeLink = link; // Found the active link
         }
     });
-
-    // 만약 정확히 일치하는 링크가 없다면, 'index.html' 관련 예외 처리를 합니다.
-    // (e.g. "..../winhub/" 와 "..../winhub/index.html" 을 동일하게 취급)
-    if (!activeLink) {
-        navLinks.forEach(link => {
-            const linkHref = link.href.replace(/\/$/, '');
-            if (
-                (currentPageHref.endsWith('/index.html') && currentPageHref.replace('/index.html', '') === linkHref) ||
-                (linkHref.endsWith('/index.html') && linkHref.replace('/index.html', '') === currentPageHref)
-            ) {
-                activeLink = link;
-            }
-        });
-    }
-
-    // --- 여기부터 아래 코드는 기존과 동일합니다 ---
 
     // --- Initial setup ---
     // Add the active class to the correct link when the page loads.
