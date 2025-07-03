@@ -52,7 +52,6 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 }
 
 // --- Configuration Variables ---
-// ▼▼▼▼▼ 수정된 부분 ▼▼▼▼▼
 const getScaleConfig = (isDesktopView) => {
     const screenWidth = window.innerWidth;
     if (!isDesktopView) { // Mobile (<= 767px)
@@ -60,7 +59,6 @@ const getScaleConfig = (isDesktopView) => {
     }
     // Desktop views (> 767px)
     if (screenWidth > 2200) { // Large Desktop
-        // 매우 넓은 화면에서는 오브젝트가 너무 커지지 않도록 기본 스케일 값을 줄입니다.
         return { hero: 115, part1: 170, part2: 170, part3: 170 };
     }
     // Standard Desktop
@@ -75,14 +73,11 @@ const getTargetWinhubX = (isMobileView) => {
     }
     const screenWidth = window.innerWidth;
     if (screenWidth > 2200) { // Large Desktop
-        // 매우 넓은 화면에서 오브젝트가 너무 오른쪽으로 치우치지 않도록 X 값을 조정합니다.
         return responsiveX(58);
     }
     // Standard Desktop
     return responsiveX(65);
 };
-// ▲▲▲▲▲ 수정 완료 ▲▲▲▲▲
-
 const getTargetWinhubY = (isMobileView) => isMobileView ? responsiveY(-10) : 0;
 const WINHUB_INTRO_END_Z = 0;
 const partBackgroundColors = { hero: "#410b7a", part1: "#0b2c7a", part2: "#0b7a48", part3: "#7a063c" };
@@ -601,6 +596,8 @@ async function runMainPageSequence() {
     let finalPositions = [];
     let tempSplit;
     try {
+        // Ensure fonts are ready before measuring
+        await document.fonts.ready;
         tempSplit = new SplitText(comNameElement, { type: 'chars' });
         if (tempSplit.chars) {
             finalPositions = tempSplit.chars.map(char => {
@@ -826,26 +823,38 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+// ▼▼▼▼▼ 수정된 부분 ▼▼▼▼▼
+// 기존 DOMContentLoaded를 window.addEventListener('load', ...)로 변경합니다.
+// 이렇게 하면 페이지의 모든 리소스(이미지, 스타일시트, 폰트 등)가 로드된 후 스크립트가 실행됩니다.
+window.addEventListener("load", async () => {
     window.scrollTo(0, 0);
 
     setupScrollRestoration();
     if (typeof ScrollTrigger !== 'undefined') {
         ScrollTrigger.normalizeScroll(true);
     }
+    
     try {
+        // 공통 UI(헤더, 푸터 등)를 먼저 로드합니다.
         await loadCommonUI();
         const headerLogoForEarlyHide = document.querySelector("#header-placeholder .com-name-logo");
         if (headerLogoForEarlyHide) gsap.set(headerLogoForEarlyHide, { autoAlpha: 0 });
         
+        // 'works' 데이터를 동적으로 채웁니다.
         populateWorksList();
         
+        // 모든 폰트가 렌더링될 준비가 될 때까지 기다립니다.
+        // 이는 SplitText와 같이 텍스트 크기에 의존하는 애니메이션의 정확도를 높입니다.
+        await document.fonts.ready;
+
+        // 모든 리소스와 폰트가 준비된 후 메인 시퀀스를 실행합니다.
         runMainPageSequence().catch(error => {
             console.error("Error in runMainPageSequence:", error);
             hideLoaderOnError();
             enableScrollInteraction();
             window.scrollTo(0, 0);
             if (!initialSetupDone) {
+                // 에러 발생 시에도 스크롤 트리거는 설정되어야 반응형으로 동작합니다.
                 setupResponsiveScrollTriggers();
                 initialSetupDone = true;
             } else {
@@ -858,3 +867,4 @@ document.addEventListener("DOMContentLoaded", async () => {
         enableScrollInteraction();
     }
 });
+// ▲▲▲▲▲ 수정 완료 ▲▲▲▲▲
