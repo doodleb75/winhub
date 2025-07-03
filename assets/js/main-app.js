@@ -476,7 +476,9 @@ function setupScrollIconAnimation() {
     });
  }
 
-function populateWorksList() {
+// ▼▼▼▼▼ 수정된 부분 ▼▼▼▼▼
+// Promise를 반환하도록 함수를 async로 변경하고, 모든 이미지가 로드될 때까지 기다립니다.
+async function populateWorksList() {
     const worksListContainer = document.querySelector("#part2 .works-list");
     if (!worksListContainer) {
         console.error("populateWorksList: .works-list element not found.");
@@ -491,8 +493,11 @@ function populateWorksList() {
     });
 
     const recentWorks = sortedWorks.slice(0, numberOfRecentWorks);
-
     worksListContainer.innerHTML = '';
+    
+    // 각 이미지의 로딩 상태를 추적하기 위한 Promise 배열
+    const imageLoadPromises = [];
+
     recentWorks.forEach(work => {
         const listItem = document.createElement('li');
         listItem.classList.add('work-item');
@@ -504,12 +509,21 @@ function populateWorksList() {
         const thumbnailDiv = document.createElement('div');
         thumbnailDiv.classList.add('work-item-thumbnail');
         const thumbnailImg = document.createElement('img');
+        
+        // 각 이미지에 대한 로딩 Promise를 생성합니다.
+        const imagePromise = new Promise((resolve) => {
+            thumbnailImg.onload = resolve;
+            thumbnailImg.onerror = function() {
+                this.onerror = null; // 무한 루프 방지
+                this.src = `https://placehold.co/600x450/cccccc/333333?text=Image+Not+Found`;
+                resolve(); // 에러가 발생해도 Promise 체인이 멈추지 않도록 resolve 호출
+            };
+        });
+        imageLoadPromises.push(imagePromise);
+
         thumbnailImg.src = buildUrl(work.listImage);
         thumbnailImg.alt = `[프로젝트 ${work.title} 썸네일]`;
-        thumbnailImg.onerror = function() {
-            this.onerror = null;
-            this.src = `https://placehold.co/600x450/cccccc/333333?text=Image+Not+Found`;
-        };
+        
         thumbnailDiv.appendChild(thumbnailImg);
 
         const captionDiv = document.createElement('div');
@@ -527,7 +541,11 @@ function populateWorksList() {
 
         worksListContainer.appendChild(listItem);
     });
+
+    // 생성된 모든 이미지 Promise가 완료될 때까지 기다립니다.
+    await Promise.all(imageLoadPromises);
 }
+// ▲▲▲▲▲ 수정 완료 ▲▲▲▲▲
 
 
 // --- Main Sequence ---
@@ -824,8 +842,7 @@ function setupResponsiveScrollTriggers() {
 }
 
 // ▼▼▼▼▼ 수정된 부분 ▼▼▼▼▼
-// 기존 DOMContentLoaded를 window.addEventListener('load', ...)로 변경합니다.
-// 이렇게 하면 페이지의 모든 리소스(이미지, 스타일시트, 폰트 등)가 로드된 후 스크립트가 실행됩니다.
+// 페이지의 모든 리소스(CSS, 이미지, 폰트 등)가 로드된 후 스크립트를 실행합니다.
 window.addEventListener("load", async () => {
     window.scrollTo(0, 0);
 
@@ -840,21 +857,19 @@ window.addEventListener("load", async () => {
         const headerLogoForEarlyHide = document.querySelector("#header-placeholder .com-name-logo");
         if (headerLogoForEarlyHide) gsap.set(headerLogoForEarlyHide, { autoAlpha: 0 });
         
-        // 'works' 데이터를 동적으로 채웁니다.
-        populateWorksList();
+        // 'works' 리스트와 그 안의 이미지들이 '모두' 로드될 때까지 기다립니다.
+        await populateWorksList();
         
         // 모든 폰트가 렌더링될 준비가 될 때까지 기다립니다.
-        // 이는 SplitText와 같이 텍스트 크기에 의존하는 애니메이션의 정확도를 높입니다.
         await document.fonts.ready;
 
-        // 모든 리소스와 폰트가 준비된 후 메인 시퀀스를 실행합니다.
+        // 모든 리소스와 폰트, 동적 이미지가 준비된 후에야 메인 시퀀스를 실행합니다.
         runMainPageSequence().catch(error => {
             console.error("Error in runMainPageSequence:", error);
             hideLoaderOnError();
             enableScrollInteraction();
             window.scrollTo(0, 0);
             if (!initialSetupDone) {
-                // 에러 발생 시에도 스크롤 트리거는 설정되어야 반응형으로 동작합니다.
                 setupResponsiveScrollTriggers();
                 initialSetupDone = true;
             } else {
