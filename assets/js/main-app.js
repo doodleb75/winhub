@@ -52,9 +52,37 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 }
 
 // --- Configuration Variables ---
-const getScaleConfig = (isDesktopView) => ({ hero: isDesktopView ? 140 : 300, part1: isDesktopView ? 200 : 400, part2: isDesktopView ? 200 : 400, part3: isDesktopView ? 200 : 400 });
+// ▼▼▼▼▼ 수정된 부분 ▼▼▼▼▼
+const getScaleConfig = (isDesktopView) => {
+    const screenWidth = window.innerWidth;
+    if (!isDesktopView) { // Mobile (<= 767px)
+        return { hero: 300, part1: 400, part2: 400, part3: 400 };
+    }
+    // Desktop views (> 767px)
+    if (screenWidth > 2200) { // Large Desktop
+        // 매우 넓은 화면에서는 오브젝트가 너무 커지지 않도록 기본 스케일 값을 줄입니다.
+        return { hero: 115, part1: 170, part2: 170, part3: 170 };
+    }
+    // Standard Desktop
+    return { hero: 140, part1: 200, part2: 200, part3: 200 };
+};
+
 const barShapesConfig = { initial: "M0 5 L0 5 L0 5 L0 5 Z", part1Enter: "M0,5 Q15,0 30,4 Q50,7 70,4 Q85,0 100,5 V5 Q85,10 70,6 Q50,3 30,6 Q15,10 0,5 Z", part2Enter: "M0,5 C20,-5 40,15 50,5 C60,-5 80,15 100,5 V5 C80,0 60,10 50,5 C40,0 20,10 0,5 Z", part3Enter: "M0,5 Q20,10 40,5 Q60,0 80,5 Q100,10 100,5 V5 Q80,0 60,5 Q40,10 20,5 Q0,0 0,5 Z", full: "M0,0 H100 V10 H0 Z" };
-const getTargetWinhubX = (isMobileView) => isMobileView ? responsiveX(70) : responsiveX(65);
+
+const getTargetWinhubX = (isMobileView) => {
+    if (isMobileView) {
+        return responsiveX(70);
+    }
+    const screenWidth = window.innerWidth;
+    if (screenWidth > 2200) { // Large Desktop
+        // 매우 넓은 화면에서 오브젝트가 너무 오른쪽으로 치우치지 않도록 X 값을 조정합니다.
+        return responsiveX(58);
+    }
+    // Standard Desktop
+    return responsiveX(65);
+};
+// ▲▲▲▲▲ 수정 완료 ▲▲▲▲▲
+
 const getTargetWinhubY = (isMobileView) => isMobileView ? responsiveY(-10) : 0;
 const WINHUB_INTRO_END_Z = 0;
 const partBackgroundColors = { hero: "#410b7a", part1: "#0b2c7a", part2: "#0b7a48", part3: "#7a063c" };
@@ -459,13 +487,23 @@ function populateWorksList() {
         console.error("populateWorksList: .works-list element not found.");
         return;
     }
+
+    const numberOfRecentWorks = 7;
+    const sortedWorks = [...worksData].sort((a, b) => {
+        const dateA = parseInt(a.date.replace('.', ''), 10);
+        const dateB = parseInt(b.date.replace('.', ''), 10);
+        return dateB - dateA;
+    });
+
+    const recentWorks = sortedWorks.slice(0, numberOfRecentWorks);
+
     worksListContainer.innerHTML = '';
-    worksData.forEach(work => {
+    recentWorks.forEach(work => {
         const listItem = document.createElement('li');
         listItem.classList.add('work-item');
 
         const link = document.createElement('a');
-        link.href = buildUrl(`/page/works_details/works-detail.html?id=${work.id}`); 
+        link.href = buildUrl(`page/works_details/works-detail.html?id=${work.id}`); 
         link.setAttribute('aria-label', `View Project ${work.title}`);
 
         const thumbnailDiv = document.createElement('div');
@@ -494,7 +532,8 @@ function populateWorksList() {
 
         worksListContainer.appendChild(listItem);
     });
- }
+}
+
 
 // --- Main Sequence ---
 async function runMainPageSequence() {
@@ -548,10 +587,6 @@ async function runMainPageSequence() {
     const masterIntroTimeline = gsap.timeline({ onComplete: onMasterIntroComplete });
     const isMobileViewInitial = window.innerWidth <= 767;
 
-    // ▼▼▼ MODIFICATION START ▼▼▼
-
-    // 1. Calculate final positions of characters
-    // Place the container in its final position first to calculate where the characters should end up.
     if (comNameElement.parentNode !== heroTextBlock) {
         heroTextBlock.prepend(comNameElement);
     }
@@ -560,13 +595,12 @@ async function runMainPageSequence() {
         top: 0,
         left: 0,
         transform: 'translateY(-100%)',
-        autoAlpha: 1 // Temporarily visible to measure
+        autoAlpha: 1 
     });
 
     let finalPositions = [];
     let tempSplit;
     try {
-        // Use 'chars' to get individual character positions
         tempSplit = new SplitText(comNameElement, { type: 'chars' });
         if (tempSplit.chars) {
             finalPositions = tempSplit.chars.map(char => {
@@ -574,13 +608,12 @@ async function runMainPageSequence() {
                 return { x: rect.left, y: rect.top };
             });
         }
-        tempSplit.revert(); // Clean up immediately after measuring
+        tempSplit.revert();
     } catch (e) {
         console.error("Failed to split text for measurement:", e);
     }
-    gsap.set(comNameElement, { autoAlpha: 0 }); // Hide it again before animation
+    gsap.set(comNameElement, { autoAlpha: 0 });
 
-    // 2. Set up the starting state (centered)
     gsap.set(comNameElement, {
         position: 'fixed',
         top: '50%',
@@ -591,16 +624,13 @@ async function runMainPageSequence() {
         autoAlpha: 1
     });
     try {
-        // Re-split with 'absolute' positioning for the animation itself
         splitComName = new SplitText(comNameElement, { type: "chars", position: "absolute" });
     } catch (e) {
         splitComName = null;
         console.error("Failed to split text for animation:", e);
     }
 
-    // 3. Build the animation timeline
-        if (splitComName && splitComName.chars && finalPositions.length === splitComName.chars.length) {
-        // Part 1: Animate characters appearing at the center of the screen
+    if (splitComName && splitComName.chars && finalPositions.length === splitComName.chars.length) {
         masterIntroTimeline.from(splitComName.chars, {
             y: -50,
             opacity: 0,
@@ -609,7 +639,6 @@ async function runMainPageSequence() {
             stagger: 0.1
         });
 
-        // Part 2: Move each character to its final position
         masterIntroTimeline.to(splitComName.chars, {
             duration: 1.2,
             x: (i, el) => finalPositions[i].x - el.getBoundingClientRect().left,
@@ -618,38 +647,28 @@ async function runMainPageSequence() {
             stagger: 0.06
         }, "+=0.02");
 
-        // ▼▼▼▼▼ 수정된 부분 ▼▼▼▼▼
-        // Part 3: Clean up after the move is done
         masterIntroTimeline.call(() => {
             if (splitComName) {
-                // SplitText 인스턴스를 revert하여 생성된 글자 <div>들을 정리합니다.
                 splitComName.revert();
-                splitComName = null; // 다시 revert되지 않도록 null로 설정합니다.
-
-                // revert 과정에서 투명도 스타일이 제거되므로,
-                // 최종 위치 스타일과 함께 autoAlpha: 1을 명시적으로 다시 설정하여
-                // 요소가 사라지지 않도록 합니다.
+                splitComName = null; 
                 gsap.set(comNameElement, {
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     transform: 'translateY(-100%)',
-                    autoAlpha: 1 // 이 속성이 요소를 계속 보이게 하는 핵심입니다.
+                    autoAlpha: 1 
                 });
             }
         });
-    } else { // Fallback if splitting fails
+    } else { 
         masterIntroTimeline.to(comNameElement, { autoAlpha: 1, duration: 1 });
     }
 
-    // 4. Time the rest of the animations relative to the main timeline
     const headlineStartTime = "<+=0.02"; 
     masterIntroTimeline
         .set(".headline", { autoAlpha: 1, xPercent: -50, left: "50%" }, headlineStartTime)
         .to(".headline", { xPercent: 0, left: "0%", duration: .5, ease: "power3.inOut" })
         .addLabel("startHeadlineChars", ">-0.1");
-
-    // ▲▲▲ MODIFICATION END ▲▲▲
     
     const headlineDivs = document.querySelectorAll(".headline div");
     if (headlineDivs.length > 0) {
@@ -687,8 +706,9 @@ async function runMainPageSequence() {
     }
 
     if (splineCanvas && winhub) {
+        const currentScaleConfig = getScaleConfig(!isMobileViewInitial);
         masterIntroTimeline.to(splineCanvas, { autoAlpha: 1, duration: 1 }, "-=0.5").call(() => winhub.visible = true, null, "<")
-            .fromTo(winhub.scale, { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5) }, { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), duration: 1.5, ease: "power3.out" }, "<+0.2")
+            .fromTo(winhub.scale, { x: responsiveScale(currentScaleConfig.hero * 0.5), y: responsiveScale(currentScaleConfig.hero * 0.5), z: responsiveScale(currentScaleConfig.hero * 0.5) }, { x: responsiveScale(currentScaleConfig.hero), y: responsiveScale(currentScaleConfig.hero), z: responsiveScale(currentScaleConfig.hero), duration: 1.5, ease: "power3.out" }, "<+0.2")
             .fromTo(winhub.rotation, { x: degToRad(90), y: degToRad(-360), z: degToRad(5) }, { x: degToRad(0), y: degToRad(90), z: degToRad(0), duration: 1.5, ease: "power3.out" }, "<")
             .fromTo(winhub.position,
                 { x: 0, y: 0, z: WINHUB_INTRO_END_Z }, 
@@ -736,7 +756,6 @@ function setupAllScrollTriggers(isDesktopView) {
             splitComName = null; 
         }
         gsap.set(comNameElement, {
-            /* clearProps: "all", */
             clearProps: "top,left,right,bottom,x,y,xPercent,yPercent,zIndex",
             autoAlpha: 1, 
             position: 'absolute',
@@ -808,11 +827,7 @@ function setupResponsiveScrollTriggers() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // ▼▼▼ 수정된 부분 ▼▼▼
-    // 페이지가 로드될 때 스크롤 위치를 항상 (0,0)으로 강제하여
-    // 새로고침 시 이전 스크롤 위치가 나타나는 것을 방지하고 애니메이션이 최상단에서 시작되도록 합니다.
     window.scrollTo(0, 0);
-    // ▲▲▲ 수정 완료 ▲▲▲
 
     setupScrollRestoration();
     if (typeof ScrollTrigger !== 'undefined') {
