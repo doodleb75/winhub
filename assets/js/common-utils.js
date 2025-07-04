@@ -251,10 +251,10 @@ export async function loadCommonUI() {
 
     try {
         await Promise.all([
-            loadHTML('header-placeholder', `${baseCommonPath}header.html`),
-            loadHTML('menu-overlay-placeholder', `${baseCommonPath}menu_overlay.html`),
-            loadHTML('footer-placeholder', `${baseCommonPath}footer.html`),
-            loadHTML('loader-placeholder', `${baseCommonPath}loader.html`)
+            loadHTML('header-placeholder', `${baseCommonPath}_header.html`),
+            loadHTML('menu-overlay-placeholder', `${baseCommonPath}_menu_overlay.html`),
+            loadHTML('footer-placeholder', `${baseCommonPath}_footer.html`),
+            loadHTML('loader-placeholder', `${baseCommonPath}_loader.html`)
         ]);
 
         if (typeof setupMenu === 'function') {
