@@ -64,40 +64,6 @@ function safeSessionSet(key, value) {
     }
 }
 
-/**
- * [수정] 지정된 컨테이너 내부의 모든 이미지가 로드될 때까지 기다립니다.
- * @param {string} selector - 컨테이너 요소의 CSS 선택자.
- * @returns {Promise<void>} 모든 이미지가 로드되거나 실패하면 resolve되는 Promise.
- */
-export function waitForImages(selector) {
-    const container = document.querySelector(selector);
-    if (!container) {
-        console.warn(`waitForImages: Container with selector "${selector}" not found.`);
-        return Promise.resolve();
-    }
-
-    const images = Array.from(container.querySelectorAll('img'));
-    if (images.length === 0) {
-        return Promise.resolve();
-    }
-
-    const promises = images.map(img => {
-        return new Promise((resolve) => {
-            if (img.complete && img.naturalHeight !== 0) {
-                // 이미지가 이미 로드된 경우
-                resolve();
-            } else {
-                img.addEventListener('load', resolve, { once: true });
-                img.addEventListener('error', resolve, { once: true }); // 오류 발생 시에도 block되지 않도록 resolve
-            }
-        });
-    });
-
-    return Promise.all(promises).then(() => {
-        console.log(`All ${images.length} images in "${selector}" have been processed.`);
-    });
-}
-
 
 /**
  * [MODIFIED] Executes the SVG loader animation sequence.
