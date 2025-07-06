@@ -1,7 +1,6 @@
 // assets/js/main-app.js
 
 // Spline Runtime, THREE.js, GSAP Plugins
-// import { Application as SplineRuntimeApp } from 'https://unpkg.com/@splinetool/runtime/build/runtime.js';
 import * as THREE_MOD from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
 window.THREE = THREE_MOD;
 
@@ -28,7 +27,8 @@ import {
     InteractiveBackgroundSphere,
     loadSplineScene,
     killAllScrollTriggers,
-    loadCommonUI
+    loadCommonUI,
+    waitForImages // [수정] 이미지 로딩 대기 함수 임포트
 } from './common-utils.js';
 
 // --- Global Variables for Main Page ---
@@ -95,7 +95,7 @@ function enableScrollInteraction() {
     }
 }
 
-// --- Animation Functions ---
+// --- Animation Functions (기존과 동일) ---
 function playHeadlineCharsAnimation(animateIn) {
     if (typeof gsap === 'undefined' || typeof SplitText === 'undefined') return;
 
@@ -167,7 +167,6 @@ function playHeadlineCharsAnimation(animateIn) {
         }
     }
 }
-
 function setupHeroHeadlineScrollTrigger() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const heroSection = document.querySelector("#hero");
@@ -185,7 +184,6 @@ function setupHeroHeadlineScrollTrigger() {
         onLeaveBack: () => { if (heroHeadlineTriggerEnabled) playHeadlineCharsAnimation(false); },
     });
 }
-
 function setupSubTitleAnimation() {
     if (typeof gsap === 'undefined' || typeof SplitText === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const subTitleElements = document.querySelectorAll(".sub-title");
@@ -219,7 +217,6 @@ function setupSubTitleAnimation() {
         } catch (e) { console.error(`Error with SplitText/ScrollTrigger for .sub-title (${triggerId}):`, element, e); gsap.set(element, { autoAlpha: 1, y: 0 }); }
     });
  }
-
 function setupWorksHorizontalScroll() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const pinTargetElement = document.querySelector("#part2 .part2-info");
@@ -243,7 +240,6 @@ function setupWorksHorizontalScroll() {
             onLeaveBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && !st.enabled) st.enable(false); }
     }});
  }
-
 function setupWorkItemAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
@@ -289,7 +285,6 @@ function setupWorkItemAnimations() {
         });
     });
 }
-
 function setupHeaderLogoScrollAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const headerLogo = document.querySelector("#header-placeholder .com-name-logo");
@@ -309,7 +304,6 @@ function setupHeaderLogoScrollAnimation() {
         onLeaveBack: () => { gsap.to(headerLogo, { autoAlpha: 0, duration: 0.2, ease: "power1.out" });}
     });
  }
-
 function setupMainPageBackgroundChangeAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     gsap.set(document.body, { backgroundColor: partBackgroundColors.hero });
@@ -324,7 +318,6 @@ function setupMainPageBackgroundChangeAnimations() {
         }
     });
  }
-
 function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     splineTimelines.forEach(tl => tl.kill()); splineTimelines = []; const currentScaleConfig = getScaleConfig(isDesktopView);
@@ -380,7 +373,6 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
         splineTimelines.push(part3Timeline);
     }
  }
-
 function setupBarAnimations() {
     if (typeof gsap === 'undefined' || typeof MorphSVGPlugin === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const barElement = document.getElementById("barElementPath"); if (!barElement) return; gsap.set(barElement, { morphSVG: barShapesConfig.initial });
@@ -393,7 +385,6 @@ function setupBarAnimations() {
         });
     });
  }
-
 function setupAdvantageCardAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const advantageCards = gsap.utils.toArray("#part1 .advantage-card"); const integratedCard = document.querySelector("#part1 .integrated-value-card");
@@ -414,7 +405,6 @@ function setupAdvantageCardAnimations() {
         });
     }
  }
-
 function setupOutroContentAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const outroContentContainer = document.querySelector("#part3 .outro-content"); if (!outroContentContainer) return;
@@ -427,13 +417,11 @@ function setupOutroContentAnimation() {
         onLeaveBack: () => gsap.to(elementsToAnimate, { autoAlpha: 0, y: 40, duration: 0.3, ease: "power1.in" }),
     });
 }
-
 function setupScrollToTopButton() {
     const scrollToTopBtn = document.getElementById("scrollToTopBtn"); if (!scrollToTopBtn) return;
     window.addEventListener("scroll", () => { if (window.scrollY > window.innerHeight / 2) { if (!scrollToTopBtn.classList.contains("show")) scrollToTopBtn.classList.add("show"); } else { if (scrollToTopBtn.classList.contains("show")) scrollToTopBtn.classList.remove("show"); }});
     scrollToTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
  }
-
 function setupScrollIconAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const scrollIcon = document.querySelector(".scroll-icon");
@@ -452,7 +440,6 @@ function setupScrollIconAnimation() {
         onLeaveBack: () => gsap.to(scrollIcon, { autoAlpha: 1, duration: 0.2 }),
     });
  }
-
 function populateWorksList() {
     const worksListContainer = document.querySelector("#part2 .works-list");
     if (!worksListContainer) {
@@ -496,232 +483,197 @@ function populateWorksList() {
     });
  }
 
-// --- Main Sequence ---
-async function runMainPageSequence() {
-    if (typeof gsap === 'undefined' || typeof SplitText === 'undefined') {
-        hideLoaderOnError();
-        return;
-    }
+// --- [수정] Main Sequence ---
 
-    if (typeof ScrollTrigger !== 'undefined') {
-        ScrollTrigger.normalizeScroll(true);
-    }
-    
-    const loaderPromise = runLoaderSequence('.part-container');
-    
-    const splineCanvas = document.getElementById("canvas3d");
-    if (splineCanvas) gsap.set(splineCanvas, { autoAlpha: 0 });
-
-    try {
-        mainSplineApp = await loadSplineScene("canvas3d", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode");
-        if (mainSplineApp) {
-            winhub = mainSplineApp.findObjectByName("Winhub");
-            cable = mainSplineApp.findObjectByName("cable");
-            if (winhub) winhub.visible = false;
-            if (cable) cable.visible = false;
-            if (!winhub || !cable) console.error("MAIN-APP: Missing critical Spline objects (Winhub or cable).");
-        } else {
-            console.error("MAIN-APP: Main Spline App could not be loaded.");
-        }
-    } catch (error) {
-        console.error("MAIN-APP: Error during critical loading:", error);
-    }
-
-    await loaderPromise;
-
-    disableScrollInteraction();
-
-    const comNameElement = document.querySelector(".com-name-ani");
-    const heroTextBlock = document.querySelector('.hero-text-block');
-
-    if (!comNameElement || !heroTextBlock) {
-        console.error("Missing critical hero text elements for intro animation.");
-        hideLoaderOnError();
-        enableScrollInteraction();
-        return;
-    }
-    
-    gsap.set(comNameElement, { autoAlpha: 0 });
-    gsap.set(".headline", { autoAlpha: 0 });
-    gsap.set(".headline div", { autoAlpha: 0 });
-    
-    const masterIntroTimeline = gsap.timeline({ onComplete: onMasterIntroComplete });
-    const isMobileViewInitial = window.innerWidth <= 767;
-
-    // ▼▼▼ MODIFICATION START ▼▼▼
-
-    // 1. Calculate final positions of characters
-    // Place the container in its final position first to calculate where the characters should end up.
-    if (comNameElement.parentNode !== heroTextBlock) {
-        heroTextBlock.prepend(comNameElement);
-    }
-    gsap.set(comNameElement, {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        transform: 'translateY(-100%)',
-        autoAlpha: 1 // Temporarily visible to measure
-    });
-
-    let finalPositions = [];
-    let tempSplit;
-    try {
-        // Use 'chars' to get individual character positions
-        tempSplit = new SplitText(comNameElement, { type: 'chars' });
-        if (tempSplit.chars) {
-            finalPositions = tempSplit.chars.map(char => {
-                const rect = char.getBoundingClientRect();
-                return { x: rect.left, y: rect.top };
-            });
-        }
-        tempSplit.revert(); // Clean up immediately after measuring
-    } catch (e) {
-        console.error("Failed to split text for measurement:", e);
-    }
-    gsap.set(comNameElement, { autoAlpha: 0 }); // Hide it again before animation
-
-    // 2. Set up the starting state (centered)
-    gsap.set(comNameElement, {
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        xPercent: -50,
-        yPercent: -50,
-        transform: 'none',
-        autoAlpha: 1
-    });
-    try {
-        // Re-split with 'absolute' positioning for the animation itself
-        splitComName = new SplitText(comNameElement, { type: "chars", position: "absolute" });
-    } catch (e) {
-        splitComName = null;
-        console.error("Failed to split text for animation:", e);
-    }
-
-    // 3. Build the animation timeline
-        if (splitComName && splitComName.chars && finalPositions.length === splitComName.chars.length) {
-        // Part 1: Animate characters appearing at the center of the screen
-        masterIntroTimeline.from(splitComName.chars, {
-            y: -50,
-            opacity: 0,
-            duration: 0.8,
-            ease: 'back.out(2)',
-            stagger: 0.1
-        });
-
-        // Part 2: Move each character to its final position
-        masterIntroTimeline.to(splitComName.chars, {
-            duration: 1.2,
-            x: (i, el) => finalPositions[i].x - el.getBoundingClientRect().left,
-            y: (i, el) => finalPositions[i].y - el.getBoundingClientRect().top,
-            ease: 'power3.inOut',
-            stagger: 0.06
-        }, "+=0.02");
-
-        // ▼▼▼▼▼ 수정된 부분 ▼▼▼▼▼
-        // Part 3: Clean up after the move is done
-        masterIntroTimeline.call(() => {
-            if (splitComName) {
-                // SplitText 인스턴스를 revert하여 생성된 글자 <div>들을 정리합니다.
-                splitComName.revert();
-                splitComName = null; // 다시 revert되지 않도록 null로 설정합니다.
-
-                // revert 과정에서 투명도 스타일이 제거되므로,
-                // 최종 위치 스타일과 함께 autoAlpha: 1을 명시적으로 다시 설정하여
-                // 요소가 사라지지 않도록 합니다.
-                gsap.set(comNameElement, {
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    transform: 'translateY(-100%)',
-                    autoAlpha: 1 // 이 속성이 요소를 계속 보이게 하는 핵심입니다.
-                });
-            }
-        });
-    } else { // Fallback if splitting fails
-        masterIntroTimeline.to(comNameElement, { autoAlpha: 1, duration: 1 });
-    }
-
-    // 4. Time the rest of the animations relative to the main timeline
-    const headlineStartTime = "<+=0.02"; 
-    masterIntroTimeline
-        .set(".headline", { autoAlpha: 1, xPercent: -50, left: "50%" }, headlineStartTime)
-        .to(".headline", { xPercent: 0, left: "0%", duration: .5, ease: "power3.inOut" })
-        .addLabel("startHeadlineChars", ">-0.1");
-
-    // ▲▲▲ MODIFICATION END ▲▲▲
-    
-    const headlineDivs = document.querySelectorAll(".headline div");
-    if (headlineDivs.length > 0) {
-        if (splitHeadlineChars.length !== headlineDivs.length || (splitHeadlineChars.length > 0 && (!splitHeadlineChars[0].chars || !splitHeadlineChars[0].chars.length))) {
-            splitHeadlineChars.forEach(st => st?.revert());
-            splitHeadlineChars = [];
-            headlineDivs.forEach((divElement) => {
-                gsap.set(divElement, { autoAlpha: 1, overflow: 'hidden' });
-                try {
-                    const lineSplit = new SplitText(divElement, { type: "chars", charsClass: "headline-char" });
-                    if (lineSplit.chars && lineSplit.chars.length > 0) {
-                        splitHeadlineChars.push(lineSplit);
-                    }
-                } catch (e) {
-                    console.error("Error splitting headline chars in intro:", e);
-                    gsap.set(divElement, { autoAlpha: 1 });
-                }
-            });
-        }
-
-        splitHeadlineChars.forEach((lineSplit, lineIndex) => {
-            if (lineSplit.chars && lineSplit.chars.length > 0) {
-                gsap.set(lineSplit.chars, { xPercent: 100, autoAlpha: 0 });
-                masterIntroTimeline.to(lineSplit.chars,
-                    { xPercent: 0, autoAlpha: 1, duration: 0.6, stagger: 0.1, ease: "circ.out" },
-                    `startHeadlineChars+=${lineIndex * 0.48}`
-                );
-            }
-        });
-        const emElements = document.querySelectorAll(".headline div em");
-        if (emElements.length > 0) {
-            gsap.set(emElements, {clearProps: "color"});
-            masterIntroTimeline.to(emElements, { color: "#FFFF00", duration: 0.3, stagger: 0.05, ease: "power1.inOut" }, ">-0.2");
-        }
-    }
-
-    if (splineCanvas && winhub) {
-        masterIntroTimeline.to(splineCanvas, { autoAlpha: 1, duration: 1 }, "-=0.5").call(() => winhub.visible = true, null, "<")
-            .fromTo(winhub.scale, { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5) }, { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), duration: 1.5, ease: "power3.out" }, "<+0.2")
-            .fromTo(winhub.rotation, { x: degToRad(90), y: degToRad(-360), z: degToRad(5) }, { x: degToRad(0), y: degToRad(90), z: degToRad(0), duration: 1.5, ease: "power3.out" }, "<")
-            .fromTo(winhub.position,
-                { x: 0, y: 0, z: WINHUB_INTRO_END_Z }, 
-                {
-                    x: getTargetWinhubX(isMobileViewInitial),
-                    y: getTargetWinhubY(isMobileViewInitial), 
-                    z: WINHUB_INTRO_END_Z,
-                    duration: 1.5,
-                    ease: "power3.out"
-                },
-                "<");
-    }
-}
-
-function onMasterIntroComplete() {
+/**
+ * 페이지의 모든 에셋이 로드되고 인트로 애니메이션이 끝난 후,
+ * 최종적으로 페이지를 설정하고 상호작용을 활성화하는 함수.
+ */
+function finalizePageSetup() {
     enableScrollInteraction();
+
+    // 3D 배경 구체 생성 및 애니메이션
     if (typeof window.THREE !== 'undefined') {
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', { sphereOffsetX: .1, sphereOffsetY: 0 });
-        if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) mainPageBackgroundSphere.init().introAnimate();
+        if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) {
+            mainPageBackgroundSphere.init().introAnimate();
+        }
     }
+
+    // 반응형 ScrollTrigger 설정
     if (!initialSetupDone) {
         setupResponsiveScrollTriggers();
         initialSetupDone = true;
     } else {
-        if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh(true);
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.refresh(true);
+        }
     }
+
+    // 헤드라인 스크롤 애니메이션 활성화
     heroHeadlineTriggerEnabled = true;
+
+    // 메뉴 아이콘과 스크롤 아이콘 표시
     const menuIcon = document.querySelector(".menu-icon");
     if (menuIcon) gsap.to(menuIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.1 });
+    
     const scrollIcon = document.querySelector(".scroll-icon");
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.3 });
+    
     window.scrollTo(0, 0);
+
+    // 모든 레이아웃이 안정화된 후 마지막으로 ScrollTrigger를 한 번 더 refresh하여 정확도를 높임.
+    setTimeout(() => {
+        if (typeof ScrollTrigger !== 'undefined') {
+            console.log("Final ScrollTrigger refresh after all assets loaded.");
+            ScrollTrigger.refresh(true);
+        }
+    }, 150); 
 }
+
+
+/**
+ * 페이지 로딩 시 실행되는 메인 인트로 애니메이션 시퀀스.
+ * @returns {Promise<void>} 애니메이션이 완료되면 resolve되는 Promise.
+ */
+function runIntroAnimationSequence() {
+    return new Promise((resolve) => {
+        if (typeof gsap === 'undefined' || typeof SplitText === 'undefined') {
+            hideLoaderOnError();
+            resolve();
+            return;
+        }
+
+        const splineCanvas = document.getElementById("canvas3d");
+        const comNameElement = document.querySelector(".com-name-ani");
+        const heroTextBlock = document.querySelector('.hero-text-block');
+
+        if (!comNameElement || !heroTextBlock || !splineCanvas) {
+            console.error("Missing critical hero elements for intro animation.");
+            hideLoaderOnError();
+            resolve();
+            return;
+        }
+        
+        gsap.set(splineCanvas, { autoAlpha: 0 });
+        gsap.set(comNameElement, { autoAlpha: 0 });
+        gsap.set(".headline", { autoAlpha: 0 });
+        gsap.set(".headline div", { autoAlpha: 0 });
+        
+        const masterIntroTimeline = gsap.timeline({ onComplete: resolve });
+        const isMobileViewInitial = window.innerWidth <= 767;
+
+        if (comNameElement.parentNode !== heroTextBlock) {
+            heroTextBlock.prepend(comNameElement);
+        }
+        gsap.set(comNameElement, {
+            position: 'absolute', top: 0, left: 0,
+            transform: 'translateY(-100%)', autoAlpha: 1
+        });
+
+        let finalPositions = [];
+        let tempSplit;
+        try {
+            tempSplit = new SplitText(comNameElement, { type: 'chars' });
+            if (tempSplit.chars) {
+                finalPositions = tempSplit.chars.map(char => {
+                    const rect = char.getBoundingClientRect();
+                    return { x: rect.left, y: rect.top };
+                });
+            }
+            tempSplit.revert();
+        } catch (e) {
+            console.error("Failed to split text for measurement:", e);
+        }
+        gsap.set(comNameElement, { autoAlpha: 0 });
+
+        gsap.set(comNameElement, {
+            position: 'fixed', top: '50%', left: '50%',
+            xPercent: -50, yPercent: -50, transform: 'none', autoAlpha: 1
+        });
+        try {
+            splitComName = new SplitText(comNameElement, { type: "chars", position: "absolute" });
+        } catch (e) {
+            splitComName = null;
+            console.error("Failed to split text for animation:", e);
+        }
+
+        if (splitComName && splitComName.chars && finalPositions.length === splitComName.chars.length) {
+            masterIntroTimeline.from(splitComName.chars, {
+                y: -50, opacity: 0, duration: 0.8, ease: 'back.out(2)', stagger: 0.1
+            });
+            masterIntroTimeline.to(splitComName.chars, {
+                duration: 1.2,
+                x: (i, el) => finalPositions[i].x - el.getBoundingClientRect().left,
+                y: (i, el) => finalPositions[i].y - el.getBoundingClientRect().top,
+                ease: 'power3.inOut', stagger: 0.06
+            }, "+=0.02");
+            masterIntroTimeline.call(() => {
+                if (splitComName) {
+                    splitComName.revert();
+                    splitComName = null;
+                    gsap.set(comNameElement, {
+                        position: 'absolute', top: 0, left: 0,
+                        transform: 'translateY(-100%)', autoAlpha: 1
+                    });
+                }
+            });
+        } else {
+            masterIntroTimeline.to(comNameElement, { autoAlpha: 1, duration: 1 });
+        }
+
+        const headlineStartTime = "<+=0.02"; 
+        masterIntroTimeline
+            .set(".headline", { autoAlpha: 1, xPercent: -50, left: "50%" }, headlineStartTime)
+            .to(".headline", { xPercent: 0, left: "0%", duration: .5, ease: "power3.inOut" })
+            .addLabel("startHeadlineChars", ">-0.1");
+        
+        const headlineDivs = document.querySelectorAll(".headline div");
+        if (headlineDivs.length > 0) {
+            if (splitHeadlineChars.length !== headlineDivs.length || (splitHeadlineChars.length > 0 && (!splitHeadlineChars[0].chars || !splitHeadlineChars[0].chars.length))) {
+                splitHeadlineChars.forEach(st => st?.revert());
+                splitHeadlineChars = [];
+                headlineDivs.forEach((divElement) => {
+                    gsap.set(divElement, { autoAlpha: 1, overflow: 'hidden' });
+                    try {
+                        const lineSplit = new SplitText(divElement, { type: "chars", charsClass: "headline-char" });
+                        if (lineSplit.chars && lineSplit.chars.length > 0) {
+                            splitHeadlineChars.push(lineSplit);
+                        }
+                    } catch (e) { console.error("Error splitting headline chars in intro:", e); }
+                });
+            }
+
+            splitHeadlineChars.forEach((lineSplit, lineIndex) => {
+                if (lineSplit.chars && lineSplit.chars.length > 0) {
+                    gsap.set(lineSplit.chars, { xPercent: 100, autoAlpha: 0 });
+                    masterIntroTimeline.to(lineSplit.chars,
+                        { xPercent: 0, autoAlpha: 1, duration: 0.6, stagger: 0.1, ease: "circ.out" },
+                        `startHeadlineChars+=${lineIndex * 0.48}`
+                    );
+                }
+            });
+            const emElements = document.querySelectorAll(".headline div em");
+            if (emElements.length > 0) {
+                gsap.set(emElements, {clearProps: "color"});
+                masterIntroTimeline.to(emElements, { color: "#FFFF00", duration: 0.3, stagger: 0.05, ease: "power1.inOut" }, ">-0.2");
+            }
+        }
+
+        if (winhub) {
+            masterIntroTimeline.to(splineCanvas, { autoAlpha: 1, duration: 1 }, "-=0.5").call(() => winhub.visible = true, null, "<")
+                .fromTo(winhub.scale, 
+                    { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5) }, 
+                    { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), duration: 1.5, ease: "power3.out" }, "<+0.2")
+                .fromTo(winhub.rotation, { x: degToRad(90), y: degToRad(-360), z: degToRad(5) }, { x: degToRad(0), y: degToRad(90), z: degToRad(0), duration: 1.5, ease: "power3.out" }, "<")
+                .fromTo(winhub.position,
+                    { x: 0, y: 0, z: WINHUB_INTRO_END_Z }, 
+                    { x: getTargetWinhubX(isMobileViewInitial), y: getTargetWinhubY(isMobileViewInitial), z: WINHUB_INTRO_END_Z, duration: 1.5, ease: "power3.out" },
+                    "<");
+        }
+    });
+}
+
 
 function setupAllScrollTriggers(isDesktopView) {
     const elementsToClear = ["#part2 .part2-info", "#part2 .works-list", "#part2 .works-list-container"];
@@ -736,7 +688,6 @@ function setupAllScrollTriggers(isDesktopView) {
             splitComName = null; 
         }
         gsap.set(comNameElement, {
-            /* clearProps: "all", */
             clearProps: "top,left,right,bottom,x,y,xPercent,yPercent,zIndex",
             autoAlpha: 1, 
             position: 'absolute',
@@ -807,39 +758,65 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
+// --- [수정] DOMContentLoaded Event Listener ---
 document.addEventListener("DOMContentLoaded", async () => {
-    // ▼▼▼ 수정된 부분 ▼▼▼
-    // 페이지가 로드될 때 스크롤 위치를 항상 (0,0)으로 강제하여
-    // 새로고침 시 이전 스크롤 위치가 나타나는 것을 방지하고 애니메이션이 최상단에서 시작되도록 합니다.
     window.scrollTo(0, 0);
-    // ▲▲▲ 수정 완료 ▲▲▲
-
     setupScrollRestoration();
     if (typeof ScrollTrigger !== 'undefined') {
         ScrollTrigger.normalizeScroll(true);
     }
+
     try {
+        // Step 1: 공통 UI 로드 및 works list DOM 생성
         await loadCommonUI();
         const headerLogoForEarlyHide = document.querySelector("#header-placeholder .com-name-logo");
         if (headerLogoForEarlyHide) gsap.set(headerLogoForEarlyHide, { autoAlpha: 0 });
         
-        populateWorksList();
+        populateWorksList(); // 이미지 태그들을 DOM에 추가
+
+        // Step 2: 로더 애니메이션, Spline 로딩, 이미지 로딩을 병렬로 시작
+        const loaderPromise = runLoaderSequence('.part-container');
+        const splinePromise = loadSplineScene("canvas3d", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode");
+        const imagesPromise = waitForImages('.works-list'); // .works-list 안의 이미지 로딩을 기다림
+
+        // 로더와 Spline이 완료될 때까지 기다림
+        const [splineApp] = await Promise.all([splinePromise, loaderPromise]);
+
+        // Spline 객체 할당
+        mainSplineApp = splineApp;
+        if (mainSplineApp) {
+            winhub = mainSplineApp.findObjectByName("Winhub");
+            cable = mainSplineApp.findObjectByName("cable");
+            if (winhub) winhub.visible = false;
+            if (cable) cable.visible = false;
+            if (!winhub || !cable) console.error("MAIN-APP: Missing critical Spline objects (Winhub or cable).");
+        } else {
+            console.error("MAIN-APP: Main Spline App could not be loaded.");
+        }
+
+        // 스크롤 비활성화
+        disableScrollInteraction();
+
+        // Step 3: 인트로 애니메이션 실행
+        const introAnimationPromise = runIntroAnimationSequence();
+
+        // Step 4: 인트로 애니메이션과 이미지 로딩이 모두 끝날 때까지 기다림
+        await Promise.all([introAnimationPromise, imagesPromise]);
         
-        runMainPageSequence().catch(error => {
-            console.error("Error in runMainPageSequence:", error);
-            hideLoaderOnError();
-            enableScrollInteraction();
-            window.scrollTo(0, 0);
-            if (!initialSetupDone) {
-                setupResponsiveScrollTriggers();
-                initialSetupDone = true;
-            } else {
-                if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh(true);
-            }
-        });
+        // Step 5: 모든 준비가 끝났으므로, 페이지 최종 설정 실행
+        finalizePageSetup();
+
     } catch (error) {
-        console.error("Failed to load common UI or initialize its scripts:", error);
+        console.error("An error occurred during the main page setup sequence:", error);
         hideLoaderOnError();
         enableScrollInteraction();
+        window.scrollTo(0, 0);
+        // 오류 발생 시 대체 설정
+        if (!initialSetupDone) {
+            setupResponsiveScrollTriggers();
+            initialSetupDone = true;
+        } else {
+            if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh(true);
+        }
     }
 });
