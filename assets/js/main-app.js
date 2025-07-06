@@ -815,9 +815,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ▲▲▲ 수정 완료 ▲▲▲
 
     setupScrollRestoration();
-    if (typeof ScrollTrigger !== 'undefined') {
+    /* if (typeof ScrollTrigger !== 'undefined') {
         ScrollTrigger.normalizeScroll(true);
-    }
+    } */
     try {
         await loadCommonUI();
         const headerLogoForEarlyHide = document.querySelector("#header-placeholder .com-name-logo");
