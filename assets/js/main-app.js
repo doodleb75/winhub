@@ -1,6 +1,3 @@
-// assets/js/main-app.js
-
-// Spline Runtime, THREE.js, GSAP Plugins
 import * as THREE_MOD from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
 window.THREE = THREE_MOD;
 
@@ -44,11 +41,18 @@ const SCROLL_PREVENTION_OPTIONS = { passive: false };
 let isScrollCurrentlyDisabled = false;
 let wasNormalizeScrollActive = false;
 
+// [수정] GSAP의 공식적인 초기화 절차
 if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+    // 1. ScrollTrigger가 load 이벤트를 포함한 주요 이벤트를 자동으로 감지하여 스스로 refresh 하도록 설정합니다.
     ScrollTrigger.config({
         autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize"
     });
+
+    // 2. 스크립트 로드 직후 normalizeScroll을 활성화합니다.
+    // 이는 모든 스크롤 관련 상호작용이 일관된 환경에서 처리되도록 보장합니다.
+    ScrollTrigger.normalizeScroll(true);
 }
+
 
 // --- Configuration Variables ---
 const getScaleConfig = (isDesktopView) => ({ hero: isDesktopView ? 140 : 300, part1: isDesktopView ? 200 : 400, part2: isDesktopView ? 200 : 400, part3: isDesktopView ? 200 : 400 });
@@ -75,9 +79,6 @@ function disableScrollInteraction() {
     window.addEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.addEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
-        const currentNormalizeConfig = ScrollTrigger.normalizeScroll();
-        wasNormalizeScrollActive = !!currentNormalizeConfig;
-        if (wasNormalizeScrollActive) ScrollTrigger.normalizeScroll(false);
         ScrollTrigger.disable(false, true);
     }
 }
@@ -89,7 +90,6 @@ function enableScrollInteraction() {
     window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
-        // 스크롤 자체만 활성화합니다. normalizeScroll은 onMasterIntroComplete에서 제어합니다.
         ScrollTrigger.enable();
     }
 }
@@ -678,16 +678,8 @@ async function runMainPageSequence() {
 }
 
 function onMasterIntroComplete() {
-    // 1. 스크롤 상호작용을 활성화합니다.
     enableScrollInteraction();
 
-    // 2. 모든 인트로 애니메이션이 끝난 이 시점에서 normalizeScroll을 활성화합니다.
-    // 이것이 '첫 클릭' 문제를 방지하는 가장 안전한 시점입니다.
-    if (typeof ScrollTrigger !== 'undefined') {
-        ScrollTrigger.normalizeScroll(true);
-    }
-
-    // 3. 나머지 UI 요소들을 활성화합니다.
     if (typeof window.THREE !== 'undefined') {
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', { sphereOffsetX: .1, sphereOffsetY: 0 });
         if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) mainPageBackgroundSphere.init().introAnimate();
@@ -696,7 +688,6 @@ function onMasterIntroComplete() {
         setupResponsiveScrollTriggers();
         initialSetupDone = true;
     } else {
-        // 이 refresh는 setupResponsiveScrollTriggers가 이미 호출되었을 경우를 대비합니다.
         if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
     }
     heroHeadlineTriggerEnabled = true;
@@ -705,24 +696,17 @@ function onMasterIntroComplete() {
     const scrollIcon = document.querySelector(".scroll-icon");
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.3 });
     
-    // 4. 페이지를 맨 위로 스크롤합니다.
     window.scrollTo(0, 0);
 
-    // 5. [최종 해결책] 브라우저 렌더링을 강제하고 ScrollTrigger를 여러 번에 걸쳐 새로고침합니다.
+    // [최종 해결책]
     if (typeof ScrollTrigger !== 'undefined') {
         // 강제 리플로우(reflow): 브라우저에게 현재 레이아웃을 즉시 계산하도록 강제합니다.
-        // Spline 캔버스 같은 요소의 최종 크기를 이 시점에서 확정짓는 효과가 있습니다.
         void document.body.offsetHeight; 
 
-        // 1차 새로고침: 강제 리플로우 직후, 업데이트된 레이아웃으로 즉시 새로고침합니다.
-        ScrollTrigger.refresh();
-
-        // 2차 새로고침 (지연): 모든 동기적 작업이 끝난 후, 혹시 모를 비동기적 레이아웃 변경에
-        // 대비하여 아주 짧은 지연 후 최종적으로 다시 한번 새로고침합니다.
-        // 이것이 가장 안정적인 상태에서 ScrollTrigger 값을 확정짓는 최종 안전장치입니다.
+        // 지연 후 최종 새로고침을 실행하여, 간헐적으로 발생하는 타이밍 이슈를 해결합니다.
         setTimeout(() => {
             ScrollTrigger.refresh(true);
-        }, 150); 
+        }, 250); // 지연 시간을 약간 더 늘려 안정성을 확보합니다.
     }
 }
 
@@ -739,7 +723,6 @@ function setupAllScrollTriggers(isDesktopView) {
             splitComName = null;
         }
         gsap.set(comNameElement, {
-            /* clearProps: "all", */
             clearProps: "top,left,right,bottom,x,y,xPercent,yPercent,zIndex",
             autoAlpha: 1,
             position: 'absolute',
@@ -761,11 +744,10 @@ function setupAllScrollTriggers(isDesktopView) {
     setupWorkItemAnimations();
     setupScrollToTopButton();
     setupScrollIconAnimation();
-    document.body.offsetHeight;
+    
+    // 이 함수 마지막에서 refresh를 호출하여, 모든 트리거가 생성된 후 위치를 계산하도록 합니다.
     if (typeof ScrollTrigger !== 'undefined') {
-        ScrollTrigger.sort();
         ScrollTrigger.refresh();
-        ScrollTrigger.update();
     }
     if (initialSetupDone) heroHeadlineTriggerEnabled = true;
 }
@@ -810,13 +792,10 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
-// 페이지의 모든 리소스(이미지, Spline 등)가 로드된 후에 스크립트를 실행합니다.
-window.addEventListener('load', async () => {
+// [수정] DOMContentLoaded를 사용하여 스크립트의 초기 실행 시점을 잡습니다.
+document.addEventListener('DOMContentLoaded', async () => {
     window.scrollTo(0, 0);
-
     setupScrollRestoration();
-    
-    // 여기서 normalizeScroll을 호출하지 않습니다.
     
     try {
         await loadCommonUI();
@@ -833,8 +812,6 @@ window.addEventListener('load', async () => {
             if (!initialSetupDone) {
                 setupResponsiveScrollTriggers();
                 initialSetupDone = true;
-            } else {
-                if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh(true);
             }
         });
     } catch (error) {
