@@ -234,19 +234,54 @@ function setupWorksHorizontalScroll() {
     }
     const getXAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? 0 : -(list.scrollWidth - pinTargetElement.offsetWidth + 40);
     const getEndAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? "+=0" : "+=" + (list.scrollWidth - pinTargetElement.offsetWidth);
-    
-    gsap.to(list, { x: getXAmount, ease: "none", scrollTrigger: {
-            id: 'worksHorizontalScrollTrigger', trigger: pinTargetElement, pin: pinTargetElement, pinType: 'transform', start: "center center", pinSpacing: true, end: getEndAmount, anticipatePin: 1, scrub: 1.2, invalidateOnRefresh: true,
-            onRefresh: (self) => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
-            onEnter: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && st.enabled) st.disable(false); },
-            onLeave: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && !st.enabled) st.enable(false); },
-            onEnterBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && st.enabled) st.disable(false); },
-            onLeaveBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && !st.enabled) st.enable(false); }
-    }});
+
+    // --- FIX START: Pause vertical ScrollTriggers during horizontal scroll ---
+    // Define a function to toggle the enabled state of main vertical ScrollTriggers.
+    // This prevents background color and Spline objects from changing during the horizontal scroll.
+    const toggleMainTriggers = (enable) => {
+        const triggerIdsToToggle = [
+            'splineScrollTrigger-part1', 'part2SplineScrollTrigger', 'splineScrollTrigger-part3',
+            'mainPageBackgroundChangeTrigger-part1', 'mainPageBackgroundChangeTrigger-part2', 'mainPageBackgroundChangeTrigger-part3',
+            'barMorphTrigger-part1', 'barMorphTrigger-part2', 'barMorphTrigger-part3',
+            worksTitleTriggerId // Also include the subtitle trigger that was originally handled
+        ];
+
+        triggerIdsToToggle.forEach(id => {
+            if (!id) return;
+            const st = ScrollTrigger.getById(id);
+            if (st) {
+                st.enabled = enable;
+            }
+        });
+    };
+    // --- FIX END ---
+
+    gsap.to(list, {
+        x: getXAmount,
+        ease: "none",
+        scrollTrigger: {
+            id: 'worksHorizontalScrollTrigger',
+            trigger: pinTargetElement,
+            pin: pinTargetElement,
+            pinType: 'transform',
+            start: "center center",
+            pinSpacing: true,
+            end: getEndAmount,
+            anticipatePin: 1,
+            scrub: 1.2,
+            invalidateOnRefresh: true,
+            onRefresh: () => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
+            // Use the new function in the callbacks to pause/resume other triggers
+            onEnter: () => toggleMainTriggers(false),
+            onLeave: () => toggleMainTriggers(true),
+            onEnterBack: () => toggleMainTriggers(false),
+            onLeaveBack: () => toggleMainTriggers(true)
+        }
+    });
 
     const horizontalST = ScrollTrigger.getById('worksHorizontalScrollTrigger');
     if (horizontalST) {
-        // 데스크톱 휠 이벤트를 처리하여 흔들림 방지
+        // Desktop wheel event handling to prevent judder
         pinTargetElement.addEventListener("wheel", (e) => {
             if (horizontalST.isActive) {
                 if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
@@ -256,7 +291,7 @@ function setupWorksHorizontalScroll() {
             }
         }, { passive: false });
 
-        // 모바일 터치 이벤트를 처리하여 흔들림 방지
+        // Mobile touch event handling to prevent judder
         let startY;
         let startScrollY;
 
@@ -281,6 +316,7 @@ function setupWorksHorizontalScroll() {
         }, { passive: true });
     }
  }
+
 
 function setupWorkItemAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
