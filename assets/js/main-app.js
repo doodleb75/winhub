@@ -89,7 +89,8 @@ function enableScrollInteraction() {
     window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
-        ScrollTrigger.normalizeScroll(true);
+        // [수정] 여기서 normalizeScroll을 활성화하지 않습니다.
+        // 이 기능은 페이지가 완전히 준비된 후에 제어되어야 합니다.
         ScrollTrigger.enable();
     }
 }
@@ -502,23 +503,14 @@ async function runMainPageSequence() {
         return;
     }
 
-    if (typeof ScrollTrigger !== 'undefined') {
-        ScrollTrigger.normalizeScroll(true);
-    }
-
     const loaderPromise = runLoaderSequence('.part-container');
 
     const splineCanvas = document.getElementById("canvas3d");
     if (splineCanvas) gsap.set(splineCanvas, { autoAlpha: 0 });
 
     try {
-        // [설명] Spline 씬 로딩과 로더 애니메이션을 병렬로 처리하되, 둘 다 끝날 때까지 기다립니다.
-        // 이렇게 하면 Spline 로딩이 느려도 로더가 사라진 후 바로 애니메이션을 시작할 수 있습니다.
         const splinePromise = loadSplineScene("canvas3d", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode");
-        
-        // Promise.all을 사용해 로더와 스플라인 로딩이 모두 완료되기를 기다립니다.
         const [_, splineApp] = await Promise.all([loaderPromise, splinePromise]);
-        
         mainSplineApp = splineApp;
 
         if (mainSplineApp) {
@@ -532,15 +524,11 @@ async function runMainPageSequence() {
         }
     } catch (error) {
         console.error("MAIN-APP: Error during critical loading:", error);
-        // [추가] 에러 발생 시에도 스크롤을 활성화하고 기본 UI를 보여주도록 처리합니다.
         hideLoaderOnError();
         enableScrollInteraction();
-        onMasterIntroComplete(); // ScrollTrigger라도 설정되도록 호출
+        onMasterIntroComplete();
         return;
     }
-
-    // [설명] 이제 loaderPromise는 위에서 이미 await 했으므로 여기서 또 기다릴 필요가 없습니다.
-    // await loaderPromise; // 이 라인은 Promise.all을 사용하면서 불필요해졌습니다.
 
     disableScrollInteraction();
 
@@ -698,6 +686,21 @@ async function runMainPageSequence() {
 
 function onMasterIntroComplete() {
     enableScrollInteraction();
+
+    // [수정] 모든 인트로 애니메이션이 끝난 이 시점에서 normalizeScroll을 활성화합니다.
+    // 이것이 가장 안전한 시점입니다.
+    if (typeof ScrollTrigger !== 'undefined') {
+        // 특히 문제가 되는 터치 환경을 위해 normalizeScroll을 활성화합니다.
+        ScrollTrigger.normalizeScroll(true);
+
+        // normalizeScroll 활성화 후, 변경된 스크롤 환경에 맞춰 ScrollTrigger가
+        // 모든 위치 계산을 다시 하도록 강제합니다.
+        setTimeout(() => {
+            ScrollTrigger.update();
+            ScrollTrigger.refresh(true);
+        }, 50); // 브라우저가 변경사항을 처리할 약간의 시간을 줍니다.
+    }
+
     if (typeof window.THREE !== 'undefined') {
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', { sphereOffsetX: .1, sphereOffsetY: 0 });
         if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) mainPageBackgroundSphere.init().introAnimate();
@@ -714,14 +717,6 @@ function onMasterIntroComplete() {
     const scrollIcon = document.querySelector(".scroll-icon");
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.3 });
     window.scrollTo(0, 0);
-
-    // [추가] 안전장치: 모든 애니메이션과 설정이 끝난 후, 잠시 뒤에 ScrollTrigger를 다시 한번 강제로 refresh 합니다.
-    // 이는 비동기적으로 로드된 요소(Spline 등)로 인해 발생할 수 있는 미세한 레이아웃 변경을 최종적으로 잡아냅니다.
-    if (typeof ScrollTrigger !== 'undefined') {
-        setTimeout(() => {
-            ScrollTrigger.refresh(true);
-        }, 150); // 150ms 정도의 짧은 지연
-    }
 }
 
 function setupAllScrollTriggers(isDesktopView) {
@@ -807,17 +802,14 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
-// [수정] 'DOMContentLoaded' 대신 'load' 이벤트를 사용합니다.
-// 'load' 이벤트는 페이지의 모든 리소스(이미지, Spline 씬 등)가 로드된 후에 발생하므로,
-// ScrollTrigger가 레이아웃을 계산할 때 모든 요소의 크기와 위치가 확정된 상태임을 보장합니다.
-// 이것이 경쟁 상태(Race Condition)를 해결하는 가장 핵심적인 변경입니다.
 window.addEventListener("load", async () => {
     window.scrollTo(0, 0);
 
     setupScrollRestoration();
-    if (typeof ScrollTrigger !== 'undefined') {
-        ScrollTrigger.normalizeScroll(true);
-    }
+    // [수정] 여기서 normalizeScroll을 활성화하지 않습니다.
+    // if (typeof ScrollTrigger !== 'undefined') {
+    //     ScrollTrigger.normalizeScroll(true);
+    // }
     try {
         await loadCommonUI();
         const headerLogoForEarlyHide = document.querySelector("#header-placeholder .com-name-logo");
