@@ -1,6 +1,7 @@
 // assets/js/main-app.js
 
 // Spline Runtime, THREE.js, GSAP Plugins
+// import { Application as SplineRuntimeApp } from 'https://unpkg.com/@splinetool/runtime/build/runtime.js';
 import * as THREE_MOD from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
 window.THREE = THREE_MOD;
 
@@ -21,7 +22,7 @@ import {
     responsiveScale,
     responsiveX,
     responsiveY,
-    runLoaderSequence,
+    runLoaderSequence, 
     hideLoaderOnError,
     buildUrl,
     InteractiveBackgroundSphere,
@@ -34,7 +35,7 @@ import {
 let mainSplineApp = null;
 let winhub = null, cable = null, splineTimelines = [];
 let splitComName, splitSubTitles = [], splitHeadlineChars = [];
-let mainPageBackgroundSphere = null;
+// let mainPageBackgroundSphere = null;
 let initialSetupDone = false;
 let headlineCharsAnim = null;
 let heroHeadlineTriggerEnabled = false;
@@ -89,8 +90,7 @@ function enableScrollInteraction() {
     window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
-        // [수정] 여기서 normalizeScroll을 활성화하지 않습니다.
-        // 이 기능은 페이지가 완전히 준비된 후에 제어되어야 합니다.
+        ScrollTrigger.normalizeScroll(true);
         ScrollTrigger.enable();
     }
 }
@@ -334,7 +334,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     const heroTimeline = gsap.timeline({ scrollTrigger: { id: 'splineScrollTrigger-hero', trigger: "#hero", start: "top 10%", end: "bottom bottom", scrub: true, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = false), onLeaveBack: () => cableObj && (cableObj.visible = false), onRefresh: () => { if (ScrollTrigger.isInViewport("#hero") && (!document.querySelector("#part1") || !ScrollTrigger.isInViewport("#part1"))) cableObj && (cableObj.visible = false); }}});
     heroTimeline.to(winhubObj.position, {
         x: getTargetWinhubX(isMobileView),
-        y: getTargetWinhubY(isMobileView),
+        y: getTargetWinhubY(isMobileView), 
         z: WINHUB_INTRO_END_Z
     }, 0)
     .to(winhubObj.rotation, { x: degToRad(0), y: degToRad(90), z: degToRad(0) }, 0)
@@ -345,8 +345,8 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     if (document.getElementById('part1')) {
         const part1Timeline = gsap.timeline({ scrollTrigger: { id: 'splineScrollTrigger-part1', trigger: "#part1", start: "top 70%", end: "center bottom", scrub: 2, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = true), onEnterBack: () => cableObj && (cableObj.visible = true), onLeaveBack: () => cableObj && (cableObj.visible = false) }});
         const part1Position = isMobileView ?
-            { x: responsiveX(-20), y: responsiveY(30), z: responsiveX(-10) } :
-            { x: responsiveX(-93.75), y: responsiveY(37.04), z: responsiveX(-31.25) };
+            { x: responsiveX(-20), y: responsiveY(30), z: responsiveX(-10) } : 
+            { x: responsiveX(-93.75), y: responsiveY(37.04), z: responsiveX(-31.25) }; 
 
         part1Timeline.to(winhubObj.position, part1Position, 0)
             .to(winhubObj.rotation, { x: degToRad(80.5), y: degToRad(60), z: degToRad(-65) }, 0)
@@ -358,8 +358,8 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     if (document.getElementById('part2')) {
         const part2Timeline = gsap.timeline({ scrollTrigger: { id: "part2SplineScrollTrigger", trigger: "#part2", start: "top 85%", end: "top 30%", scrub: 2, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = true), onEnterBack: () => cableObj && (cableObj.visible = true) }});
         const part2Position = isMobileView ?
-            { x: responsiveX(20), y: responsiveY(15), z: responsiveX(-5) } :
-            { x: responsiveX(50), y: responsiveY(10), z: responsiveX(-20) };
+            { x: responsiveX(20), y: responsiveY(15), z: responsiveX(-5) } : 
+            { x: responsiveX(50), y: responsiveY(10), z: responsiveX(-20) }; 
 
         part2Timeline.to(winhubObj.position, part2Position, 0)
             .to(winhubObj.rotation, { x: degToRad(40), y: degToRad(60), z: degToRad(-60) }, 0)
@@ -371,7 +371,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     if (document.getElementById('part3')) {
         const part3Timeline = gsap.timeline({ scrollTrigger: { id: 'splineScrollTrigger-part3', trigger: "#part3", start: "top 30%", end: "center bottom", scrub: 2, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = true) }});
         const part3Position = isMobileView ?
-            { x: responsiveX(-30), y: responsiveY(70), z: 0 } :
+            { x: responsiveX(-30), y: responsiveY(70), z: 0 } : 
             { x: responsiveX(-61.67), y: responsiveY(80.11), z: 0 };
 
         part3Timeline.to(winhubObj.position, part3Position, 0)
@@ -465,7 +465,7 @@ function populateWorksList() {
         listItem.classList.add('work-item');
 
         const link = document.createElement('a');
-        link.href = buildUrl(`/page/works_details/works-detail.html?id=${work.id}`);
+        link.href = buildUrl(`/page/works_details/works-detail.html?id=${work.id}`); 
         link.setAttribute('aria-label', `View Project ${work.title}`);
 
         const thumbnailDiv = document.createElement('div');
@@ -503,16 +503,17 @@ async function runMainPageSequence() {
         return;
     }
 
+    if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.normalizeScroll(true);
+    }
+    
     const loaderPromise = runLoaderSequence('.part-container');
-
+    
     const splineCanvas = document.getElementById("canvas3d");
     if (splineCanvas) gsap.set(splineCanvas, { autoAlpha: 0 });
 
     try {
-        const splinePromise = loadSplineScene("canvas3d", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode");
-        const [_, splineApp] = await Promise.all([loaderPromise, splinePromise]);
-        mainSplineApp = splineApp;
-
+        mainSplineApp = await loadSplineScene("canvas3d", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode");
         if (mainSplineApp) {
             winhub = mainSplineApp.findObjectByName("Winhub");
             cable = mainSplineApp.findObjectByName("cable");
@@ -524,11 +525,9 @@ async function runMainPageSequence() {
         }
     } catch (error) {
         console.error("MAIN-APP: Error during critical loading:", error);
-        hideLoaderOnError();
-        enableScrollInteraction();
-        onMasterIntroComplete();
-        return;
     }
+
+    await loaderPromise;
 
     disableScrollInteraction();
 
@@ -541,14 +540,18 @@ async function runMainPageSequence() {
         enableScrollInteraction();
         return;
     }
-
+    
     gsap.set(comNameElement, { autoAlpha: 0 });
     gsap.set(".headline", { autoAlpha: 0 });
     gsap.set(".headline div", { autoAlpha: 0 });
-
+    
     const masterIntroTimeline = gsap.timeline({ onComplete: onMasterIntroComplete });
     const isMobileViewInitial = window.innerWidth <= 767;
 
+    // ▼▼▼ MODIFICATION START ▼▼▼
+
+    // 1. Calculate final positions of characters
+    // Place the container in its final position first to calculate where the characters should end up.
     if (comNameElement.parentNode !== heroTextBlock) {
         heroTextBlock.prepend(comNameElement);
     }
@@ -557,12 +560,13 @@ async function runMainPageSequence() {
         top: 0,
         left: 0,
         transform: 'translateY(-100%)',
-        autoAlpha: 1
+        autoAlpha: 1 // Temporarily visible to measure
     });
 
     let finalPositions = [];
     let tempSplit;
     try {
+        // Use 'chars' to get individual character positions
         tempSplit = new SplitText(comNameElement, { type: 'chars' });
         if (tempSplit.chars) {
             finalPositions = tempSplit.chars.map(char => {
@@ -570,12 +574,13 @@ async function runMainPageSequence() {
                 return { x: rect.left, y: rect.top };
             });
         }
-        tempSplit.revert();
+        tempSplit.revert(); // Clean up immediately after measuring
     } catch (e) {
         console.error("Failed to split text for measurement:", e);
     }
-    gsap.set(comNameElement, { autoAlpha: 0 });
+    gsap.set(comNameElement, { autoAlpha: 0 }); // Hide it again before animation
 
+    // 2. Set up the starting state (centered)
     gsap.set(comNameElement, {
         position: 'fixed',
         top: '50%',
@@ -586,13 +591,16 @@ async function runMainPageSequence() {
         autoAlpha: 1
     });
     try {
+        // Re-split with 'absolute' positioning for the animation itself
         splitComName = new SplitText(comNameElement, { type: "chars", position: "absolute" });
     } catch (e) {
         splitComName = null;
         console.error("Failed to split text for animation:", e);
     }
 
-    if (splitComName && splitComName.chars && finalPositions.length === splitComName.chars.length) {
+    // 3. Build the animation timeline
+        if (splitComName && splitComName.chars && finalPositions.length === splitComName.chars.length) {
+        // Part 1: Animate characters appearing at the center of the screen
         masterIntroTimeline.from(splitComName.chars, {
             y: -50,
             opacity: 0,
@@ -601,6 +609,7 @@ async function runMainPageSequence() {
             stagger: 0.1
         });
 
+        // Part 2: Move each character to its final position
         masterIntroTimeline.to(splitComName.chars, {
             duration: 1.2,
             x: (i, el) => finalPositions[i].x - el.getBoundingClientRect().left,
@@ -609,29 +618,39 @@ async function runMainPageSequence() {
             stagger: 0.06
         }, "+=0.02");
 
+        // ▼▼▼▼▼ 수정된 부분 ▼▼▼▼▼
+        // Part 3: Clean up after the move is done
         masterIntroTimeline.call(() => {
             if (splitComName) {
+                // SplitText 인스턴스를 revert하여 생성된 글자 <div>들을 정리합니다.
                 splitComName.revert();
-                splitComName = null;
+                splitComName = null; // 다시 revert되지 않도록 null로 설정합니다.
+
+                // revert 과정에서 투명도 스타일이 제거되므로,
+                // 최종 위치 스타일과 함께 autoAlpha: 1을 명시적으로 다시 설정하여
+                // 요소가 사라지지 않도록 합니다.
                 gsap.set(comNameElement, {
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     transform: 'translateY(-100%)',
-                    autoAlpha: 1
+                    autoAlpha: 1 // 이 속성이 요소를 계속 보이게 하는 핵심입니다.
                 });
             }
         });
-    } else {
+    } else { // Fallback if splitting fails
         masterIntroTimeline.to(comNameElement, { autoAlpha: 1, duration: 1 });
     }
 
-    const headlineStartTime = "<+=0.02";
+    // 4. Time the rest of the animations relative to the main timeline
+    const headlineStartTime = "<+=0.02"; 
     masterIntroTimeline
         .set(".headline", { autoAlpha: 1, xPercent: -50, left: "50%" }, headlineStartTime)
         .to(".headline", { xPercent: 0, left: "0%", duration: .5, ease: "power3.inOut" })
         .addLabel("startHeadlineChars", ">-0.1");
 
+    // ▲▲▲ MODIFICATION END ▲▲▲
+    
     const headlineDivs = document.querySelectorAll(".headline div");
     if (headlineDivs.length > 0) {
         if (splitHeadlineChars.length !== headlineDivs.length || (splitHeadlineChars.length > 0 && (!splitHeadlineChars[0].chars || !splitHeadlineChars[0].chars.length))) {
@@ -672,10 +691,10 @@ async function runMainPageSequence() {
             .fromTo(winhub.scale, { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5) }, { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), duration: 1.5, ease: "power3.out" }, "<+0.2")
             .fromTo(winhub.rotation, { x: degToRad(90), y: degToRad(-360), z: degToRad(5) }, { x: degToRad(0), y: degToRad(90), z: degToRad(0), duration: 1.5, ease: "power3.out" }, "<")
             .fromTo(winhub.position,
-                { x: 0, y: 0, z: WINHUB_INTRO_END_Z },
+                { x: 0, y: 0, z: WINHUB_INTRO_END_Z }, 
                 {
                     x: getTargetWinhubX(isMobileViewInitial),
-                    y: getTargetWinhubY(isMobileViewInitial),
+                    y: getTargetWinhubY(isMobileViewInitial), 
                     z: WINHUB_INTRO_END_Z,
                     duration: 1.5,
                     ease: "power3.out"
@@ -686,25 +705,10 @@ async function runMainPageSequence() {
 
 function onMasterIntroComplete() {
     enableScrollInteraction();
-
-    // [수정] 모든 인트로 애니메이션이 끝난 이 시점에서 normalizeScroll을 활성화합니다.
-    // 이것이 가장 안전한 시점입니다.
-    if (typeof ScrollTrigger !== 'undefined') {
-        // 특히 문제가 되는 터치 환경을 위해 normalizeScroll을 활성화합니다.
-        ScrollTrigger.normalizeScroll(true);
-
-        // normalizeScroll 활성화 후, 변경된 스크롤 환경에 맞춰 ScrollTrigger가
-        // 모든 위치 계산을 다시 하도록 강제합니다.
-        setTimeout(() => {
-            ScrollTrigger.update();
-            ScrollTrigger.refresh(true);
-        }, 50); // 브라우저가 변경사항을 처리할 약간의 시간을 줍니다.
-    }
-
-    if (typeof window.THREE !== 'undefined') {
+    /* if (typeof window.THREE !== 'undefined') {
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', { sphereOffsetX: .1, sphereOffsetY: 0 });
         if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) mainPageBackgroundSphere.init().introAnimate();
-    }
+    } */
     if (!initialSetupDone) {
         setupResponsiveScrollTriggers();
         initialSetupDone = true;
@@ -723,17 +727,18 @@ function setupAllScrollTriggers(isDesktopView) {
     const elementsToClear = ["#part2 .part2-info", "#part2 .works-list", "#part2 .works-list-container"];
     elementsToClear.forEach(selector => { const el = document.querySelector(selector); if (el) gsap.set(el, { clearProps: "all" }); });
     gsap.set(document.body, { clearProps: "backgroundColor" });
-
+    
     const comNameElement = document.querySelector(".com-name-ani");
     if (comNameElement) {
         comNameElement.classList.remove('scrolled');
         if (splitComName && splitComName.revert) {
             splitComName.revert();
-            splitComName = null;
+            splitComName = null; 
         }
         gsap.set(comNameElement, {
+            /* clearProps: "all", */
             clearProps: "top,left,right,bottom,x,y,xPercent,yPercent,zIndex",
-            autoAlpha: 1,
+            autoAlpha: 1, 
             position: 'absolute',
             top: '0px',
             left: '0px',
@@ -773,13 +778,13 @@ function setupResponsiveScrollTriggers() {
             if (splitComName) { splitComName.revert(); splitComName = null; }
             splitHeadlineChars.forEach(st => st?.revert()); splitHeadlineChars = [];
             setupAllScrollTriggers(true);
-            return function() {
-                killAllScrollTriggers();
-                heroHeadlineTriggerEnabled = false;
-                splineTimelines.forEach(tl => tl.kill()); splineTimelines = [];
-                splitSubTitles.forEach(st => st?.revert()); splitSubTitles = [];
-                if (splitComName) { splitComName.revert(); splitComName = null; }
-                splitHeadlineChars.forEach(st => st?.revert()); splitHeadlineChars = [];
+            return function() { 
+                killAllScrollTriggers(); 
+                heroHeadlineTriggerEnabled = false; 
+                splineTimelines.forEach(tl => tl.kill()); splineTimelines = []; 
+                splitSubTitles.forEach(st => st?.revert()); splitSubTitles = []; 
+                if (splitComName) { splitComName.revert(); splitComName = null; } 
+                splitHeadlineChars.forEach(st => st?.revert()); splitHeadlineChars = []; 
             };
         },
         "(max-width: 767px)": function() {
@@ -790,33 +795,36 @@ function setupResponsiveScrollTriggers() {
             if (splitComName) { splitComName.revert(); splitComName = null; }
             splitHeadlineChars.forEach(st => st?.revert()); splitHeadlineChars = [];
             setupAllScrollTriggers(false);
-            return function() {
-                killAllScrollTriggers();
-                heroHeadlineTriggerEnabled = false;
-                splineTimelines.forEach(tl => tl.kill()); splineTimelines = [];
-                splitSubTitles.forEach(st => st?.revert()); splitSubTitles = [];
-                if (splitComName) { splitComName.revert(); splitComName = null; }
-                splitHeadlineChars.forEach(st => st?.revert()); splitHeadlineChars = [];
+            return function() { 
+                killAllScrollTriggers(); 
+                heroHeadlineTriggerEnabled = false; 
+                splineTimelines.forEach(tl => tl.kill()); splineTimelines = []; 
+                splitSubTitles.forEach(st => st?.revert()); splitSubTitles = []; 
+                if (splitComName) { splitComName.revert(); splitComName = null; } 
+                splitHeadlineChars.forEach(st => st?.revert()); splitHeadlineChars = []; 
             };
         }
     });
 }
 
-window.addEventListener("load", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    // ▼▼▼ 수정된 부분 ▼▼▼
+    // 페이지가 로드될 때 스크롤 위치를 항상 (0,0)으로 강제하여
+    // 새로고침 시 이전 스크롤 위치가 나타나는 것을 방지하고 애니메이션이 최상단에서 시작되도록 합니다.
     window.scrollTo(0, 0);
+    // ▲▲▲ 수정 완료 ▲▲▲
 
     setupScrollRestoration();
-    // [수정] 여기서 normalizeScroll을 활성화하지 않습니다.
-    // if (typeof ScrollTrigger !== 'undefined') {
-    //     ScrollTrigger.normalizeScroll(true);
-    // }
+    if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.normalizeScroll(true);
+    }
     try {
         await loadCommonUI();
         const headerLogoForEarlyHide = document.querySelector("#header-placeholder .com-name-logo");
         if (headerLogoForEarlyHide) gsap.set(headerLogoForEarlyHide, { autoAlpha: 0 });
-
+        
         populateWorksList();
-
+        
         runMainPageSequence().catch(error => {
             console.error("Error in runMainPageSequence:", error);
             hideLoaderOnError();
