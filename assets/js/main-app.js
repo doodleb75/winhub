@@ -7,17 +7,11 @@ window.THREE = THREE_MOD;
 import { Draggable } from "https://esm.sh/gsap/Draggable";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
 import { MorphSVGPlugin } from "https://esm.sh/gsap/MorphSVGPlugin";
-// FIX: Import the Observer plugin, which works well with normalizeScroll.
-import { Observer } from "https://esm.sh/gsap/Observer";
 
 import { worksData } from './works-data.js';
 
-if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-    // FIX: Register the Observer plugin.
-    gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin, Observer);
-    // FIX: Enable normalizeScroll globally. This is the key to fixing the mobile scroll conflict.
-    // It creates a smoother, unified scrolling experience on touch devices.
-    ScrollTrigger.normalizeScroll(true);
+if (typeof gsap !== 'undefined') {
+    gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin);
 }
 
 // Imports from common-utils
@@ -51,6 +45,8 @@ let isScrollCurrentlyDisabled = false;
 let wasNormalizeScrollActive = false;
 
 if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+    // [FIX] normalizeScroll을 기본으로 활성화하여 스크롤 동작을 일관되고 부드럽게 만듭니다.
+    ScrollTrigger.normalizeScroll(true);
     ScrollTrigger.config({
         autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize"
     });
@@ -96,8 +92,7 @@ function enableScrollInteraction() {
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
         ScrollTrigger.enable();
-        // FIX: Restore normalizeScroll's state when scrolling is re-enabled.
-        // This ensures the smooth scrolling behavior is consistently applied after being temporarily disabled.
+        // [FIX] 스크롤 비활성화 이전에 normalizeScroll이 활성 상태였다면 다시 활성화합니다.
         if (wasNormalizeScrollActive) {
             ScrollTrigger.normalizeScroll(true);
         }
@@ -708,16 +703,20 @@ function onMasterIntroComplete() {
     
     window.scrollTo(0, 0);
 
+    // [최종 해결책] '첫 클릭' 문제를 해결하기 위한 강력한 일회성 리스너
     const forceRefreshOnFirstInteraction = () => {
         const handler = () => {
             console.log("[DEBUG] First user interaction detected. Forcing scroll restoration and refresh.");
             
+            // 만약을 위해 스크롤 상호작용을 다시 활성화합니다.
             enableScrollInteraction();
 
             if (typeof ScrollTrigger !== 'undefined') {
+                // 최종 레이아웃을 기준으로 모든 값을 다시 계산합니다.
                 ScrollTrigger.refresh(true);
             }
         };
+        // 'pointerdown'은 클릭과 터치를 모두 포함하며, { once: true } 옵션으로 단 한 번만 실행됩니다.
         window.addEventListener('pointerdown', handler, { once: true });
     };
 
@@ -759,6 +758,7 @@ function setupAllScrollTriggers(isDesktopView) {
     setupScrollToTopButton();
     setupScrollIconAnimation();
     
+    // 이 함수 마지막에서 refresh를 호출하여, 모든 트리거가 생성된 후 위치를 계산하도록 합니다.
     if (typeof ScrollTrigger !== 'undefined') {
         ScrollTrigger.refresh();
     }
@@ -805,6 +805,7 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
+// [수정] DOMContentLoaded를 사용하여 스크립트의 초기 실행 시점을 잡습니다.
 document.addEventListener('DOMContentLoaded', async () => {
     window.scrollTo(0, 0);
     setupScrollRestoration();
