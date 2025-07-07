@@ -89,8 +89,7 @@ function enableScrollInteraction() {
     window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
-        // [수정] 여기서 normalizeScroll을 호출하지 않습니다.
-        // 스크롤 자체만 활성화합니다.
+        // 스크롤 자체만 활성화합니다. normalizeScroll은 onMasterIntroComplete에서 제어합니다.
         ScrollTrigger.enable();
     }
 }
@@ -680,6 +679,13 @@ async function runMainPageSequence() {
 
 function onMasterIntroComplete() {
     enableScrollInteraction();
+
+    // [핵심 해결책] 모든 인트로 애니메이션이 끝난 이 시점에서 normalizeScroll을 활성화합니다.
+    // 이것이 '첫 클릭' 문제를 방지하는 가장 안전한 시점입니다.
+    if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.normalizeScroll(true);
+    }
+
     if (typeof window.THREE !== 'undefined') {
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', { sphereOffsetX: .1, sphereOffsetY: 0 });
         if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) mainPageBackgroundSphere.init().introAnimate();
@@ -697,10 +703,8 @@ function onMasterIntroComplete() {
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.3 });
     window.scrollTo(0, 0);
 
-    // [핵심 해결] 모든 설정이 끝나고 사용자와 상호작용이 가능해진 이 시점에서,
-    // 브라우저가 최종 레이아웃을 렌더링할 수 있도록 아주 짧은 지연시간을 줍니다.
-    // 그 후 ScrollTrigger의 모든 값을 강제로 다시 계산하여 정확한 위치를 잡게 합니다.
-    // 이것이 '첫 클릭' 시 발생하는 타이밍 문제를 해결하는 가장 확실한 방법입니다.
+    // [안전장치] normalizeScroll 활성화 후, 브라우저가 변경사항을 처리하고
+    // 최종 레이아웃을 확정할 시간을 주기 위해 짧은 지연 후 refresh를 실행합니다.
     if (typeof ScrollTrigger !== 'undefined') {
         setTimeout(() => {
             ScrollTrigger.refresh(true);
@@ -792,15 +796,13 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
-// [수정] DOMContentLoaded 대신 window.addEventListener('load', ...)를 사용하여
 // 페이지의 모든 리소스(이미지, Spline 등)가 로드된 후에 스크립트를 실행합니다.
-// 이는 경쟁 상태를 방지하는 첫 번째 방어선입니다.
 window.addEventListener('load', async () => {
     window.scrollTo(0, 0);
 
     setupScrollRestoration();
     
-    // [수정] normalizeScroll은 여기서 호출하지 않고, 모든 준비가 끝난 후에 호출합니다.
+    // 여기서 normalizeScroll을 호출하지 않습니다.
     
     try {
         await loadCommonUI();
