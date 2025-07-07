@@ -45,6 +45,8 @@ let isScrollCurrentlyDisabled = false;
 let wasNormalizeScrollActive = false;
 
 if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+    // [FIX] normalizeScroll을 기본으로 활성화하여 스크롤 동작을 일관되고 부드럽게 만듭니다.
+    ScrollTrigger.normalizeScroll(true);
     ScrollTrigger.config({
         autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize"
     });
@@ -89,8 +91,11 @@ function enableScrollInteraction() {
     window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
-        // 스크롤 자체만 활성화합니다. normalizeScroll은 onMasterIntroComplete에서 제어합니다.
         ScrollTrigger.enable();
+        // [FIX] 스크롤 비활성화 이전에 normalizeScroll이 활성 상태였다면 다시 활성화합니다.
+        if (wasNormalizeScrollActive) {
+            ScrollTrigger.normalizeScroll(true);
+        }
     }
 }
 
