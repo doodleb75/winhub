@@ -7,11 +7,13 @@ window.THREE = THREE_MOD;
 import { Draggable } from "https://esm.sh/gsap/Draggable";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
 import { MorphSVGPlugin } from "https://esm.sh/gsap/MorphSVGPlugin";
+import { Observer } from "https://esm.sh/gsap/Observer";
+
 
 import { worksData } from './works-data.js';
 
 if (typeof gsap !== 'undefined') {
-    gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin);
+    gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin, Observer);
 }
 
 // Imports from common-utils
@@ -48,6 +50,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
     ScrollTrigger.config({
         autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize"
     });
+    ScrollTrigger.normalizeScroll(true);
 }
 
 // --- Configuration Variables ---
@@ -75,9 +78,6 @@ function disableScrollInteraction() {
     window.addEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.addEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
-        const currentNormalizeConfig = ScrollTrigger.normalizeScroll();
-        wasNormalizeScrollActive = !!currentNormalizeConfig;
-        if (wasNormalizeScrollActive) ScrollTrigger.normalizeScroll(false);
         ScrollTrigger.disable(false, true);
     }
 }
@@ -89,7 +89,6 @@ function enableScrollInteraction() {
     window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
-        // 스크롤 자체만 활성화합니다. normalizeScroll은 onMasterIntroComplete에서 제어합니다.
         ScrollTrigger.enable();
     }
 }
@@ -219,29 +218,80 @@ function setupSubTitleAnimation() {
     });
  }
 
+// [수정] Works 영역의 가로 스크롤 설정 함수
 function setupWorksHorizontalScroll() {
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' || typeof Draggable === 'undefined') {
+        console.error("GSAP, ScrollTrigger, or Draggable is not loaded.");
+        return;
+    }
+
     const pinTargetElement = document.querySelector("#part2 .part2-info");
     const list = document.querySelector("#part2 .works-list");
     if (!pinTargetElement || !list) return;
-    let worksTitleTriggerId = "subTitleAppearTrigger-works-0";
-    const worksSubTitleElement = document.querySelector("#part2 .sub-title");
-    if (worksSubTitleElement) {
-        const textContentForId = worksSubTitleElement.textContent.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-        const stInstance = ScrollTrigger.getAll().find(st => st.vars.trigger === worksSubTitleElement && st.vars.id.startsWith(`subTitleAppearTrigger-${textContentForId}`));
-        if (stInstance) worksTitleTriggerId = stInstance.vars.id;
+
+    // 리사이즈 시 충돌을 방지하기 위해 이전 인스턴스를 모두 제거합니다.
+    ScrollTrigger.getById('worksHorizontalScrollTrigger')?.kill();
+    Draggable.get(list)?.kill();
+
+    // 가로 스크롤 애니메이션을 위한 타임라인을 생성합니다.
+    const horizontalTween = gsap.to(list, {
+        x: () => -(list.scrollWidth - pinTargetElement.clientWidth),
+        ease: "none",
+        // 이 타임라인은 ScrollTrigger의 scrub이나 Draggable에 의해 제어됩니다.
+    });
+
+    // 모든 기기에서 공통적으로 적용될 pinning(고정)을 위한 ScrollTrigger입니다.
+    const pinST = ScrollTrigger.create({
+        id: 'worksHorizontalScrollTrigger',
+        trigger: pinTargetElement,
+        pin: true,
+        start: "center center",
+        // 가로 스크롤이 일어나는 동안 pinning이 유지될 길이를 설정합니다.
+        end: () => `+=${list.scrollWidth - pinTargetElement.clientWidth}`,
+        invalidateOnRefresh: true,
+    });
+
+    // isTouch는 터치 이벤트를 지원하는 기기인지 확인합니다.
+    if (ScrollTrigger.isTouch) {
+        // --- 모바일 (터치) 환경을 위한 설정 ---
+        console.log("Setting up Draggable for touch device.");
+
+        // Draggable 인스턴스를 생성하여 터치 드래그를 제어합니다.
+        Draggable.create(list, {
+            type: "x", // x축으로만 드래그
+            inertia: true, // 관성(flick) 효과
+            bounds: { // 드래그 가능 범위를 설정합니다.
+                minX: () => -(list.scrollWidth - pinTargetElement.clientWidth),
+                maxX: 0
+            },
+            edgeResistance: 0.8, // 가장자리에 도달했을 때의 저항감
+            
+            // 사용자가 드래그를 시작할 때, 페이지의 기본 스크롤을 비활성화합니다.
+            onPress: function() {
+                pinST.disable(); // ScrollTrigger의 스크롤 연동을 일시 중지
+            },
+            // 드래그가 진행되는 동안, 드래그 위치에 따라 애니메이션 타임라인의 진행도를 수동으로 업데이트합니다.
+            onDrag: function() {
+                // this.x는 Draggable의 현재 x 위치입니다.
+                // mapRange를 사용하여 x 위치를 0과 1 사이의 progress 값으로 변환합니다.
+                const progress = gsap.utils.mapRange(this.minX, 0, 1, 0, this.x);
+                gsap.set(horizontalTween, { progress: progress });
+            },
+            // 드래그가 끝나면 페이지 스크롤을 다시 활성화합니다.
+            onRelease: function() {
+                pinST.enable();
+            }
+        });
+
+    } else {
+        // --- 데스크탑 (마우스 휠) 환경을 위한 설정 ---
+        console.log("Setting up scrub for desktop device.");
+        // 기존의 ScrollTrigger에 scrub 기능을 추가하여 마우스 휠로 제어하도록 합니다.
+        pinST.vars.scrub = 1.2;
+        pinST.vars.animation = horizontalTween; // 생성해둔 애니메이션을 연결합니다.
     }
-    const getXAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? 0 : -(list.scrollWidth - pinTargetElement.offsetWidth + 40);
-    const getEndAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? "+=0" : "+=" + (list.scrollWidth - pinTargetElement.offsetWidth);
-    gsap.to(list, { x: getXAmount, ease: "none", scrollTrigger: {
-            id: 'worksHorizontalScrollTrigger', trigger: pinTargetElement, pin: pinTargetElement, pinType: 'transform', start: "center center", pinSpacing: true, end: getEndAmount, anticipatePin: 1, scrub: 1.2, invalidateOnRefresh: true,
-            onRefresh: (self) => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
-            onEnter: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && st.enabled) st.disable(false); },
-            onLeave: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && !st.enabled) st.enable(false); },
-            onEnterBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && st.enabled) st.disable(false); },
-            onLeaveBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && !st.enabled) st.enable(false); }
-    }});
- }
+}
+
 
 function setupWorkItemAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
@@ -260,6 +310,7 @@ function setupWorkItemAnimations() {
         ScrollTrigger.create({
             id: `work-item-anim-${index}`,
             trigger: item,
+            // horizontalScrollTrigger의 애니메이션(horizontalTween)을 기준으로 작동합니다.
             containerAnimation: horizontalScrollTrigger.animation,
             start: "left 95%",
             toggleActions: "restart pause resume reverse",
