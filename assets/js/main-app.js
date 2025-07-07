@@ -224,6 +224,7 @@ function setupWorksHorizontalScroll() {
     const pinTargetElement = document.querySelector("#part2 .part2-info");
     const list = document.querySelector("#part2 .works-list");
     if (!pinTargetElement || !list) return;
+
     let worksTitleTriggerId = "subTitleAppearTrigger-works-0";
     const worksSubTitleElement = document.querySelector("#part2 .sub-title");
     if (worksSubTitleElement) {
@@ -233,6 +234,7 @@ function setupWorksHorizontalScroll() {
     }
     const getXAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? 0 : -(list.scrollWidth - pinTargetElement.offsetWidth + 40);
     const getEndAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? "+=0" : "+=" + (list.scrollWidth - pinTargetElement.offsetWidth);
+    
     gsap.to(list, { x: getXAmount, ease: "none", scrollTrigger: {
             id: 'worksHorizontalScrollTrigger', trigger: pinTargetElement, pin: pinTargetElement, pinType: 'transform', start: "center center", pinSpacing: true, end: getEndAmount, anticipatePin: 1, scrub: 1.2, invalidateOnRefresh: true,
             onRefresh: (self) => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
@@ -241,6 +243,43 @@ function setupWorksHorizontalScroll() {
             onEnterBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && st.enabled) st.disable(false); },
             onLeaveBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && !st.enabled) st.enable(false); }
     }});
+
+    const horizontalST = ScrollTrigger.getById('worksHorizontalScrollTrigger');
+    if (horizontalST) {
+        // 데스크톱 휠 이벤트를 처리하여 흔들림 방지
+        pinTargetElement.addEventListener("wheel", (e) => {
+            if (horizontalST.isActive) {
+                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                    e.preventDefault();
+                    window.scrollTo(window.scrollX, window.scrollY + e.deltaY);
+                }
+            }
+        }, { passive: false });
+
+        // 모바일 터치 이벤트를 처리하여 흔들림 방지
+        let startY;
+        let startScrollY;
+
+        pinTargetElement.addEventListener("touchstart", (e) => {
+            if (horizontalST.isActive) {
+                startY = e.touches[0].clientY;
+                startScrollY = window.scrollY;
+            }
+        }, { passive: true });
+
+        pinTargetElement.addEventListener("touchmove", (e) => {
+            if (horizontalST.isActive && startY !== undefined) {
+                const deltaY = e.touches[0].clientY - startY;
+                e.preventDefault();
+                window.scrollTo(window.scrollX, startScrollY - deltaY);
+            }
+        }, { passive: false });
+
+        pinTargetElement.addEventListener("touchend", () => {
+            startY = undefined;
+            startScrollY = undefined;
+        }, { passive: true });
+    }
  }
 
 function setupWorkItemAnimations() {
