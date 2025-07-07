@@ -1,19 +1,14 @@
-// assets/js/main-app.js
-
-// Spline Runtime, THREE.js, GSAP Plugins
 import * as THREE_MOD from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
 window.THREE = THREE_MOD;
 
 import { Draggable } from "https://esm.sh/gsap/Draggable";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
 import { MorphSVGPlugin } from "https://esm.sh/gsap/MorphSVGPlugin";
-import { Observer } from "https://esm.sh/gsap/Observer";
-
 
 import { worksData } from './works-data.js';
 
 if (typeof gsap !== 'undefined') {
-    gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin, Observer);
+    gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin);
 }
 
 // Imports from common-utils
@@ -46,12 +41,18 @@ const SCROLL_PREVENTION_OPTIONS = { passive: false };
 let isScrollCurrentlyDisabled = false;
 let wasNormalizeScrollActive = false;
 
+// [수정] GSAP의 공식적인 초기화 절차
 if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+    // 1. ScrollTrigger가 load 이벤트를 포함한 주요 이벤트를 자동으로 감지하여 스스로 refresh 하도록 설정합니다.
     ScrollTrigger.config({
         autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize"
     });
+
+    // 2. 스크립트 로드 직후 normalizeScroll을 활성화합니다.
+    // 이는 모든 스크롤 관련 상호작용이 일관된 환경에서 처리되도록 보장합니다.
     ScrollTrigger.normalizeScroll(true);
 }
+
 
 // --- Configuration Variables ---
 const getScaleConfig = (isDesktopView) => ({ hero: isDesktopView ? 140 : 300, part1: isDesktopView ? 200 : 400, part2: isDesktopView ? 200 : 400, part3: isDesktopView ? 200 : 400 });
@@ -218,16 +219,11 @@ function setupSubTitleAnimation() {
     });
  }
 
-// [원복] Works 영역의 가로 스크롤 설정 함수
 function setupWorksHorizontalScroll() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const pinTargetElement = document.querySelector("#part2 .part2-info");
     const list = document.querySelector("#part2 .works-list");
     if (!pinTargetElement || !list) return;
-
-    // 리사이즈 시 충돌을 방지하기 위해 이전 인스턴스를 모두 제거합니다.
-    ScrollTrigger.getById('worksHorizontalScrollTrigger')?.kill();
-
     let worksTitleTriggerId = "subTitleAppearTrigger-works-0";
     const worksSubTitleElement = document.querySelector("#part2 .sub-title");
     if (worksSubTitleElement) {
@@ -237,29 +233,15 @@ function setupWorksHorizontalScroll() {
     }
     const getXAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? 0 : -(list.scrollWidth - pinTargetElement.offsetWidth + 40);
     const getEndAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? "+=0" : "+=" + (list.scrollWidth - pinTargetElement.offsetWidth);
-    gsap.to(list, {
-        x: getXAmount,
-        ease: "none",
-        scrollTrigger: {
-            id: 'worksHorizontalScrollTrigger',
-            trigger: pinTargetElement,
-            pin: pinTargetElement,
-            pinType: 'transform',
-            start: "center center",
-            pinSpacing: true,
-            end: getEndAmount,
-            anticipatePin: 1,
-            scrub: 1.2,
-            invalidateOnRefresh: true,
+    gsap.to(list, { x: getXAmount, ease: "none", scrollTrigger: {
+            id: 'worksHorizontalScrollTrigger', trigger: pinTargetElement, pin: pinTargetElement, pinType: 'transform', start: "center center", pinSpacing: true, end: getEndAmount, anticipatePin: 1, scrub: 1.2, invalidateOnRefresh: true,
             onRefresh: (self) => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
             onEnter: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && st.enabled) st.disable(false); },
             onLeave: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && !st.enabled) st.enable(false); },
             onEnterBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && st.enabled) st.disable(false); },
             onLeaveBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && !st.enabled) st.enable(false); }
-        }
-    });
-}
-
+    }});
+ }
 
 function setupWorkItemAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
@@ -716,24 +698,16 @@ function onMasterIntroComplete() {
     
     window.scrollTo(0, 0);
 
-    // [최종 해결책] '첫 클릭' 문제를 해결하기 위한 강력한 일회성 리스너
-    const forceRefreshOnFirstInteraction = () => {
-        const handler = () => {
-            console.log("[DEBUG] First user interaction detected. Forcing scroll restoration and refresh.");
-            
-            // 만약을 위해 스크롤 상호작용을 다시 활성화합니다.
-            enableScrollInteraction();
+    // [최종 해결책]
+    if (typeof ScrollTrigger !== 'undefined') {
+        // 강제 리플로우(reflow): 브라우저에게 현재 레이아웃을 즉시 계산하도록 강제합니다.
+        void document.body.offsetHeight; 
 
-            if (typeof ScrollTrigger !== 'undefined') {
-                // 최종 레이아웃을 기준으로 모든 값을 다시 계산합니다.
-                ScrollTrigger.refresh(true);
-            }
-        };
-        // 'pointerdown'은 클릭과 터치를 모두 포함하며, { once: true } 옵션으로 단 한 번만 실행됩니다.
-        window.addEventListener('pointerdown', handler, { once: true });
-    };
-
-    forceRefreshOnFirstInteraction();
+        // 지연 후 최종 새로고침을 실행하여, 간헐적으로 발생하는 타이밍 이슈를 해결합니다.
+        setTimeout(() => {
+            ScrollTrigger.refresh(true);
+        }, 250); // 지연 시간을 약간 더 늘려 안정성을 확보합니다.
+    }
 }
 
 function setupAllScrollTriggers(isDesktopView) {
