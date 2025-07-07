@@ -218,51 +218,46 @@ function setupSubTitleAnimation() {
     });
  }
 
-// [최종 수정] Works 영역의 가로 스크롤 설정 함수
+// [원복] Works 영역의 가로 스크롤 설정 함수
 function setupWorksHorizontalScroll() {
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' || typeof Observer === 'undefined') {
-        console.error("GSAP, ScrollTrigger, or Observer is not loaded.");
-        return;
-    }
-
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const pinTargetElement = document.querySelector("#part2 .part2-info");
     const list = document.querySelector("#part2 .works-list");
     if (!pinTargetElement || !list) return;
 
     // 리사이즈 시 충돌을 방지하기 위해 이전 인스턴스를 모두 제거합니다.
     ScrollTrigger.getById('worksHorizontalScrollTrigger')?.kill();
-    Observer.get(pinTargetElement)?.kill();
 
-    // 표준 scrub 기반의 가로 스크롤을 모든 기기에 적용합니다.
+    let worksTitleTriggerId = "subTitleAppearTrigger-works-0";
+    const worksSubTitleElement = document.querySelector("#part2 .sub-title");
+    if (worksSubTitleElement) {
+        const textContentForId = worksSubTitleElement.textContent.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+        const stInstance = ScrollTrigger.getAll().find(st => st.vars.trigger === worksSubTitleElement && st.vars.id.startsWith(`subTitleAppearTrigger-${textContentForId}`));
+        if (stInstance) worksTitleTriggerId = stInstance.vars.id;
+    }
+    const getXAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? 0 : -(list.scrollWidth - pinTargetElement.offsetWidth + 40);
+    const getEndAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? "+=0" : "+=" + (list.scrollWidth - pinTargetElement.offsetWidth);
     gsap.to(list, {
-        x: () => -(list.scrollWidth - pinTargetElement.clientWidth),
+        x: getXAmount,
         ease: "none",
         scrollTrigger: {
             id: 'worksHorizontalScrollTrigger',
             trigger: pinTargetElement,
-            pin: true,
-            scrub: 1,
+            pin: pinTargetElement,
+            pinType: 'transform',
             start: "center center",
-            end: () => `+=${list.scrollWidth - pinTargetElement.clientWidth}`,
-            invalidateOnRefresh: true
+            pinSpacing: true,
+            end: getEndAmount,
+            anticipatePin: 1,
+            scrub: 1.2,
+            invalidateOnRefresh: true,
+            onRefresh: (self) => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
+            onEnter: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && st.enabled) st.disable(false); },
+            onLeave: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && !st.enabled) st.enable(false); },
+            onEnterBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && st.enabled) st.disable(false); },
+            onLeaveBack: () => { const st = ScrollTrigger.getById(worksTitleTriggerId); if (st && !st.enabled) st.enable(false); }
         }
     });
-
-    // 터치 기기에서만 Observer를 추가하여, 수직 스크롤 흔들림을 방지합니다.
-    if (ScrollTrigger.isTouch) {
-        Observer.create({
-            target: pinTargetElement,
-            type: "touch,pointer",
-            // onDrag 콜백은 사용자가 드래그하는 동안 계속 호출됩니다.
-            onDrag: self => {
-                // 사용자의 드래그 방향이 수평에 더 가까운 경우,
-                if (Math.abs(self.deltaX) > Math.abs(self.deltaY)) {
-                    // 브라우저의 기본 수직 스크롤 동작(페이지 흔들림의 원인)을 막습니다.
-                    self.event.preventDefault();
-                }
-            }
-        });
-    }
 }
 
 
@@ -283,7 +278,6 @@ function setupWorkItemAnimations() {
         ScrollTrigger.create({
             id: `work-item-anim-${index}`,
             trigger: item,
-            // horizontalScrollTrigger의 애니메이션(scrub)을 기준으로 작동합니다.
             containerAnimation: horizontalScrollTrigger.animation,
             start: "left 95%",
             toggleActions: "restart pause resume reverse",
