@@ -678,14 +678,16 @@ async function runMainPageSequence() {
 }
 
 function onMasterIntroComplete() {
+    // 1. 스크롤 상호작용을 활성화합니다.
     enableScrollInteraction();
 
-    // [핵심 해결책] 모든 인트로 애니메이션이 끝난 이 시점에서 normalizeScroll을 활성화합니다.
+    // 2. 모든 인트로 애니메이션이 끝난 이 시점에서 normalizeScroll을 활성화합니다.
     // 이것이 '첫 클릭' 문제를 방지하는 가장 안전한 시점입니다.
     if (typeof ScrollTrigger !== 'undefined') {
         ScrollTrigger.normalizeScroll(true);
     }
 
+    // 3. 나머지 UI 요소들을 활성화합니다.
     if (typeof window.THREE !== 'undefined') {
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', { sphereOffsetX: .1, sphereOffsetY: 0 });
         if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) mainPageBackgroundSphere.init().introAnimate();
@@ -694,21 +696,33 @@ function onMasterIntroComplete() {
         setupResponsiveScrollTriggers();
         initialSetupDone = true;
     } else {
-        if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh(true);
+        // 이 refresh는 setupResponsiveScrollTriggers가 이미 호출되었을 경우를 대비합니다.
+        if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
     }
     heroHeadlineTriggerEnabled = true;
     const menuIcon = document.querySelector(".menu-icon");
     if (menuIcon) gsap.to(menuIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.1 });
     const scrollIcon = document.querySelector(".scroll-icon");
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.3 });
+    
+    // 4. 페이지를 맨 위로 스크롤합니다.
     window.scrollTo(0, 0);
 
-    // [안전장치] normalizeScroll 활성화 후, 브라우저가 변경사항을 처리하고
-    // 최종 레이아웃을 확정할 시간을 주기 위해 짧은 지연 후 refresh를 실행합니다.
+    // 5. [최종 해결책] 브라우저 렌더링을 강제하고 ScrollTrigger를 여러 번에 걸쳐 새로고침합니다.
     if (typeof ScrollTrigger !== 'undefined') {
+        // 강제 리플로우(reflow): 브라우저에게 현재 레이아웃을 즉시 계산하도록 강제합니다.
+        // Spline 캔버스 같은 요소의 최종 크기를 이 시점에서 확정짓는 효과가 있습니다.
+        void document.body.offsetHeight; 
+
+        // 1차 새로고침: 강제 리플로우 직후, 업데이트된 레이아웃으로 즉시 새로고침합니다.
+        ScrollTrigger.refresh();
+
+        // 2차 새로고침 (지연): 모든 동기적 작업이 끝난 후, 혹시 모를 비동기적 레이아웃 변경에
+        // 대비하여 아주 짧은 지연 후 최종적으로 다시 한번 새로고침합니다.
+        // 이것이 가장 안정적인 상태에서 ScrollTrigger 값을 확정짓는 최종 안전장치입니다.
         setTimeout(() => {
             ScrollTrigger.refresh(true);
-        }, 200); // 0.2초의 지연시간을 주어 안정성을 확보합니다.
+        }, 150); 
     }
 }
 
