@@ -58,7 +58,7 @@ const getTargetWinhubY = (isMobileView) => isMobileView ? responsiveY(-10) : 0;
 const WINHUB_INTRO_END_Z = 0;
 const partBackgroundColors = { hero: "#410b7a", part1: "#0b2c7a", part2: "#0b7a48", part3: "#7a063c" };
 
-// --- Scroll Prevention Functions (수정됨) ---
+// --- Scroll Prevention Functions ---
 function preventScroll(event) {
     if (isScrollCurrentlyDisabled) event.preventDefault();
 }
@@ -70,32 +70,29 @@ function preventKeyboardScroll(event) {
 function disableScrollInteraction() {
     if (isScrollCurrentlyDisabled) return;
     isScrollCurrentlyDisabled = true;
-    const body = document.body;
-    body.style.overflow = 'hidden';
-    body.style.touchAction = 'none'; // [수정] 터치 제스처를 직접 비활성화
-    body.style.overscrollBehavior = 'none'; // [수정] 오버스크롤 효과 비활성화
+    document.body.style.overflow = 'hidden';
     window.addEventListener('wheel', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.addEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.addEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
+        const currentNormalizeConfig = ScrollTrigger.normalizeScroll();
+        wasNormalizeScrollActive = !!currentNormalizeConfig;
+        if (wasNormalizeScrollActive) ScrollTrigger.normalizeScroll(false);
         ScrollTrigger.disable(false, true);
     }
 }
 function enableScrollInteraction() {
     if (!isScrollCurrentlyDisabled) return;
     isScrollCurrentlyDisabled = false;
-    const body = document.body;
-    body.style.overflow = 'auto';
-    body.style.touchAction = 'auto'; // [수정] 터치 제스처 활성화
-    body.style.overscrollBehavior = 'auto'; // [수정] 오버스크롤 효과 활성화
+    document.body.style.overflow = 'auto';
     window.removeEventListener('wheel', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
+        // 스크롤 자체만 활성화합니다. normalizeScroll은 onMasterIntroComplete에서 제어합니다.
         ScrollTrigger.enable();
     }
 }
-
 
 // --- Animation Functions ---
 function playHeadlineCharsAnimation(animateIn) {
@@ -757,6 +754,7 @@ async function runMainPageSequence() {
 
 function onMasterIntroComplete() {
     enableScrollInteraction();
+
     if (typeof window.THREE !== 'undefined') {
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', { sphereOffsetX: .1, sphereOffsetY: 0 });
         if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) mainPageBackgroundSphere.init().introAnimate();

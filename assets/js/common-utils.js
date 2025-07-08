@@ -1,17 +1,5 @@
 // assets/js/common-utils.js
 
-// [수정] 화면 높이를 계산하여 CSS 변수 '--vh'를 설정하는 함수
-function setVhVariable() {
-    // window.innerHeight는 주소창을 제외한 실제 뷰포트 높이를 가져옵니다.
-    let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-}
-// 페이지 로드 시 즉시 실행
-setVhVariable();
-// 창 크기가 변경될 때마다 다시 계산 (모바일에서 가로/세로 전환 시 유용)
-window.addEventListener('resize', setVhVariable);
-
-
 // --- Spline Runtime Import ---
 import { Application as SplineApplication } from 'https://unpkg.com/@splinetool/runtime/build/runtime.js';
 
@@ -78,9 +66,10 @@ function safeSessionSet(key, value) {
 
 
 /**
- * [MODIFIED] Executes the SVG loader animation sequence.
+ * [MODIFIED & FIXED] Executes the SVG loader animation sequence.
  * Checks sessionStorage to see if the page has been visited before in the current session.
  * If so, it plays a much shorter animation.
+ * This version includes a fix to prevent layout issues on mobile during load.
  * @param {string} mainContentSelector - Selector for the main content area to show after loading.
  * @returns {Promise<void>} A promise that resolves when the loader animation is complete.
  */
@@ -105,6 +94,12 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         
         // --- Shared Completion Logic ---
         const completeAndShowContent = () => {
+            // ★★★ FIX: 로딩 완료 시 화면 잠금 스타일을 원래대로 복원합니다. ★★★
+            document.documentElement.style.height = '';
+            document.documentElement.style.overflow = '';
+            document.body.style.height = '';
+            document.body.style.overflow = 'auto';
+
             window.scrollTo(0, 0); 
             gsap.to(loader, {
                 opacity: 0,
@@ -123,15 +118,20 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                             }
                         });
                     }
-                    document.body.style.overflow = 'auto';
+                    // document.body.style.overflow = 'auto'; // Replaced by the fix above
                     resolve();
                 }
             });
         };
 
         // --- Initial setup ---
-        gsap.set(loader, { opacity: 1, visibility: 'visible' });
+        // ★★★ FIX: 모바일에서 레이아웃 깨짐을 방지하기 위해 로딩 중 화면 스타일을 고정합니다. ★★★
+        document.documentElement.style.height = '100%';
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.height = '100%';
         document.body.style.overflow = 'hidden';
+
+        gsap.set(loader, { opacity: 1, visibility: 'visible' });
         if (mainContent) {
              gsap.set(mainContent, { opacity: 0, visibility: 'hidden' });
         }
@@ -223,6 +223,9 @@ export function hideLoaderOnError() {
             opacity: 0,
             onComplete: () => {
                 loader.style.visibility = 'hidden';
+                document.documentElement.style.height = '';
+                document.documentElement.style.overflow = '';
+                document.body.style.height = '';
                 document.body.style.overflow = 'auto';
             }
         });

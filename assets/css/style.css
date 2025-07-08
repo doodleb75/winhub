@@ -2250,24 +2250,3 @@ section.content-section {
   transition: color 0.3s ease;
 }
 
-#loader-placeholder {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: grid; /* Grid를 사용하여 자식 요소를 중앙 정렬 */
-    place-items: center; /* 수직, 수평 모두 중앙 */
-    z-index: 9999;
-}
-
-/* body의 기본 오버스크롤 동작을 제어하여 불필요한 드래그 효과 방지 */
-body {
-    overscroll-behavior: none;
-}
-
-/* 스크롤이 비활성화 될 때 body에 추가될 클래스 */
-body.scroll-disabled {
-    overflow: hidden;
-    touch-action: none; /* 터치 스크롤 및 패닝 비활성화 */
-}
