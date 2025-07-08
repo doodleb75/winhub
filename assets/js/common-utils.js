@@ -66,10 +66,9 @@ function safeSessionSet(key, value) {
 
 
 /**
- * [MODIFIED & FIXED] Executes the SVG loader animation sequence.
+ * [MODIFIED] Executes the SVG loader animation sequence.
  * Checks sessionStorage to see if the page has been visited before in the current session.
  * If so, it plays a much shorter animation.
- * This version includes a fix to prevent layout issues on mobile during load.
  * @param {string} mainContentSelector - Selector for the main content area to show after loading.
  * @returns {Promise<void>} A promise that resolves when the loader animation is complete.
  */
@@ -94,12 +93,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         
         // --- Shared Completion Logic ---
         const completeAndShowContent = () => {
-            // ★★★ FIX: 로딩 완료 시 화면 잠금 스타일을 원래대로 복원합니다. ★★★
-            document.documentElement.style.height = '';
-            document.documentElement.style.overflow = '';
-            document.body.style.height = '';
-            document.body.style.overflow = 'auto';
-
             window.scrollTo(0, 0); 
             gsap.to(loader, {
                 opacity: 0,
@@ -118,25 +111,15 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                             }
                         });
                     }
+                    document.body.style.overflow = 'auto';
                     resolve();
                 }
             });
         };
 
         // --- Initial setup ---
-        // ★★★ FIX V2: JS로 실제 화면 높이를 측정하여 레이아웃 깨짐을 방지합니다. ★★★
-        const viewportHeight = window.innerHeight;
-        document.documentElement.style.height = `${viewportHeight}px`;
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.height = `${viewportHeight}px`;
-        document.body.style.overflow = 'hidden';
-
-        // 로더의 높이도 100%로 설정하여 body에 맞춰지도록 합니다.
-        if (loader) {
-            loader.style.height = '100%';
-        }
-
         gsap.set(loader, { opacity: 1, visibility: 'visible' });
+        document.body.style.overflow = 'hidden';
         if (mainContent) {
              gsap.set(mainContent, { opacity: 0, visibility: 'hidden' });
         }
@@ -228,9 +211,6 @@ export function hideLoaderOnError() {
             opacity: 0,
             onComplete: () => {
                 loader.style.visibility = 'hidden';
-                document.documentElement.style.height = '';
-                document.documentElement.style.overflow = '';
-                document.body.style.height = '';
                 document.body.style.overflow = 'auto';
             }
         });
