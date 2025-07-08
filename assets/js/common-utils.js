@@ -66,13 +66,15 @@ function safeSessionSet(key, value) {
 
 
 /**
- * [MODIFIED & FINAL FIX] Executes the SVG loader animation sequence.
- * This version fixes both the mobile layout issue and the unclickable links problem.
+ * [MODIFIED] Executes the SVG loader animation sequence.
+ * Checks sessionStorage to see if the page has been visited before in the current session.
+ * If so, it plays a much shorter animation.
  * @param {string} mainContentSelector - Selector for the main content area to show after loading.
  * @returns {Promise<void>} A promise that resolves when the loader animation is complete.
  */
 export function runLoaderSequence(mainContentSelector = '#main-content') {
     return new Promise((resolve) => {
+        // Select loader elements
         const loader = document.getElementById('loader');
         const socket = document.getElementById('loader-socket');
         const socketPath = document.getElementById('lan-hole-path');
@@ -82,7 +84,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
 
         if (!loader || !socket || !socketPath || !cable || !loaderText) {
             console.warn("Loader elements not found. Skipping animation.");
-            if (loader) gsap.set(loader, { autoAlpha: 0, display: 'none' });
+            if (loader) gsap.set(loader, { autoAlpha: 0 });
             if (mainContent) gsap.set(mainContent, { autoAlpha: 1 });
             document.body.style.overflow = 'auto';
             resolve();
@@ -91,20 +93,12 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         
         // --- Shared Completion Logic ---
         const completeAndShowContent = () => {
-            // Restore original styles
-            document.documentElement.style.height = '';
-            document.documentElement.style.overflow = '';
-            document.body.style.height = '';
-            document.body.style.overflow = 'auto';
-
             window.scrollTo(0, 0); 
             gsap.to(loader, {
                 opacity: 0,
                 duration: 0.5,
                 onComplete: () => {
-                    // ★★★ FINAL FIX 1: Completely hide the loader to make links clickable ★★★
-                    loader.style.display = 'none'; 
-                    
+                    loader.style.visibility = 'hidden';
                     if (mainContent) {
                         gsap.to(mainContent, { 
                             opacity: 1, 
@@ -117,34 +111,28 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                             }
                         });
                     }
+                    document.body.style.overflow = 'auto';
                     resolve();
                 }
             });
         };
 
         // --- Initial setup ---
-        // ★★★ FINAL FIX 2: Lock screen size using JS to prevent mobile layout issues ★★★
-        const viewportHeight = window.innerHeight;
-        document.documentElement.style.height = `${viewportHeight}px`;
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.height = `${viewportHeight}px`;
+        gsap.set(loader, { opacity: 1, visibility: 'visible' });
         document.body.style.overflow = 'hidden';
-        loader.style.height = '100%'; // Ensure loader fills the locked body
-
-        gsap.set(loader, { opacity: 1, visibility: 'visible', display: 'flex' });
         if (mainContent) {
              gsap.set(mainContent, { opacity: 0, visibility: 'hidden' });
         }
 
         const visitedKey = `visited_${window.location.pathname}`;
-        const hasVisited = safeSessionGet(visitedKey);
+        const hasVisited = safeSessionGet(visitedKey); // [FIX] Use safe getter
         
         const socketRect = socket.getBoundingClientRect();
         const yOffset = 6; 
         const finalCableTop = socketRect.top + yOffset;
 
         if (hasVisited) {
-            // --- SKIP ANIMATION ---
+            // --- SKIP ANIMATION (Already Visited) ---
             gsap.set(socketPath, { strokeDashoffset: 0, fill: '#ffc400', stroke: '#ffc400' });
             gsap.set(cable, { top: finalCableTop, opacity: 1, scale: 1 });
             gsap.set(socket, { opacity: 1, scale: 1 });
@@ -161,7 +149,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
             });
 
         } else {
-            // --- FULL ANIMATION ---
+            // --- FULL ANIMATION (First Visit) ---
             const socketPathLength = socketPath.getTotalLength();
             gsap.set(socketPath, {
                 strokeDasharray: socketPathLength,
@@ -175,7 +163,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
 
             const tl = gsap.timeline({
                 onComplete: () => {
-                    safeSessionSet(visitedKey, 'true');
+                    safeSessionSet(visitedKey, 'true'); // [FIX] Use safe setter
                     completeAndShowContent();
                 }
             });
@@ -222,11 +210,7 @@ export function hideLoaderOnError() {
             duration: 0.3,
             opacity: 0,
             onComplete: () => {
-                // Also apply the display:none fix here
-                loader.style.display = 'none';
-                document.documentElement.style.height = '';
-                document.documentElement.style.overflow = '';
-                document.body.style.height = '';
+                loader.style.visibility = 'hidden';
                 document.body.style.overflow = 'auto';
             }
         });
