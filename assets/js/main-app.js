@@ -89,7 +89,6 @@ function enableScrollInteraction() {
     window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
-        // 스크롤 자체만 활성화합니다. normalizeScroll은 onMasterIntroComplete에서 제어합니다.
         ScrollTrigger.enable();
     }
 }
@@ -235,15 +234,12 @@ function setupWorksHorizontalScroll() {
     const getXAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? 0 : -(list.scrollWidth - pinTargetElement.offsetWidth + 40);
     const getEndAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? "+=0" : "+=" + (list.scrollWidth - pinTargetElement.offsetWidth);
 
-    // --- FIX START: Pause vertical ScrollTriggers during horizontal scroll ---
-    // Define a function to toggle the enabled state of main vertical ScrollTriggers.
-    // This prevents background color and Spline objects from changing during the horizontal scroll.
     const toggleMainTriggers = (enable) => {
         const triggerIdsToToggle = [
             'splineScrollTrigger-part1', 'part2SplineScrollTrigger', 'splineScrollTrigger-part3',
             'mainPageBackgroundChangeTrigger-part1', 'mainPageBackgroundChangeTrigger-part2', 'mainPageBackgroundChangeTrigger-part3',
             'barMorphTrigger-part1', 'barMorphTrigger-part2', 'barMorphTrigger-part3',
-            worksTitleTriggerId // Also include the subtitle trigger that was originally handled
+            worksTitleTriggerId
         ];
 
         triggerIdsToToggle.forEach(id => {
@@ -254,7 +250,6 @@ function setupWorksHorizontalScroll() {
             }
         });
     };
-    // --- FIX END ---
 
     gsap.to(list, {
         x: getXAmount,
@@ -271,7 +266,6 @@ function setupWorksHorizontalScroll() {
             scrub: 1.2,
             invalidateOnRefresh: true,
             onRefresh: () => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
-            // Use the new function in the callbacks to pause/resume other triggers
             onEnter: () => toggleMainTriggers(false),
             onLeave: () => toggleMainTriggers(true),
             onEnterBack: () => toggleMainTriggers(false),
@@ -281,7 +275,6 @@ function setupWorksHorizontalScroll() {
 
     const horizontalST = ScrollTrigger.getById('worksHorizontalScrollTrigger');
     if (horizontalST) {
-        // Desktop wheel event handling to prevent judder
         pinTargetElement.addEventListener("wheel", (e) => {
             if (horizontalST.isActive) {
                 if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
@@ -291,7 +284,6 @@ function setupWorksHorizontalScroll() {
             }
         }, { passive: false });
 
-        // Mobile touch event handling to prevent judder
         let startY;
         let startScrollY;
 
@@ -752,46 +744,40 @@ async function runMainPageSequence() {
     }
 }
 
-// [수정됨] 인트로 애니메이션 완료 후 실행될 함수
 function onMasterIntroComplete() {
-    enableScrollInteraction(); // 스크롤 활성화
-
+    enableScrollInteraction();
     if (typeof window.THREE !== 'undefined') {
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', { sphereOffsetX: .1, sphereOffsetY: 0 });
         if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) mainPageBackgroundSphere.init().introAnimate();
     }
-
     if (!initialSetupDone) {
         setupResponsiveScrollTriggers();
         initialSetupDone = true;
     } else {
-        // 이미 초기화된 경우, refresh만 호출
-        if (typeof ScrollTrigger !== 'undefined') {
-            ScrollTrigger.refresh();
-        }
+        if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
     }
-
     heroHeadlineTriggerEnabled = true;
-
     const menuIcon = document.querySelector(".menu-icon");
     if (menuIcon) gsap.to(menuIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.1 });
     const scrollIcon = document.querySelector(".scroll-icon");
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.3 });
+    
+    window.scrollTo(0, 0);
 
-    // [핵심 수정]
-    // 인트로 종료 후 아주 짧은 지연(150ms)을 주어 브라우저가 뷰포트 크기를
-    // 최종적으로 확정할 시간을 줍니다. 그 후, 변경된 뷰포트 크기에 맞춰
-    // 모든 ScrollTrigger의 위치를 강제로 다시 계산합니다.
-    setTimeout(() => {
-        console.log("Forcing ScrollTrigger refresh after intro completion and a short delay.");
-        if (typeof ScrollTrigger !== 'undefined') {
-            ScrollTrigger.refresh(true); // true 옵션으로 모든 계산을 처음부터 다시 합니다.
-        }
-    }, 150);
+    // This function remains from the original code as a fallback.
+    const forceRefreshOnFirstInteraction = () => {
+        const handler = () => {
+            console.log("[DEBUG] First user interaction detected. Forcing scroll restoration and refresh.");
+            enableScrollInteraction();
+            if (typeof ScrollTrigger !== 'undefined') {
+                ScrollTrigger.refresh(true);
+            }
+        };
+        window.addEventListener('pointerdown', handler, { once: true });
+    };
 
-    window.scrollTo(0, 0); // 최종적으로 스크롤을 맨 위로 이동
+    forceRefreshOnFirstInteraction();
 }
-
 
 function setupAllScrollTriggers(isDesktopView) {
     const elementsToClear = ["#part2 .part2-info", "#part2 .works-list", "#part2 .works-list-container"];
@@ -828,7 +814,6 @@ function setupAllScrollTriggers(isDesktopView) {
     setupScrollToTopButton();
     setupScrollIconAnimation();
     
-    // 이 함수 마지막에서 refresh를 호출하여, 모든 트리거가 생성된 후 위치를 계산하도록 합니다.
     if (typeof ScrollTrigger !== 'undefined') {
         ScrollTrigger.refresh();
     }
@@ -875,10 +860,37 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
-// [수정] DOMContentLoaded를 사용하여 스크립트의 초기 실행 시점을 잡습니다.
+/**
+ * [NEW] Sets up a listener for the visual viewport to handle mobile browser UI changes.
+ * This is a robust way to fix layout shifts when the address bar hides/shows.
+ */
+function setupViewportListener() {
+    // Check for visualViewport support
+    if (window.visualViewport) {
+        let initialHeight = window.visualViewport.height;
+        let timeoutId;
+
+        window.visualViewport.addEventListener('resize', () => {
+            // A small timeout helps batch rapid resize events
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                // Check if the height change is significant enough to warrant a refresh
+                if (Math.abs(window.visualViewport.height - initialHeight) > 50) {
+                    console.log('Visual viewport height changed, refreshing ScrollTrigger.');
+                    if (typeof ScrollTrigger !== 'undefined') {
+                        ScrollTrigger.refresh(true);
+                    }
+                    initialHeight = window.visualViewport.height;
+                }
+            }, 100);
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     window.scrollTo(0, 0);
     setupScrollRestoration();
+    setupViewportListener(); // [NEW] Call the new function here
     
     try {
         await loadCommonUI();
