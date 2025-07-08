@@ -1,5 +1,17 @@
 // assets/js/common-utils.js
 
+// [수정] 화면 높이를 계산하여 CSS 변수 '--vh'를 설정하는 함수
+function setVhVariable() {
+    // window.innerHeight는 주소창을 제외한 실제 뷰포트 높이를 가져옵니다.
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+// 페이지 로드 시 즉시 실행
+setVhVariable();
+// 창 크기가 변경될 때마다 다시 계산 (모바일에서 가로/세로 전환 시 유용)
+window.addEventListener('resize', setVhVariable);
+
+
 // --- Spline Runtime Import ---
 import { Application as SplineApplication } from 'https://unpkg.com/@splinetool/runtime/build/runtime.js';
 

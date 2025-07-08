@@ -752,46 +752,46 @@ async function runMainPageSequence() {
     }
 }
 
+// [수정됨] 인트로 애니메이션 완료 후 실행될 함수
 function onMasterIntroComplete() {
-    enableScrollInteraction();
+    enableScrollInteraction(); // 스크롤 활성화
 
     if (typeof window.THREE !== 'undefined') {
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', { sphereOffsetX: .1, sphereOffsetY: 0 });
         if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) mainPageBackgroundSphere.init().introAnimate();
     }
+
     if (!initialSetupDone) {
         setupResponsiveScrollTriggers();
         initialSetupDone = true;
     } else {
-        if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+        // 이미 초기화된 경우, refresh만 호출
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.refresh();
+        }
     }
+
     heroHeadlineTriggerEnabled = true;
+
     const menuIcon = document.querySelector(".menu-icon");
     if (menuIcon) gsap.to(menuIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.1 });
     const scrollIcon = document.querySelector(".scroll-icon");
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.3 });
-    
-    window.scrollTo(0, 0);
 
-    // [최종 해결책] '첫 클릭' 문제를 해결하기 위한 강력한 일회성 리스너
-    const forceRefreshOnFirstInteraction = () => {
-        const handler = () => {
-            console.log("[DEBUG] First user interaction detected. Forcing scroll restoration and refresh.");
-            
-            // 만약을 위해 스크롤 상호작용을 다시 활성화합니다.
-            enableScrollInteraction();
+    // [핵심 수정]
+    // 인트로 종료 후 아주 짧은 지연(150ms)을 주어 브라우저가 뷰포트 크기를
+    // 최종적으로 확정할 시간을 줍니다. 그 후, 변경된 뷰포트 크기에 맞춰
+    // 모든 ScrollTrigger의 위치를 강제로 다시 계산합니다.
+    setTimeout(() => {
+        console.log("Forcing ScrollTrigger refresh after intro completion and a short delay.");
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.refresh(true); // true 옵션으로 모든 계산을 처음부터 다시 합니다.
+        }
+    }, 150);
 
-            if (typeof ScrollTrigger !== 'undefined') {
-                // 최종 레이아웃을 기준으로 모든 값을 다시 계산합니다.
-                ScrollTrigger.refresh(true);
-            }
-        };
-        // 'pointerdown'은 클릭과 터치를 모두 포함하며, { once: true } 옵션으로 단 한 번만 실행됩니다.
-        window.addEventListener('pointerdown', handler, { once: true });
-    };
-
-    forceRefreshOnFirstInteraction();
+    window.scrollTo(0, 0); // 최종적으로 스크롤을 맨 위로 이동
 }
+
 
 function setupAllScrollTriggers(isDesktopView) {
     const elementsToClear = ["#part2 .part2-info", "#part2 .works-list", "#part2 .works-list-container"];

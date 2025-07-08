@@ -8,6 +8,17 @@
     <title>WINHUB - CONTACT</title>
     <link rel="stylesheet" href="assets/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- EmailJS 라이브러리 추가 -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        // EmailJS 초기화. 페이지 로드 시 실행됩니다.
+        // "YOUR_PUBLIC_KEY" 부분을 EmailJS 계정의 Public Key로 교체해주세요.
+        (function(){
+            emailjs.init({
+                publicKey: "KP61W9VFSlI9aXaqE",
+            });
+        })();
+    </script>
 </head>
 <body class="subpage-body">
    
@@ -60,7 +71,7 @@
                     </div>
                     <div class="contact-form-container">
                         <form id="contactForm">
-                            <!-- HTML 구조 변경: input/textarea를 label 앞으로 이동 -->
+                            <!-- HTML 구조는 그대로 유지합니다. -->
                             <div class="form-group">
                                 <input type="text" id="name" name="name" class="form-input" placeholder=" " required>
                                 <label for="name" class="form-label content-class">Name</label>
@@ -95,7 +106,7 @@
     <script type="module" src="assets/js/sub-app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Kakao Map 초기화
+            // Kakao Map 초기화 (기존 코드 유지)
             const mapContainer = document.getElementById('kakao-map');
             if (mapContainer && typeof kakao !== 'undefined' && kakao.maps) {
                 const mapOption = { 
@@ -142,31 +153,57 @@
                 console.error("Kakao Maps API가 로드되지 않았습니다.");
             }
 
-            // 문의하기 폼 제출 처리
+            // --- EmailJS를 사용하도록 문의하기 폼 제출 처리 수정 ---
             const contactForm = document.getElementById('contactForm');
             const formStatusMessage = document.getElementById('form-status-message');
 
             if (contactForm) {
                 contactForm.addEventListener('submit', function(event) {
                     event.preventDefault();
-                    if (formStatusMessage) {
-                        formStatusMessage.textContent = '문의가 성공적으로 전송되었습니다.';
-                        formStatusMessage.className = 'form-status-message success';
-                        formStatusMessage.style.display = 'block';
+
+                    const submitBtn = this.querySelector('.form-submit-btn');
+                    const originalBtnHTML = submitBtn.innerHTML;
+                    
+                    // 유효성 검사
+                    if (!this.checkValidity()) {
+                        this.reportValidity();
+                        return;
                     }
-                    contactForm.reset();
 
-                    // 레이블 위치를 원래대로 되돌리기 위해 잠시 클래스를 제거
-                    document.querySelectorAll('.form-input, .form-textarea').forEach(input => {
-                        // Check if the input is valid after reset
-                        if (!input.checkValidity()) {
-                           // No action needed, the CSS handles the empty state
-                        }
-                    });
-
-                    setTimeout(() => {
-                        if (formStatusMessage) formStatusMessage.style.display = 'none';
-                    }, 5000);
+                    // 전송 중 버튼 비활성화 및 텍스트 변경
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = 'Sending...';
+                    
+                    // EmailJS를 사용하여 이메일 전송
+                    // 'YOUR_SERVICE_ID'와 'YOUR_TEMPLATE_ID'를 EmailJS에서 발급받은 ID로 교체해주세요.
+                    emailjs.sendForm('service_cqy50dd', 'template_xwc8u4g', this)
+                        .then(() => {
+                            // 성공 시
+                            if (formStatusMessage) {
+                                formStatusMessage.textContent = '문의가 성공적으로 전송되었습니다.';
+                                formStatusMessage.className = 'form-status-message success';
+                                formStatusMessage.style.display = 'block';
+                            }
+                            contactForm.reset();
+                        }, (error) => {
+                            // 실패 시
+                            console.error('FAILED...', error);
+                            if (formStatusMessage) {
+                                formStatusMessage.textContent = '전송에 실패했습니다. 잠시 후 다시 시도해주세요.';
+                                formStatusMessage.className = 'form-status-message error';
+                                formStatusMessage.style.display = 'block';
+                            }
+                        })
+                        .finally(() => {
+                            // 전송 완료 후 버튼 원래 상태로 복구
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnHTML;
+                            
+                            // 5초 후 상태 메시지 숨김
+                            setTimeout(() => {
+                                if (formStatusMessage) formStatusMessage.style.display = 'none';
+                            }, 5000);
+                        });
                 });
             }
         });
