@@ -68,10 +68,17 @@ function preventKeyboardScroll(event) {
         event.preventDefault();
     }
 }
+
+/**
+ * [MODIFIED] Disables scrolling on the page more robustly.
+ * It now applies `overflow: hidden` to both `<html>` and `<body>` elements
+ * to provide a more reliable scroll lock across different browsers, especially on mobile.
+ */
 function disableScrollInteraction() {
     if (isScrollCurrentlyDisabled) return;
     isScrollCurrentlyDisabled = true;
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden'; // Added for robustness
     window.addEventListener('wheel', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.addEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.addEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
@@ -82,18 +89,25 @@ function disableScrollInteraction() {
         ScrollTrigger.disable(false, true);
     }
 }
+
+/**
+ * [MODIFIED] Re-enables scrolling on the page.
+ * Corresponds to the changes in `disableScrollInteraction` by clearing the
+ * `overflow` style on both `<html>` and `<body>`.
+ */
 function enableScrollInteraction() {
     if (!isScrollCurrentlyDisabled) return;
     isScrollCurrentlyDisabled = false;
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = ''; // Added for robustness
     window.removeEventListener('wheel', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
     if (typeof ScrollTrigger !== 'undefined') {
-        // 스크롤 자체만 활성화합니다. normalizeScroll은 onMasterIntroComplete에서 제어합니다.
         ScrollTrigger.enable();
     }
 }
+
 
 // --- Animation Functions ---
 function playHeadlineCharsAnimation(animateIn) {
@@ -592,7 +606,8 @@ async function runMainPageSequence() {
 
     await loaderPromise;
 
-    disableScrollInteraction();
+    // [MODIFIED] This call was moved to the DOMContentLoaded listener to run earlier.
+    // disableScrollInteraction();
 
     const comNameElement = document.querySelector(".com-name-ani");
     const heroTextBlock = document.querySelector('.hero-text-block');
@@ -868,8 +883,10 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
-// [수정] DOMContentLoaded를 사용하여 스크립트의 초기 실행 시점을 잡습니다.
+// [MODIFIED] DOMContentLoaded를 사용하여 스크립트의 초기 실행 시점을 잡습니다.
 document.addEventListener('DOMContentLoaded', async () => {
+    // [FIX] 페이지 로드 시 스크롤을 즉시 비활성화하여 상호작용 및 레이아웃 문제를 방지합니다.
+    disableScrollInteraction();
     window.scrollTo(0, 0);
     setupScrollRestoration();
     
@@ -895,4 +912,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideLoaderOnError();
         enableScrollInteraction();
     }
+
 });
