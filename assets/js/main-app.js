@@ -31,6 +31,15 @@ import {
     loadCommonUI
 } from './common-utils.js';
 
+function setViewportHeight() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+window.addEventListener('resize', setViewportHeight);
+window.addEventListener('orientationchange', setViewportHeight);
+document.addEventListener('DOMContentLoaded', setViewportHeight);
+
 // --- Global Variables for Main Page ---
 let mainSplineApp = null;
 let winhub = null, cable = null, splineTimelines = [];
@@ -882,6 +891,14 @@ function setupResponsiveScrollTriggers() {
         }
     });
 }
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    if (typeof ScrollTrigger !== 'undefined') {
+      ScrollTrigger.refresh(true);
+    }
+  }, 600);
+});
 
 // DOMContentLoaded를 사용하여 스크립트의 초기 실행 시점을 잡습니다.
 document.addEventListener('DOMContentLoaded', async () => {

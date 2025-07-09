@@ -2250,3 +2250,15 @@ section.content-section {
   transition: color 0.3s ease;
 }
 
+
+#hero,
+#loader,
+.fullscreen-cover {
+  height: calc(var(--vh, 1vh) * 100);
+  overflow: hidden;
+}
+
+html, body {
+  overscroll-behavior: none;
+  /* touch-action: none; */
+}
