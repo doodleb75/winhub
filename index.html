@@ -12,8 +12,10 @@
     />
     <!-- [FIX] Added touch-action CSS to prevent scroll conflicts on mobile -->
     <style>
-      #part2 .works-list .work-item a {
-        touch-action: pan-y;
+      #part2 .works-list {
+        touch-action: pan-x pan-y;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
     </style>
   </head>
