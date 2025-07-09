@@ -296,6 +296,7 @@ function setupWorksHorizontalScroll() {
     const getXAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? 0 : -(list.scrollWidth - pinTargetElement.offsetWidth + 40);
     const getEndAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? "+=0" : "+=" + (list.scrollWidth - pinTargetElement.offsetWidth);
     
+    // [FIX] Removed all calls to ScrollTrigger.normalizeScroll() to prevent conflict with native mobile scrolling.
     gsap.to(list, { x: getXAmount, ease: "none", scrollTrigger: {
             id: 'worksHorizontalScrollTrigger', trigger: pinTargetElement, pin: pinTargetElement, pinType: 'fixed', start: "center center", pinSpacing: true, end: getEndAmount, anticipatePin: 1, scrub: 0.3, invalidateOnRefresh: true,
             onRefresh: (self) => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
@@ -303,33 +304,21 @@ function setupWorksHorizontalScroll() {
                 const st = ScrollTrigger.getById(worksTitleTriggerId);
                 if (st && st.enabled) st.disable(false);
                 togglePart3Triggers(false);
-                if (typeof ScrollTrigger.normalizeScroll === 'function') {
-                    ScrollTrigger.normalizeScroll(true);
-                }
             },
             onLeave: () => {
                 const st = ScrollTrigger.getById(worksTitleTriggerId);
                 if (st && !st.enabled) st.enable(false);
                 togglePart3Triggers(true);
-                if (typeof ScrollTrigger.normalizeScroll === 'function') {
-                    ScrollTrigger.normalizeScroll(false);
-                }
             },
             onEnterBack: () => {
                 const st = ScrollTrigger.getById(worksTitleTriggerId);
                 if (st && st.enabled) st.disable(false);
                 togglePart3Triggers(false);
-                if (typeof ScrollTrigger.normalizeScroll === 'function') {
-                    ScrollTrigger.normalizeScroll(true);
-                }
             },
             onLeaveBack: () => {
                 const st = ScrollTrigger.getById(worksTitleTriggerId);
                 if (st && !st.enabled) st.enable(false);
                 togglePart3Triggers(true);
-                if (typeof ScrollTrigger.normalizeScroll === 'function') {
-                    ScrollTrigger.normalizeScroll(false);
-                }
             }
     }});
  }

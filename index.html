@@ -10,6 +10,17 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
+    <!-- [FIX] Added touch-action CSS to prevent scroll conflicts on mobile -->
+    <style>
+      /* Allow vertical scrolling by default on the body */
+      body.main-page {
+        touch-action: pan-y;
+      }
+      /* For the horizontal scroll container, prioritize horizontal panning */
+      #part2 .works-list-container {
+        touch-action: pan-x;
+      }
+    </style>
   </head>
   <body class="main-page">
     <!-- Placeholders for dynamically loaded content -->
