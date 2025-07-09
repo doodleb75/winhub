@@ -7,11 +7,12 @@ window.THREE = THREE_MOD;
 import { Draggable } from "https://esm.sh/gsap/Draggable";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
 import { MorphSVGPlugin } from "https://esm.sh/gsap/MorphSVGPlugin";
+import { Observer } from "https://esm.sh/gsap/Observer";
 
 import { worksData } from './works-data.js';
 
 if (typeof gsap !== 'undefined') {
-    gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin);
+    gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin, Observer);
 }
 
 // Imports from common-utils
@@ -219,6 +220,43 @@ function setupSubTitleAnimation() {
     });
  }
 
+/**
+ * Part3 관련 ScrollTrigger들을 토글하는 헬퍼 함수.
+ * Part2의 가로 스크롤 중에 Part3 관련 애니메이션이 실행되는 것을 방지합니다.
+ * @param {boolean} enable - true는 활성화, false는 비활성화를 의미합니다.
+ */
+function togglePart3Triggers(enable) {
+    const idsToToggle = [
+        'splineScrollTrigger-part3',
+        'mainPageBackgroundChangeTrigger-part3',
+        'barMorphTrigger-part3',
+        'outroContentAllTrigger'
+    ];
+
+    idsToToggle.forEach(id => {
+        const trigger = ScrollTrigger.getById(id);
+        if (trigger) {
+            if (enable && !trigger.enabled) {
+                trigger.enable(false);
+            } else if (!enable && trigger.enabled) {
+                trigger.disable(false);
+            }
+        }
+    });
+
+    ScrollTrigger.getAll().forEach(st => {
+        // outro 부제의 모든 트리거를 찾아 토글합니다.
+        if (st.vars.id && typeof st.vars.id === 'string' && st.vars.id.includes('subTitleAppearTrigger-outro')) {
+            if (enable && !st.enabled) {
+                st.enable(false);
+            } else if (!enable && st.enabled) {
+                st.disable(false);
+            }
+        }
+    });
+}
+
+
 function setupWorksHorizontalScroll() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const pinTargetElement = document.querySelector("#part2 .part2-info");
@@ -234,89 +272,44 @@ function setupWorksHorizontalScroll() {
     }
     const getXAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? 0 : -(list.scrollWidth - pinTargetElement.offsetWidth + 40);
     const getEndAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? "+=0" : "+=" + (list.scrollWidth - pinTargetElement.offsetWidth);
-
-    // --- FIX START: Pause vertical ScrollTriggers during horizontal scroll ---
-    // Define a function to toggle the enabled state of main vertical ScrollTriggers.
-    // This prevents background color and Spline objects from changing during the horizontal scroll.
-    const toggleMainTriggers = (enable) => {
-        const triggerIdsToToggle = [
-            'splineScrollTrigger-part1', 'part2SplineScrollTrigger', 'splineScrollTrigger-part3',
-            'mainPageBackgroundChangeTrigger-part1', 'mainPageBackgroundChangeTrigger-part2', 'mainPageBackgroundChangeTrigger-part3',
-            'barMorphTrigger-part1', 'barMorphTrigger-part2', 'barMorphTrigger-part3',
-            worksTitleTriggerId // Also include the subtitle trigger that was originally handled
-        ];
-
-        triggerIdsToToggle.forEach(id => {
-            if (!id) return;
-            const st = ScrollTrigger.getById(id);
-            if (st) {
-                st.enabled = enable;
-            }
-        });
-    };
-    // --- FIX END ---
-
-    gsap.to(list, {
-        x: getXAmount,
-        ease: "none",
-        scrollTrigger: {
-            id: 'worksHorizontalScrollTrigger',
-            trigger: pinTargetElement,
-            pin: pinTargetElement,
-            pinType: 'transform',
-            start: "center center",
-            pinSpacing: true,
-            end: getEndAmount,
-            anticipatePin: 1,
-            scrub: 1.2,
-            invalidateOnRefresh: true,
-            onRefresh: () => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
-            // Use the new function in the callbacks to pause/resume other triggers
-            onEnter: () => toggleMainTriggers(false),
-            onLeave: () => toggleMainTriggers(true),
-            onEnterBack: () => toggleMainTriggers(false),
-            onLeaveBack: () => toggleMainTriggers(true)
-        }
-    });
-
-    const horizontalST = ScrollTrigger.getById('worksHorizontalScrollTrigger');
-    if (horizontalST) {
-        // Desktop wheel event handling to prevent judder
-        pinTargetElement.addEventListener("wheel", (e) => {
-            if (horizontalST.isActive) {
-                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                    e.preventDefault();
-                    window.scrollTo(window.scrollX, window.scrollY + e.deltaY);
+    
+    gsap.to(list, { x: getXAmount, ease: "none", scrollTrigger: {
+            id: 'worksHorizontalScrollTrigger', trigger: pinTargetElement, pin: pinTargetElement, pinType: 'transform', start: "center center", pinSpacing: true, end: getEndAmount, anticipatePin: 1, scrub: 1.2, invalidateOnRefresh: true,
+            onRefresh: (self) => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
+            onEnter: () => {
+                const st = ScrollTrigger.getById(worksTitleTriggerId);
+                if (st && st.enabled) st.disable(false);
+                togglePart3Triggers(false);
+                if (typeof ScrollTrigger.normalizeScroll === 'function') {
+                    ScrollTrigger.normalizeScroll(true);
+                }
+            },
+            onLeave: () => {
+                const st = ScrollTrigger.getById(worksTitleTriggerId);
+                if (st && !st.enabled) st.enable(false);
+                togglePart3Triggers(true);
+                if (typeof ScrollTrigger.normalizeScroll === 'function') {
+                    ScrollTrigger.normalizeScroll(false);
+                }
+            },
+            onEnterBack: () => {
+                const st = ScrollTrigger.getById(worksTitleTriggerId);
+                if (st && st.enabled) st.disable(false);
+                togglePart3Triggers(false);
+                if (typeof ScrollTrigger.normalizeScroll === 'function') {
+                    ScrollTrigger.normalizeScroll(true);
+                }
+            },
+            onLeaveBack: () => {
+                const st = ScrollTrigger.getById(worksTitleTriggerId);
+                if (st && !st.enabled) st.enable(false);
+                togglePart3Triggers(true);
+                if (typeof ScrollTrigger.normalizeScroll === 'function') {
+                    ScrollTrigger.normalizeScroll(false);
                 }
             }
-        }, { passive: false });
-
-        // Mobile touch event handling to prevent judder
-        let startY;
-        let startScrollY;
-
-        pinTargetElement.addEventListener("touchstart", (e) => {
-            if (horizontalST.isActive) {
-                startY = e.touches[0].clientY;
-                startScrollY = window.scrollY;
-            }
-        }, { passive: true });
-
-        pinTargetElement.addEventListener("touchmove", (e) => {
-            if (horizontalST.isActive && startY !== undefined) {
-                const deltaY = e.touches[0].clientY - startY;
-                e.preventDefault();
-                window.scrollTo(window.scrollX, startScrollY - deltaY);
-            }
-        }, { passive: false });
-
-        pinTargetElement.addEventListener("touchend", () => {
-            startY = undefined;
-            startScrollY = undefined;
-        }, { passive: true });
-    }
+    }});
  }
-
 
 function setupWorkItemAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
