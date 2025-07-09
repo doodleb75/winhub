@@ -296,7 +296,6 @@ function setupWorksHorizontalScroll() {
     const getXAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? 0 : -(list.scrollWidth - pinTargetElement.offsetWidth + 40);
     const getEndAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? "+=0" : "+=" + (list.scrollWidth - pinTargetElement.offsetWidth);
     
-    // [FIX] Removed all calls to ScrollTrigger.normalizeScroll() to prevent conflict with native mobile scrolling.
     gsap.to(list, { x: getXAmount, ease: "none", scrollTrigger: {
             id: 'worksHorizontalScrollTrigger', trigger: pinTargetElement, pin: pinTargetElement, pinType: 'fixed', start: "center center", pinSpacing: true, end: getEndAmount, anticipatePin: 1, scrub: 0.3, invalidateOnRefresh: true,
             onRefresh: (self) => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
@@ -507,11 +506,57 @@ function setupOutroContentAnimation() {
     });
 }
 
+// [FIX] Reverted to the original function and applied a more robust solution for handling scroll restoration from pinned sections.
 function setupScrollToTopButton() {
-    const scrollToTopBtn = document.getElementById("scrollToTopBtn"); if (!scrollToTopBtn) return;
-    window.addEventListener("scroll", () => { if (window.scrollY > window.innerHeight / 2) { if (!scrollToTopBtn.classList.contains("show")) scrollToTopBtn.classList.add("show"); } else { if (scrollToTopBtn.classList.contains("show")) scrollToTopBtn.classList.remove("show"); }});
-    scrollToTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
- }
+    const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+    if (!scrollToTopBtn) return;
+
+    // Show/hide button based on scroll position
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > window.innerHeight / 2) {
+            if (!scrollToTopBtn.classList.contains("show")) {
+                scrollToTopBtn.classList.add("show");
+            }
+        } else {
+            if (scrollToTopBtn.classList.contains("show")) {
+                scrollToTopBtn.classList.remove("show");
+            }
+        }
+    });
+
+    // Handle the click event
+    scrollToTopBtn.addEventListener("click", () => {
+        // 1. Temporarily disable all triggers to prevent them from firing
+        //    or calculating during the jump, especially when leaving a pinned section.
+        //    The `true` argument prevents them from reverting to their start state.
+        const triggers = typeof ScrollTrigger !== 'undefined' ? ScrollTrigger.getAll() : [];
+        triggers.forEach(trigger => trigger.disable(true));
+
+        // 2. Jump to the top instantly. Using 'auto' is crucial to prevent
+        //    animation-related race conditions with layout changes.
+        window.scrollTo({ top: 0, behavior: 'auto' });
+
+        // [FIX] Manually reset the background color and scroll icon to their initial states immediately.
+        gsap.set(document.body, { backgroundColor: partBackgroundColors.hero });
+        const scrollIcon = document.querySelector(".scroll-icon");
+        if (scrollIcon) {
+            gsap.set(scrollIcon, { autoAlpha: 1 });
+        }
+
+        // 3. Use a small timeout to ensure the scroll position is updated in the browser's engine.
+        setTimeout(() => {
+            // 4. Re-enable all triggers.
+            triggers.forEach(trigger => trigger.enable());
+            
+            // 5. Force a hard refresh. This will make all triggers recalculate their
+            //    start/end positions based on the now-stable layout at the top of the page.
+            //    This is the most critical step to ensure correct object positioning.
+            if (typeof ScrollTrigger !== 'undefined') {
+                ScrollTrigger.refresh(true);
+            }
+        }, 100); // A 100ms delay provides a safe buffer for the browser to process the layout changes.
+    });
+}
 
 function setupScrollIconAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
@@ -918,3 +963,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         enableScrollInteraction();
     }
 });
+
