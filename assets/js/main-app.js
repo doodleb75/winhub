@@ -506,12 +506,12 @@ function setupOutroContentAnimation() {
     });
 }
 
-// [FIX] Reverted to the original function and applied a more robust solution for handling scroll restoration from pinned sections.
+// [FIX] 'Top' 버튼 클릭 시 로고 상태가 초기화되지 않는 문제 해결
 function setupScrollToTopButton() {
     const scrollToTopBtn = document.getElementById("scrollToTopBtn");
     if (!scrollToTopBtn) return;
 
-    // Show/hide button based on scroll position
+    // 스크롤 위치에 따라 버튼 보이기/숨기기
     window.addEventListener("scroll", () => {
         if (window.scrollY > window.innerHeight / 2) {
             if (!scrollToTopBtn.classList.contains("show")) {
@@ -524,39 +524,40 @@ function setupScrollToTopButton() {
         }
     });
 
-    // Handle the click event
+    // 클릭 이벤트 처리
     scrollToTopBtn.addEventListener("click", () => {
-        // 1. Temporarily disable all triggers to prevent them from firing
-        //    or calculating during the jump, especially when leaving a pinned section.
-        //    The `true` argument prevents them from reverting to their start state.
+        // 1. 모든 ScrollTrigger를 일시적으로 비활성화하여 이동 중 예기치 않은 동작 방지
         const triggers = typeof ScrollTrigger !== 'undefined' ? ScrollTrigger.getAll() : [];
         triggers.forEach(trigger => trigger.disable(true));
 
-        // 2. Jump to the top instantly. Using 'auto' is crucial to prevent
-        //    animation-related race conditions with layout changes.
+        // 2. 페이지 최상단으로 즉시 이동
         window.scrollTo({ top: 0, behavior: 'auto' });
 
-        // [FIX] Manually reset the background color and scroll icon to their initial states immediately.
+        // 3. [FIX] 페이지 상단에 있어야 할 요소들의 상태를 수동으로 즉시 초기화
         gsap.set(document.body, { backgroundColor: partBackgroundColors.hero });
         const scrollIcon = document.querySelector(".scroll-icon");
         if (scrollIcon) {
             gsap.set(scrollIcon, { autoAlpha: 1 });
         }
+        // 헤더 로고를 즉시 숨김 상태로 설정
+        const headerLogo = document.querySelector("#header-placeholder .com-name-logo");
+        if (headerLogo) {
+            gsap.set(headerLogo, { autoAlpha: 0 });
+        }
 
-        // 3. Use a small timeout to ensure the scroll position is updated in the browser's engine.
+        // 4. 짧은 지연 후 ScrollTrigger 재활성화 및 새로고침
         setTimeout(() => {
-            // 4. Re-enable all triggers.
+            // 5. 모든 트리거 재활성화
             triggers.forEach(trigger => trigger.enable());
             
-            // 5. Force a hard refresh. This will make all triggers recalculate their
-            //    start/end positions based on the now-stable layout at the top of the page.
-            //    This is the most critical step to ensure correct object positioning.
+            // 6. ScrollTrigger를 새로고침하여 현재 페이지 상태에 맞게 위치를 다시 계산
             if (typeof ScrollTrigger !== 'undefined') {
                 ScrollTrigger.refresh(true);
             }
-        }, 100); // A 100ms delay provides a safe buffer for the browser to process the layout changes.
+        }, 100); 
     });
 }
+
 
 function setupScrollIconAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
@@ -963,4 +964,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         enableScrollInteraction();
     }
 });
-
