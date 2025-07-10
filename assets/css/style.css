@@ -598,41 +598,6 @@ button.goto-work:hover:before {
   transform: skewX(0deg);
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2)  ;
 }
-/* button.goto-work:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: #fff;
-    transform: skewX(30deg);
-    z-index: -1;
-    transition: all .2s;
-}
-button.goto-work:after {
-    content: '';
-    position: absolute;
-    top: 38%;
-    left: -10%;
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.2);
-    transform: skewX(-30deg);
-    z-index: -2;
-    transition: all .2s;
-}
-button.goto-work:hover:before {  
-    transform: skewX(0deg);
-    background: #7700ff;
-}
-button.goto-work:hover:after {
-    top: 12%;
-    left: 3%;
-    transform: skewX(0deg);
-} */
 
 .menu-link-hover-svg .arrow-path {
   fill: none;
@@ -1754,8 +1719,6 @@ body.subpage-body.scrolled-past-hero-colors {
   pointer-events: none;
   cursor: text;
   
-  /* 이 부분이 가장 중요합니다! */
-  /* top, font-size, color 속성이 바뀔 때 0.2초 동안 부드럽게 전환되도록 설정합니다. */
   transition: top 0.2s ease-in-out, font-size 0.2s ease-in-out, color 0.2s ease-in-out !important;
 }
 
@@ -2264,4 +2227,150 @@ html, body {
 }
 body {
   overflow-x: hidden;
+}
+
+/* [REVISED] History Section Styles */
+/* [REVISED] History Section Styles */
+#history-section .section-content-wrapper {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  max-width: 1200px;
+}
+
+.history-timeline {
+  position: relative;
+  width: 90%;
+  max-width: 1000px;
+  margin: 4rem auto;
+  padding: 2rem 0;
+}
+
+.history-timeline::after {
+  content: '';
+  position: absolute;
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.15);
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  margin-left: -2px;
+  transition: background-color 0.5s ease-in-out;
+  z-index: 1; 
+}
+
+.subpage-body.scrolled-past-hero-colors .history-timeline::after {
+  background-color: #d0d0d0;
+}
+
+.timeline-entry {
+  padding: 1rem 4rem;
+  position: relative;
+  width: 50%;
+  opacity: 0; /* For GSAP animation */
+  z-index: 2; /* [MODIFIED] Set z-index for the entry container */
+}
+
+.timeline-entry.left-entry {
+  left: 0;
+  text-align: right;
+}
+
+.timeline-entry.right-entry {
+  left: 50%;
+  text-align: left;
+}
+
+/* The circles on the timeline */
+.timeline-entry::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 25px;
+  background-color: #fff;
+  border: 4px solid #4dabf7;
+  border-radius: 50%;
+  z-index: 3; /* [MODIFIED] Ensure circle is on top of its entry */
+  transition: all 0.5s ease-in-out;
+}
+
+.timeline-entry.left-entry::after {
+  right: -11px;
+}
+
+.timeline-entry.right-entry::after {
+  left: -16px;
+}
+
+.subpage-body.scrolled-past-hero-colors .timeline-entry::after {
+  background-color: #f0f0f0;
+  border-color: #007bff;
+}
+
+/* [MODIFIED] Removed box shadow and background for a cleaner look */
+.timeline-content-container {
+  padding: 0;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  position: relative;
+  border-radius: 0;
+}
+
+.subpage-body.scrolled-past-hero-colors .timeline-content-container {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.history-year {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #74c0fc;
+  transition: color 0.5s ease-in-out;
+}
+.subpage-body.scrolled-past-hero-colors .history-year {
+    color: #0056b3;
+}
+
+.history-details p {
+  margin: 0;
+  line-height: 1.7;
+  opacity: 0.9;
+}
+.history-details p:not(:last-child) {
+    margin-bottom: 0.5rem;
+}
+
+/* --- Responsive Layout for Timeline --- */
+@media screen and (max-width: 768px) {
+  #history-section .section-content-wrapper {
+    max-width: 100%;
+  }
+
+  .history-timeline::after {
+    left: 20px;
+    margin-left: 0;
+  }
+
+  .timeline-entry {
+    width: 100%;
+    padding-left: 70px;
+    padding-right: 25px;
+  }
+
+  .timeline-entry.left-entry,
+  .timeline-entry.right-entry {
+    left: 0;
+    text-align: left;
+  }
+
+  .timeline-entry.left-entry::after,
+  .timeline-entry.right-entry::after {
+    left: 10px;
+  }
 }

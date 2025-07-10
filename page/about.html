@@ -22,16 +22,16 @@
       /* [MODIFIED] 왼쪽 사각형 스타일 및 패럴랙스 배경 컨테이너 */
       .rect-random {
           position: absolute;
-    width: 38vw;
-    height: 92vh;
-    transform: rotate(45deg);
-    z-index: 0;
-    left: -18vw;
-    top: -43vh;
-    overflow: hidden;
-}
+          width: 38vw;
+          height: 92vh;
+          transform: rotate(45deg);
+          z-index: 0;
+          left: -18vw;
+          top: -43vh;
+          overflow: hidden;
+      }
       /* [ADDED] 패럴랙스 효과가 적용될 배경 이미지 스타일 */
-     /* .rect-random */ .parallax-bg {
+     .parallax-bg {
           position: absolute;
           top: -25%; 
           left: -25%;
@@ -91,10 +91,8 @@
         <p class="scroll-icon"><span class="scroll"></span></p>
       </section>
 
-      <!-- [MODIFIED] rect-random 마크업 구조 변경 및 section 스타일 추가 -->
       <section id="sub-section-1" class="subpage-section content-section">
         <div class="rect-random">
-          <!-- [ADDED] 패럴랙스 배경을 위한 자식 요소 -->
           <div class="parallax-bg"></div>
         </div>
         <div class="section-content-wrapper">
@@ -113,14 +111,75 @@
                   </p>
               </div>
               <div style="flex: 1 1 1000px; display: flex; justify-content: center; align-items: center; min-width: 300px;">
-                  <!-- [MODIFIED] autoplay 속성을 다시 추가했습니다. JavaScript에서 즉시 제어할 것입니다. -->
-                  <lottie-player id="overview-lottie" src="../assets/images/overview-set.json" background="transparent" speed="1" style="width: 100%; height: auto; max-width: 100%;"  autoplay>
+                  <lottie-player id="overview-lottie" src="../assets/images/overview-set.json" background="transparent" speed="1" style="width: 100%; height: auto; max-width: 100%;" loop autoplay>
                   </lottie-player> 
               </div>
           </div>
         </div>
         <div class="rect-random2">
            <div class="parallax-bg"></div>
+        </div>
+      </section>
+
+      <!-- [REVISED] History Section with new timeline design -->
+      <section id="history-section" class="subpage-section content-section">
+        <div class="section-content-wrapper">
+          <h2 class="content-class section-title">COMPANY HISTORY</h2>
+          <div class="history-timeline">
+            <div class="timeline-entry left-entry">
+                <div class="timeline-content-container">
+                    <h3 class="history-year">2018</h3>
+                    <div class="history-details">
+                        <p>WINHUB 법인 설립</p>
+                        <p>현대 L&C, AK PLAZA 시스템 구축</p>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-entry right-entry">
+                <div class="timeline-content-container">
+                    <h3 class="history-year">2019</h3>
+                    <div class="history-details">
+                        <p>이마트, 롯데컬처웍스 시스템 개발</p>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-entry left-entry">
+                <div class="timeline-content-container">
+                    <h3 class="history-year">2020</h3>
+                    <div class="history-details">
+                        <p>스타벅스 Display 및 품질 관리 시스템 구축</p>
+                        <p>비욘드 아이앤씨 플랫폼 개발</p>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-entry right-entry">
+                 <div class="timeline-content-container">
+                    <h3 class="history-year">2021-2022</h3>
+                    <div class="history-details">
+                        <p>신세계아이앤씨 AMS 구축</p>
+                        <p>LG 하우시스 스마트 공장관리 시스템 구축</p>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-entry left-entry">
+                <div class="timeline-content-container">
+                    <h3 class="history-year">2023</h3>
+                    <div class="history-details">
+                        <p>LX 하우시스 판매기준정보 시스템 고도화</p>
+                        <p>AK PLAZA 신규 VIP 회원 정책 적용</p>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-entry right-entry">
+                <div class="timeline-content-container">
+                    <h3 class="history-year">2024</h3>
+                    <div class="history-details">
+                        <p>ABC 마트 차세대 POS 시스템 구축</p>
+                        <p>LX 하우시스 투자관리 시스템 구축</p>
+                    </div>
+                </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -236,7 +295,6 @@
     <div id="footer-placeholder"></div>
     
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <!-- [NOTE] ScrollTrigger를 사용하기 위해 GSAP 플러그인 로드 -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script type="module" src="assets/js/sub-app.js"></script>
   </body>

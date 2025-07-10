@@ -8,7 +8,7 @@ import { ScrollToPlugin } from "https://esm.sh/gsap/ScrollToPlugin";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
 
 if (typeof gsap !== 'undefined') {
-    // ScrollTrigger 플러그인 등록
+    // Register GSAP plugins
     gsap.registerPlugin(ScrollToPlugin, SplitText, ScrollTrigger);
 } else console.error("SUB-APP: GSAP core not loaded, cannot register plugins.");
 
@@ -74,7 +74,7 @@ const currentPageConfig = getCurrentPageConfig();
 
 
 /**
- * Mission 섹션의 장식용 사각형 요소에 애니메이션과 패럴랙스 효과를 설정합니다.
+ * Sets up animations and parallax effects for decorative rectangles in the Mission section.
  */
 function setupDecorativeRectAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
@@ -191,9 +191,8 @@ function setupDecorativeRectAnimations() {
 }
 
 /**
- * Lottie 애니메이션 플레이어를 제어하기 위해 ScrollTrigger를 설정합니다.
- * 'ready' 이벤트를 사용하여 플레이어가 준비된 후 스크립트를 실행합니다.
- * 플레이어가 뷰포트에 들어오면 재생하고, 벗어나면 정지시킵니다.
+ * [REVISED] Sets up ScrollTrigger to control the Lottie animation player.
+ * The animation now loops and restarts from the beginning when scrolled into view.
  */
 function setupLottieScrollTrigger() {
     const lottiePlayer = document.querySelector("#overview-lottie");
@@ -201,33 +200,35 @@ function setupLottieScrollTrigger() {
         return;
     }
 
-    // ScrollTrigger를 생성하되, 처음에는 비활성화 상태로 둡니다.
+    // Ensure the player is set to loop
+    lottiePlayer.loop = true;
+
     const st = ScrollTrigger.create({
-        trigger: lottiePlayer,
+        trigger: lottiePlayer.parentElement, // Trigger based on the parent container for better accuracy
         start: "top 80%",
         end: "bottom 20%",
         id: 'lottie-overview-trigger',
         invalidateOnRefresh: true,
-        onToggle: self => {
-            if (self.isActive) {
-                // 뷰포트 안에 있을 때: 애니메이션을 처음부터 재생합니다.
-                lottiePlayer.seek(0);
-                lottiePlayer.play();
-            } else {
-                // 뷰포트 밖에 있을 때: 애니메이션을 정지합니다.
-                lottiePlayer.stop();
-            }
+        onEnter: () => {
+            lottiePlayer.seek(0);
+            lottiePlayer.play();
         },
-        enabled: false // 초기에 비활성화
+        onEnterBack: () => {
+            lottiePlayer.seek(0);
+            lottiePlayer.play();
+        },
+        onLeave: () => {
+            lottiePlayer.pause(); // Pause when it leaves the screen to save resources
+        },
+        onLeaveBack: () => {
+            lottiePlayer.pause();
+        },
+        enabled: false // Initially disabled until the player is ready
     });
 
-    // Lottie-player가 상호작용 가능할 때 발생하는 'ready' 이벤트를 기다립니다.
+    // Enable the scroll trigger once the Lottie player is ready
     lottiePlayer.addEventListener('ready', () => {
-        // 'autoplay' 속성으로 인해 재생될 수 있으므로, 준비가 되면 즉시 정지시킵니다.
-        lottiePlayer.stop();
-
-        // Lottie 플레이어가 준비되면 ScrollTrigger를 활성화합니다.
-        // 이제 ScrollTrigger는 정확한 위치 계산을 할 수 있습니다.
+        lottiePlayer.stop(); // Stop any autoplay initially
         if (st) {
             st.enable();
         }
@@ -235,7 +236,67 @@ function setupLottieScrollTrigger() {
 }
 
 
-// --- Animation & Setup Functions (기존 함수들) ---
+/**
+ * [REVISED] Sets up scroll animations for the new timeline entries.
+ * Entries slide in from the sides.
+ */
+function setupHistoryTimelineAnimation() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    const timelineEntries = gsap.utils.toArray('.timeline-entry');
+    if (!timelineEntries.length) return;
+
+    timelineEntries.forEach(entry => {
+        // Determine animation direction based on class
+        const xFrom = entry.classList.contains('left-entry') ? -100 : 100;
+        
+        gsap.set(entry, { autoAlpha: 0, x: xFrom, y: 30 }); // Set initial state
+        gsap.to(entry, {
+            autoAlpha: 1,
+            x: 0,
+            y: 0,
+            duration: 0.8,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: entry,
+                start: 'top 85%',
+                toggleActions: 'play none none reverse',
+                invalidateOnRefresh: true
+            }
+        });
+    });
+}
+
+
+/**
+ * [REVISED] Integrated function to set up animations for the History section.
+ */
+function setupHistorySectionAnimation() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    
+    const historySectionWrapper = document.querySelector("#history-section .section-content-wrapper");
+    const historyTitle = historySectionWrapper ? historySectionWrapper.querySelector('.section-title') : null;
+
+    if (historyTitle) {
+        gsap.set(historyTitle, { opacity: 0, y: 50 }); // Set initial state for title
+        gsap.to(historyTitle, {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: historySectionWrapper,
+                start: "top 85%",
+                toggleActions: 'play none none reverse',
+                invalidateOnRefresh: true,
+            }
+        });
+    }
+
+    setupHistoryTimelineAnimation(); // Call the new timeline animation function
+}
+
+
+// --- Animation & Setup Functions (Existing functions) ---
 function initialPageVisualSetup(isResize = false) { 
     if (typeof gsap === 'undefined') return;
     subpageBodyElement = document.querySelector('.subpage-body'); if (!subpageBodyElement) return;
@@ -254,11 +315,19 @@ function initialPageVisualSetup(isResize = false) {
     nonHeroSections.forEach(section => {
         const wrapper = section.querySelector(".section-content-wrapper");
         if (wrapper) {
-            const animatedContent = wrapper.querySelector(".animated-content");
-            if (animatedContent) gsap.set(animatedContent, { opacity: 0, y: 50 });
-            else gsap.set(wrapper, {opacity: 0, y: 50});
+            if (section.id === 'history-section') {
+                gsap.set(wrapper.querySelector('.section-title'), { opacity: 0, y: 50 });
+                gsap.set(gsap.utils.toArray('.timeline-entry'), { opacity: 0 });
+            } else {
+                const animatedContent = wrapper.querySelector(".animated-content");
+                if (animatedContent) {
+                    gsap.set(animatedContent, { opacity: 0, y: 50 });
+                } else {
+                    gsap.set(wrapper, { opacity: 0, y: 50 });
+                }
+            }
         } else {
-            gsap.set(section, {opacity:0, y:50});
+            gsap.set(section, { opacity: 0, y: 50 });
         }
     });
 
@@ -411,7 +480,7 @@ function setupHeroParallax() {
 
 function setupSubPageContentAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-    const sections = gsap.utils.toArray(".subpage-section:not(#sub-hero)");
+    const sections = gsap.utils.toArray(".subpage-section:not(#sub-hero):not(#history-section)");
 
     sections.forEach((section) => {
         let animatedElement;
@@ -670,7 +739,8 @@ async function initializeSubpage() {
 
     setupSubPageContentAnimations();
     setupDecorativeRectAnimations();
-    setupLottieScrollTrigger(); // Lottie 애니메이션 설정 함수 호출
+    setupLottieScrollTrigger();
+    setupHistorySectionAnimation();
     setupHeroParallax(); 
     setupHeroColorSwitcher();
     setupHeroScrollSnap();
@@ -709,7 +779,8 @@ function handleSubPageResize() {
         setupSubPageContentAnimations();
         setupTabs();
         setupDecorativeRectAnimations();
-        setupLottieScrollTrigger(); // 리사이즈 시 Lottie 트리거도 재설정
+        setupLottieScrollTrigger();
+        setupHistorySectionAnimation();
         setupHeroParallax(); 
         setupHeroColorSwitcher();
         setupHeroScrollSnap(); 
