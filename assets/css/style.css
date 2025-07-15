@@ -2371,6 +2371,6 @@ body {
 
   .timeline-entry.left-entry::after,
   .timeline-entry.right-entry::after {
-    left: 10px;
+    left: 6px;
   }
 }
