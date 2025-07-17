@@ -10,14 +10,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
-    <!-- [FIX] Added touch-action CSS to prevent scroll conflicts on mobile -->
-    <style>
-      #part2 .works-list {
-        touch-action: pan-x pan-y;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-    </style>
+    <!-- [REMOVED] 인라인 스타일 블록을 제거하여 CSS 파일에서 스타일을 일관되게 관리합니다. -->
   </head>
   <body class="main-page">
     <!-- Placeholders for dynamically loaded content -->
@@ -172,6 +165,9 @@
           </div>
         </div>
       </div>
+
+      <!-- [REMOVED] Partners Section moved to about.html -->
+
     </section>
 
     <!-- Footer and Scroll to Top Button -->

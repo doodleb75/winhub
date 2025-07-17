@@ -78,16 +78,11 @@ function preventKeyboardScroll(event) {
     }
 }
 
-/**
- * [MODIFIED] Disables scrolling on the page more robustly.
- * It now applies `overflow: hidden` to both `<html>` and `<body>` elements
- * to provide a more reliable scroll lock across different browsers, especially on mobile.
- */
 function disableScrollInteraction() {
     if (isScrollCurrentlyDisabled) return;
     isScrollCurrentlyDisabled = true;
-    document.documentElement.style.overflow = 'hidden'; // Target html
-    document.body.style.overflow = 'hidden'; // Target body
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
     window.addEventListener('wheel', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.addEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.addEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
@@ -99,16 +94,11 @@ function disableScrollInteraction() {
     }
 }
 
-/**
- * [MODIFIED] Re-enables scrolling on the page.
- * Corresponds to the changes in `disableScrollInteraction` by clearing the
- * `overflow` style on both `<html>` and `<body>`.
- */
 function enableScrollInteraction() {
     if (!isScrollCurrentlyDisabled) return;
     isScrollCurrentlyDisabled = false;
-    document.documentElement.style.overflow = ''; // Clear on html
-    document.body.style.overflow = ''; // Clear on body
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
     window.removeEventListener('wheel', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
     window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
@@ -223,10 +213,16 @@ function setupSubTitleAnimation() {
         try {
             splitInstance = new SplitText(element, { type: "chars" }); splitSubTitles.push(splitInstance);
             gsap.set(element, { autoAlpha: 1 });
+
             if (isOutroTitle) {
                 if (splitInstance.chars && splitInstance.chars.length > 0) {
                     const part3Info = element.closest('.part3-info'); if (part3Info) gsap.set(part3Info, { autoAlpha: 1 });
-                    ScrollTrigger.create({ id: triggerId, trigger: element, start: "top 75%", toggleActions: "play none none reverse", invalidateOnRefresh: true, markers: false,
+                    ScrollTrigger.create({ 
+                        id: triggerId, 
+                        trigger: element, 
+                        start: "top 85%",
+                        toggleActions: "play none none reverse",
+                        invalidateOnRefresh: true,
                         onEnter: () => gsap.fromTo(splitInstance.chars, { opacity: 0, y: -60 }, { opacity: 1, y: 0, color: '', duration: 0.6, ease: "bounce.out", stagger: 0.08, overwrite: true }),
                         onLeaveBack: () => gsap.to(splitInstance.chars, { opacity: 0, y: -60, duration: 0.3, ease: "power1.in", stagger: { each: 0.04, from: "start" } }),
                     });
@@ -243,11 +239,6 @@ function setupSubTitleAnimation() {
     });
  }
 
-/**
- * Part3 관련 ScrollTrigger들을 토글하는 헬퍼 함수.
- * Part2의 가로 스크롤 중에 Part3 관련 애니메이션이 실행되는 것을 방지합니다.
- * @param {boolean} enable - true는 활성화, false는 비활성화를 의미합니다.
- */
 function togglePart3Triggers(enable) {
     const idsToToggle = [
         'splineScrollTrigger-part3',
@@ -268,7 +259,6 @@ function togglePart3Triggers(enable) {
     });
 
     ScrollTrigger.getAll().forEach(st => {
-        // outro 부제의 모든 트리거를 찾아 토글합니다.
         if (st.vars.id && typeof st.vars.id === 'string' && st.vars.id.includes('subTitleAppearTrigger-outro')) {
             if (enable && !st.enabled) {
                 st.enable(false);
@@ -408,7 +398,6 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     splineTimelines.forEach(tl => tl.kill()); splineTimelines = []; const currentScaleConfig = getScaleConfig(isDesktopView);
     const isMobileView = !isDesktopView;
 
-    // Hero Timeline
     const heroTimeline = gsap.timeline({ scrollTrigger: { id: 'splineScrollTrigger-hero', trigger: "#hero", start: "top 10%", end: "bottom bottom", scrub: true, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = false), onLeaveBack: () => cableObj && (cableObj.visible = false), onRefresh: () => { if (ScrollTrigger.isInViewport("#hero") && (!document.querySelector("#part1") || !ScrollTrigger.isInViewport("#part1"))) cableObj && (cableObj.visible = false); }}});
     heroTimeline.to(winhubObj.position, {
         x: getTargetWinhubX(isMobileView),
@@ -419,7 +408,6 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     .to(winhubObj.scale, { x: responsiveScale(currentScaleConfig.hero), y: responsiveScale(currentScaleConfig.hero), z: responsiveScale(currentScaleConfig.hero) }, 0);
     splineTimelines.push(heroTimeline);
 
-    // Part 1 Timeline
     if (document.getElementById('part1')) {
         const part1Timeline = gsap.timeline({ scrollTrigger: { id: 'splineScrollTrigger-part1', trigger: "#part1", start: "top 70%", end: "center bottom", scrub: 2, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = true), onEnterBack: () => cableObj && (cableObj.visible = true), onLeaveBack: () => cableObj && (cableObj.visible = false) }});
         const part1Position = isMobileView ?
@@ -432,7 +420,6 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
         splineTimelines.push(part1Timeline);
     }
 
-    // Part 2 Timeline
     if (document.getElementById('part2')) {
         const part2Timeline = gsap.timeline({ scrollTrigger: { id: "part2SplineScrollTrigger", trigger: "#part2", start: "top 85%", end: "top 30%", scrub: 2, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = true), onEnterBack: () => cableObj && (cableObj.visible = true) }});
         const part2Position = isMobileView ?
@@ -445,7 +432,6 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
         splineTimelines.push(part2Timeline);
     }
 
-    // Part 3 Timeline
     if (document.getElementById('part3')) {
         const part3Timeline = gsap.timeline({ scrollTrigger: { id: 'splineScrollTrigger-part3', trigger: "#part3", start: "top 30%", end: "center bottom", scrub: 2, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = true) }});
         const part3Position = isMobileView ?
@@ -506,12 +492,10 @@ function setupOutroContentAnimation() {
     });
 }
 
-// [FIX] 'Top' 버튼 클릭 시 로고 상태가 초기화되지 않는 문제 해결
 function setupScrollToTopButton() {
     const scrollToTopBtn = document.getElementById("scrollToTopBtn");
     if (!scrollToTopBtn) return;
 
-    // 스크롤 위치에 따라 버튼 보이기/숨기기
     window.addEventListener("scroll", () => {
         if (window.scrollY > window.innerHeight / 2) {
             if (!scrollToTopBtn.classList.contains("show")) {
@@ -524,33 +508,22 @@ function setupScrollToTopButton() {
         }
     });
 
-    // 클릭 이벤트 처리
     scrollToTopBtn.addEventListener("click", () => {
-        // 1. 모든 ScrollTrigger를 일시적으로 비활성화하여 이동 중 예기치 않은 동작 방지
         const triggers = typeof ScrollTrigger !== 'undefined' ? ScrollTrigger.getAll() : [];
         triggers.forEach(trigger => trigger.disable(true));
-
-        // 2. 페이지 최상단으로 즉시 이동
         window.scrollTo({ top: 0, behavior: 'auto' });
-
-        // 3. [FIX] 페이지 상단에 있어야 할 요소들의 상태를 수동으로 즉시 초기화
         gsap.set(document.body, { backgroundColor: partBackgroundColors.hero });
         const scrollIcon = document.querySelector(".scroll-icon");
         if (scrollIcon) {
             gsap.set(scrollIcon, { autoAlpha: 1 });
         }
-        // 헤더 로고를 즉시 숨김 상태로 설정
         const headerLogo = document.querySelector("#header-placeholder .com-name-logo");
         if (headerLogo) {
             gsap.set(headerLogo, { autoAlpha: 0 });
         }
 
-        // 4. 짧은 지연 후 ScrollTrigger 재활성화 및 새로고침
         setTimeout(() => {
-            // 5. 모든 트리거 재활성화
             triggers.forEach(trigger => trigger.enable());
-            
-            // 6. ScrollTrigger를 새로고침하여 현재 페이지 상태에 맞게 위치를 다시 계산
             if (typeof ScrollTrigger !== 'undefined') {
                 ScrollTrigger.refresh(true);
             }
@@ -635,12 +608,28 @@ async function runMainPageSequence() {
 
     try {
         mainSplineApp = await loadSplineScene("canvas3d", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode");
+        
         if (mainSplineApp) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+
             winhub = mainSplineApp.findObjectByName("Winhub");
             cable = mainSplineApp.findObjectByName("cable");
-            if (winhub) winhub.visible = false;
-            if (cable) cable.visible = false;
-            if (!winhub || !cable) console.error("MAIN-APP: Missing critical Spline objects (Winhub or cable).");
+            
+            if (winhub) {
+                winhub.visible = false;
+            } else {
+                console.warn("MAIN-APP: 'Winhub' object not found in the Spline scene.");
+            }
+
+            if (cable) {
+                cable.visible = false;
+            } else {
+                console.warn("MAIN-APP: 'cable' object not found in the Spline scene.");
+            }
+
+            if (!winhub || !cable) {
+                console.error("MAIN-APP: Missing one or more critical Spline objects (Winhub, cable). The 3D animation might be degraded.");
+            }
         } else {
             console.error("MAIN-APP: Main Spline App could not be loaded.");
         }
@@ -650,7 +639,6 @@ async function runMainPageSequence() {
 
     await loaderPromise;
 
-    // [REVERTED] Per user request, the disableScrollInteraction call is moved back here.
     disableScrollInteraction();
 
     const comNameElement = document.querySelector(".com-name-ani");
@@ -804,6 +792,8 @@ async function runMainPageSequence() {
     }
 }
 
+// [REVISED] This function now only sets up animations and enables scroll.
+// The final refresh is handled by the window.load event.
 function onMasterIntroComplete() {
     enableScrollInteraction();
 
@@ -824,25 +814,8 @@ function onMasterIntroComplete() {
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.3 });
     
     window.scrollTo(0, 0);
-
-    // [최종 해결책] '첫 클릭' 문제를 해결하기 위한 강력한 일회성 리스너
-    const forceRefreshOnFirstInteraction = () => {
-        const handler = () => {
-            console.log("[DEBUG] First user interaction detected. Forcing scroll restoration and refresh.");
-            
-            // 만약을 위해 스크롤 상호작용을 다시 활성화합니다.
-            enableScrollInteraction();
-
-            if (typeof ScrollTrigger !== 'undefined') {
-                // 최종 레이아웃을 기준으로 모든 값을 다시 계산합니다.
-                ScrollTrigger.refresh(true);
-            }
-        };
-        // 'pointerdown'은 클릭과 터치를 모두 포함하며, { once: true } 옵션으로 단 한 번만 실행됩니다.
-        window.addEventListener('pointerdown', handler, { once: true });
-    };
-
-    forceRefreshOnFirstInteraction();
+    
+    // [REMOVED] The redundant and premature refresh call has been removed from here.
 }
 
 function setupAllScrollTriggers(isDesktopView) {
@@ -880,7 +853,6 @@ function setupAllScrollTriggers(isDesktopView) {
     setupScrollToTopButton();
     setupScrollIconAnimation();
     
-    // 이 함수 마지막에서 refresh를 호출하여, 모든 트리거가 생성된 후 위치를 계산하도록 합니다.
     if (typeof ScrollTrigger !== 'undefined') {
         ScrollTrigger.refresh();
     }
@@ -927,17 +899,17 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
+// [REVISED] This listener is now the single source of truth for the final layout refresh.
 window.addEventListener('load', () => {
-  setTimeout(() => {
-    if (typeof ScrollTrigger !== 'undefined') {
-      ScrollTrigger.refresh(true);
-    }
-  }, 600);
+  // This ensures that after all resources (like images) are loaded,
+  // we perform one final, authoritative refresh of all ScrollTrigger instances.
+  // This corrects any miscalculations made before the final layout was established.
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.refresh(true);
+  }
 });
 
-// DOMContentLoaded를 사용하여 스크립트의 초기 실행 시점을 잡습니다.
 document.addEventListener('DOMContentLoaded', async () => {
-    // [REVERTED] Per user request, the disableScrollInteraction call is removed from here.
     window.scrollTo(0, 0);
     setupScrollRestoration();
     

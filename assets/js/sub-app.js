@@ -1,8 +1,11 @@
 // assets/js/sub-app.js
 
-import { Application as SplineRuntimeApp } from 'https://unpkg.com/@splinetool/runtime/build/runtime.js';
-import * as THREE_MOD from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
-window.THREE = THREE_MOD;
+// [REMOVED] Spline Runtime 중복 로딩 제거 (common-utils.js에서 관리)
+// import { Application as SplineRuntimeApp } from 'https://unpkg.com/@splinetool/runtime/build/runtime.js';
+
+// [REMOVED] Three.js 중복 로딩 제거
+// import * as THREE_MOD from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+// window.THREE = THREE_MOD;
 
 import { ScrollToPlugin } from "https://esm.sh/gsap/ScrollToPlugin";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
@@ -12,7 +15,9 @@ if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(ScrollToPlugin, SplitText, ScrollTrigger);
 } else console.error("SUB-APP: GSAP core not loaded, cannot register plugins.");
 
+// [MODIFIED] common-utils.js에서 중앙 관리되는 THREE 객체를 가져옵니다.
 import {
+    THREE, // Three.js 객체 추가
     setupScrollRestoration,
     degToRad,
     responsiveY,
@@ -23,6 +28,9 @@ import {
     killAllScrollTriggers,
     loadCommonUI
 } from './common-utils.js';
+
+// Spline 런타임이 window.THREE를 참조할 수 있도록 전역 스코프에 할당합니다.
+window.THREE = THREE;
 
 // --- Subpage Specific Global Variables ---
 let subpageSplineApp = null;
@@ -295,6 +303,32 @@ function setupHistorySectionAnimation() {
     setupHistoryTimelineAnimation(); // Call the new timeline animation function
 }
 
+/**
+ * [NEW] Sets up scroll animations for the Partners section.
+ */
+function setupPartnersSectionAnimation() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    const section = document.querySelector("#partners-section");
+    if (!section) return;
+
+    const wrapper = section.querySelector(".section-content-wrapper");
+    
+    if (wrapper) {
+        gsap.set(wrapper, { opacity: 0, y: 50 });
+
+        ScrollTrigger.create({
+            trigger: section,
+            start: "top 80%",
+            end: "bottom 20%",
+            invalidateOnRefresh: true,
+            onEnter: () => gsap.to(wrapper, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out", overwrite: "auto" }),
+            onLeave: () => gsap.to(wrapper, { opacity: 0, y: -50, duration: 0.4, ease: "power1.in", overwrite: "auto" }),
+            onEnterBack: () => gsap.to(wrapper, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", overwrite: "auto" }),
+            onLeaveBack: () => gsap.to(wrapper, { opacity: 0, y: 50, duration: 0.4, ease: "power1.in", overwrite: "auto" }),
+        });
+    }
+}
+
 
 // --- Animation & Setup Functions (Existing functions) ---
 function initialPageVisualSetup(isResize = false) { 
@@ -480,7 +514,7 @@ function setupHeroParallax() {
 
 function setupSubPageContentAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-    const sections = gsap.utils.toArray(".subpage-section:not(#sub-hero):not(#history-section)");
+    const sections = gsap.utils.toArray(".subpage-section:not(#sub-hero):not(#history-section):not(#partners-section)");
 
     sections.forEach((section) => {
         let animatedElement;
@@ -741,6 +775,7 @@ async function initializeSubpage() {
     setupDecorativeRectAnimations();
     setupLottieScrollTrigger();
     setupHistorySectionAnimation();
+    setupPartnersSectionAnimation(); // [NEW] Call animation setup for partners section
     setupHeroParallax(); 
     setupHeroColorSwitcher();
     setupHeroScrollSnap();
@@ -781,6 +816,7 @@ function handleSubPageResize() {
         setupDecorativeRectAnimations();
         setupLottieScrollTrigger();
         setupHistorySectionAnimation();
+        setupPartnersSectionAnimation(); // [NEW] Call animation setup for partners section
         setupHeroParallax(); 
         setupHeroColorSwitcher();
         setupHeroScrollSnap(); 

@@ -310,22 +310,15 @@ a {
   margin: 0 auto;
 }
 
+/* [MODIFIED] Works 섹션 스크롤 문제 해결 */
 .works-list-container {
   width: 100%;
   height: auto;
-  max-height: none;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden; /* 자식 요소의 스크롤을 막고 GSAP가 제어하도록 함 */
   margin: 1.875rem 0;
   position: relative;
-  -webkit-overflow-scrolling: touch;
   padding-bottom: 1rem;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.works-list-container::-webkit-scrollbar {
-  display: none;
+  touch-action: pan-y; /* 수직 스크롤(페이지 스크롤)만 허용하여 수평 스크롤과의 충돌 방지 */
 }
 
 .works-list {
@@ -918,6 +911,7 @@ button.goto-work:hover:before {
   position: relative;
   overflow: hidden;
   padding: 3.75rem 1.25rem;
+  padding-bottom: 8rem;
   box-sizing: border-box;
 }
 
@@ -2306,7 +2300,7 @@ body {
 }
 
 .subpage-body.scrolled-past-hero-colors .timeline-entry::after {
-  background-color: #f0f0f0;
+  background-color: #fff;
   border-color: #007bff;
 }
 
@@ -2373,4 +2367,88 @@ body {
   .timeline-entry.right-entry::after {
     left: 6px;
   }
+}
+
+/* [MODIFIED] Partners Section Styles for about.html */
+#partners-section {
+  /* Override default padding for full-width effect */
+  padding-left: 0;
+  padding-right: 0;
+  /* Ensure it doesn't create unwanted vertical space if empty */
+  min-height: auto;
+}
+
+#partners-section .section-content-wrapper {
+  /* Reset styles for the title container */
+  padding-bottom: 0; /* Remove bottom padding */
+  margin-bottom: 3rem; /* Add margin to space out from slider */
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.partners-slider {
+  width: 100%;
+  position: relative;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+.partners-slide-track {
+  display: flex;
+  align-items: center; /* Vertically center all logos in the track */
+  /* (width of logo + horizontal margin) * number of logos * 2 */
+  width: calc( (200px + 80px) * 16); /* 8 original logos + 8 duplicates */
+  animation: scroll 60s linear infinite;
+}
+
+.partners-slider:hover .partners-slide-track {
+  animation-play-state: paused;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* (width of logo + horizontal margin) * number of original logos */
+    transform: translateX(calc( (200px + 80px) * -8));
+  }
+}
+
+.partner-slide {
+  /* height: 100px; REMOVED - Let height be flexible */
+  width: 200px;
+  margin: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px; /* Ensure track has a minimum height */
+}
+
+.partner-slide img {
+    max-width: 100%;
+    max-height: 100px; /* Set a maximum height for all logos */
+    width: auto;
+    height: auto;
+    filter: grayscale(100%); /* Initially grayscale */
+    opacity: 0.7;
+    transition: all 0.4s ease;
+    mix-blend-mode: screen;
+}
+
+/* Adjust image style when scrolled past hero (light background) */
+.subpage-body.scrolled-past-hero-colors .partner-slide img {
+    mix-blend-mode: multiply;
+    filter: grayscale(100%) brightness(0.9);
+    opacity: 0.8;
+}
+
+/* [MODIFIED] Increased specificity for hover effect to override scrolled state */
+.partner-slide a:hover img,
+.subpage-body.scrolled-past-hero-colors .partner-slide a:hover img {
+    filter: grayscale(0); /* Revert to original color on hover */
+    opacity: 1;
+    transform: scale(1.1);
+    mix-blend-mode: normal;
 }
