@@ -31,14 +31,19 @@ import {
     loadCommonUI
 } from './common-utils.js';
 
+// ★★★ FIX: 이 함수는 모바일 뷰포트 높이 문제를 해결하는 핵심입니다. ★★★
+// 동적으로 변하는 화면 높이를 계산하여 CSS 변수 '--vh'에 저장합니다.
 function setViewportHeight() {
   const vh = window.innerHeight * 0.01;
   document.documentElement.style.setProperty('--vh', `${vh}px`);
 }
 
+// 창 크기 변경, 화면 방향 전환, 그리고 DOM 로드 시점에 높이를 다시 계산하여
+// 항상 정확한 뷰포트 높이를 유지하도록 합니다.
 window.addEventListener('resize', setViewportHeight);
 window.addEventListener('orientationchange', setViewportHeight);
 document.addEventListener('DOMContentLoaded', setViewportHeight);
+
 
 // --- Global Variables for Main Page ---
 let mainSplineApp = null;
@@ -910,6 +915,9 @@ window.addEventListener('load', () => {
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // DOMContentLoaded 이벤트 리스너가 setViewportHeight를 먼저 호출하여
+    // runMainPageSequence가 실행되기 전에 --vh 변수가 설정되도록 합니다.
+    setViewportHeight();
     window.scrollTo(0, 0);
     setupScrollRestoration();
     

@@ -92,9 +92,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         // --- Shared Completion Logic ---
         const completeAndShowContent = () => {
             // Restore original styles
-            document.documentElement.style.height = '';
             document.documentElement.style.overflow = '';
-            document.body.style.height = '';
             document.body.style.overflow = 'auto';
 
             window.scrollTo(0, 0); 
@@ -123,13 +121,18 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         };
 
         // --- Initial setup ---
-        // ★★★ FINAL FIX 2: Lock screen size using JS to prevent mobile layout issues ★★★
+        // ★★★ FIX: 모바일 높이 문제를 해결하기 위해 JS로 높이를 직접 제어하는 대신 CSS와 --vh 변수를 사용하도록 수정합니다. ★★★
+        // 아래의 불안정한 높이 고정 로직을 제거합니다.
+        /*
         const viewportHeight = window.innerHeight;
         document.documentElement.style.height = `${viewportHeight}px`;
-        document.documentElement.style.overflow = 'hidden';
         document.body.style.height = `${viewportHeight}px`;
+        loader.style.height = '100%'; 
+        */
+       
+        // 스크롤만 막도록 수정합니다. 높이는 CSS가 담당합니다.
+        document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
-        loader.style.height = '100%'; // Ensure loader fills the locked body
 
         gsap.set(loader, { opacity: 1, visibility: 'visible', display: 'flex' });
         if (mainContent) {
