@@ -1,9 +1,11 @@
 // assets/js/main-app.js
 
 // Spline Runtime, THREE.js, GSAP Plugins
-import * as THREE_MOD from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
-window.THREE = THREE_MOD;
+// import * as THREE_MOD from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+// window.THREE = THREE_MOD;
 
+import { THREE } from './common-utils.js';
+window.THREE = THREE; 
 import { Draggable } from "https://esm.sh/gsap/Draggable";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
 import { MorphSVGPlugin } from "https://esm.sh/gsap/MorphSVGPlugin";
@@ -31,15 +33,11 @@ import {
     loadCommonUI
 } from './common-utils.js';
 
-// ★★★ FIX: 이 함수는 모바일 뷰포트 높이 문제를 해결하는 핵심입니다. ★★★
-// 동적으로 변하는 화면 높이를 계산하여 CSS 변수 '--vh'에 저장합니다.
+// 모바일 브라우저의 동적 주소창에 대응하여 실제 뷰포트 높이를 계산하고 CSS 변수(--vh)를 설정합니다.
 function setViewportHeight() {
   const vh = window.innerHeight * 0.01;
   document.documentElement.style.setProperty('--vh', `${vh}px`);
 }
-
-// 창 크기 변경, 화면 방향 전환, 그리고 DOM 로드 시점에 높이를 다시 계산하여
-// 항상 정확한 뷰포트 높이를 유지하도록 합니다.
 window.addEventListener('resize', setViewportHeight);
 window.addEventListener('orientationchange', setViewportHeight);
 document.addEventListener('DOMContentLoaded', setViewportHeight);
@@ -210,18 +208,21 @@ function setupSubTitleAnimation() {
     if (subTitleElements.length === 0) return;
     splitSubTitles.forEach(splitInstance => splitInstance?.revert()); splitSubTitles = [];
     subTitleElements.forEach((element, index) => {
-        const isOutroTitle = element.closest('#part3');
+        const useSimpleToggle = element.closest('#part2') || element.closest('#part3');
         const textContentForId = element.textContent.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
         const triggerIdSuffix = textContentForId || `untitled-${index}`;
-        const triggerId = isOutroTitle ? `subTitleAppearTrigger-outro-${index}` : `subTitleAppearTrigger-${triggerIdSuffix}-${index}`;
+        const triggerId = useSimpleToggle ? `subTitleAppearTrigger-simple-${index}` : `subTitleAppearTrigger-${triggerIdSuffix}-${index}`;
+        
         let splitInstance;
         try {
             splitInstance = new SplitText(element, { type: "chars" }); splitSubTitles.push(splitInstance);
             gsap.set(element, { autoAlpha: 1 });
 
-            if (isOutroTitle) {
+            if (useSimpleToggle) {
                 if (splitInstance.chars && splitInstance.chars.length > 0) {
-                    const part3Info = element.closest('.part3-info'); if (part3Info) gsap.set(part3Info, { autoAlpha: 1 });
+                    const parentInfo = element.closest('.part2-info, .part3-info'); 
+                    if (parentInfo) gsap.set(parentInfo, { autoAlpha: 1 });
+                    
                     ScrollTrigger.create({ 
                         id: triggerId, 
                         trigger: element, 
@@ -264,7 +265,7 @@ function togglePart3Triggers(enable) {
     });
 
     ScrollTrigger.getAll().forEach(st => {
-        if (st.vars.id && typeof st.vars.id === 'string' && st.vars.id.includes('subTitleAppearTrigger-outro')) {
+        if (st.vars.id && typeof st.vars.id === 'string' && st.vars.id.includes('subTitleAppearTrigger-simple')) {
             if (enable && !st.enabled) {
                 st.enable(false);
             } else if (!enable && st.enabled) {
@@ -281,13 +282,12 @@ function setupWorksHorizontalScroll() {
     const list = document.querySelector("#part2 .works-list");
     if (!pinTargetElement || !list) return;
 
-    let worksTitleTriggerId = "subTitleAppearTrigger-works-0";
     const worksSubTitleElement = document.querySelector("#part2 .sub-title");
+    let worksTitleTrigger = null;
     if (worksSubTitleElement) {
-        const textContentForId = worksSubTitleElement.textContent.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-        const stInstance = ScrollTrigger.getAll().find(st => st.vars.trigger === worksSubTitleElement && st.vars.id.startsWith(`subTitleAppearTrigger-${textContentForId}`));
-        if (stInstance) worksTitleTriggerId = stInstance.vars.id;
+        worksTitleTrigger = ScrollTrigger.getAll().find(st => st.trigger === worksSubTitleElement);
     }
+
     const getXAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? 0 : -(list.scrollWidth - pinTargetElement.offsetWidth + 40);
     const getEndAmount = () => (!list || !pinTargetElement || pinTargetElement.offsetWidth === 0) ? "+=0" : "+=" + (list.scrollWidth - pinTargetElement.offsetWidth);
     
@@ -295,23 +295,19 @@ function setupWorksHorizontalScroll() {
             id: 'worksHorizontalScrollTrigger', trigger: pinTargetElement, pin: pinTargetElement, pinType: 'fixed', start: "center center", pinSpacing: true, end: getEndAmount, anticipatePin: 1, scrub: 0.3, invalidateOnRefresh: true,
             onRefresh: (self) => { if (list) void list.offsetWidth; if (pinTargetElement) void pinTargetElement.offsetHeight; },
             onEnter: () => {
-                const st = ScrollTrigger.getById(worksTitleTriggerId);
-                if (st && st.enabled) st.disable(false);
+                if (worksTitleTrigger && worksTitleTrigger.enabled) worksTitleTrigger.disable(false);
                 togglePart3Triggers(false);
             },
             onLeave: () => {
-                const st = ScrollTrigger.getById(worksTitleTriggerId);
-                if (st && !st.enabled) st.enable(false);
+                if (worksTitleTrigger && !worksTitleTrigger.enabled) worksTitleTrigger.enable(false);
                 togglePart3Triggers(true);
             },
             onEnterBack: () => {
-                const st = ScrollTrigger.getById(worksTitleTriggerId);
-                if (st && st.enabled) st.disable(false);
+                if (worksTitleTrigger && worksTitleTrigger.enabled) worksTitleTrigger.disable(false);
                 togglePart3Triggers(false);
             },
             onLeaveBack: () => {
-                const st = ScrollTrigger.getById(worksTitleTriggerId);
-                if (st && !st.enabled) st.enable(false);
+                if (worksTitleTrigger && !worksTitleTrigger.enabled) worksTitleTrigger.enable(false);
                 togglePart3Triggers(true);
             }
     }});
@@ -797,8 +793,6 @@ async function runMainPageSequence() {
     }
 }
 
-// [REVISED] This function now only sets up animations and enables scroll.
-// The final refresh is handled by the window.load event.
 function onMasterIntroComplete() {
     enableScrollInteraction();
 
@@ -819,8 +813,6 @@ function onMasterIntroComplete() {
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.3 });
     
     window.scrollTo(0, 0);
-    
-    // [REMOVED] The redundant and premature refresh call has been removed from here.
 }
 
 function setupAllScrollTriggers(isDesktopView) {
@@ -904,19 +896,14 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
-// [REVISED] This listener is now the single source of truth for the final layout refresh.
 window.addEventListener('load', () => {
-  // This ensures that after all resources (like images) are loaded,
-  // we perform one final, authoritative refresh of all ScrollTrigger instances.
-  // This corrects any miscalculations made before the final layout was established.
+  // 모든 리소스(이미지 등)가 로드된 후, 최종 레이아웃을 기준으로 ScrollTrigger 인스턴스를 다시 계산합니다.
   if (typeof ScrollTrigger !== 'undefined') {
     ScrollTrigger.refresh(true);
   }
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // DOMContentLoaded 이벤트 리스너가 setViewportHeight를 먼저 호출하여
-    // runMainPageSequence가 실행되기 전에 --vh 변수가 설정되도록 합니다.
     setViewportHeight();
     window.scrollTo(0, 0);
     setupScrollRestoration();

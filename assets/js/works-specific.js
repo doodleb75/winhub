@@ -1,6 +1,5 @@
 // ../assets/js/works-specific.js
 
-// [수정] works-data.js에서 프로젝트 데이터를 가져옵니다.
 import { worksData } from './works-data.js';
 
 // 페이지 로드 및 pageshow (뒤로가기/앞으로가기 캐시) 시 호출될 메인 초기화 함수
@@ -8,22 +7,15 @@ window.addEventListener('load', initializePortfolio);
 window.addEventListener('pageshow', function(event) {
     // 페이지가 브라우저의 BFcache에서 복원되었는지 확인
     if (event.persisted) {
-        console.log("WORKS-SPECIFIC: Page restored from BFcache. Re-initializing portfolio items.");
         initializePortfolio(); // 메인 초기화 함수를 다시 실행하여 애니메이션 재생
     }
 });
 
 function initializePortfolio() {
-    if (typeof gsap === 'undefined') {
-        console.error("WORKS-SPECIFIC: GSAP core is not loaded!");
-        return;
-    }
-    if (typeof ScrollTrigger === 'undefined') {
-        console.error("WORKS-SPECIFIC: ScrollTrigger is not loaded!");
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
         return;
     }
 
-    // --- Portfolio Items Logic ---
     // [수정] 기존 로컬 데이터 대신 import한 worksData를 사용합니다.
     const portfolioItemsData = worksData;
 
@@ -32,7 +24,6 @@ function initializePortfolio() {
 
     function renderPortfolioItems(filter = 'all') {
         if (!portfolioGrid) {
-            console.warn("WORKS-SPECIFIC: Portfolio grid element not found.");
             return;
         }
         portfolioGrid.innerHTML = ''; // 기존 아이템을 지웁니다.
@@ -90,22 +81,10 @@ function initializePortfolio() {
         ScrollTrigger.create({
             trigger: portfolioGrid, // 그리드 전체가 뷰포트에 들어올 때 애니메이션 트리거
             start: 'top 90%', // 그리드 상단이 뷰포트의 90% 지점에 도달할 때
-            onEnter: () => {
-                console.log("ScrollTrigger: onEnter - playing animation.");
-                animationTimeline.restart(true); // true를 추가하여 즉시 시작 지점으로 이동 후 재생
-            }, 
-            onLeave: () => { // 스크롤을 아래로 내려 트리거 영역을 벗어날 때
-                console.log("ScrollTrigger: onLeave - reversing animation (on scroll down).");
-                animationTimeline.reverse(); 
-            },
-            onEnterBack: () => { // 스크롤을 위로 올려 트리거 영역으로 다시 들어올 때
-                console.log("ScrollTrigger: onEnterBack - playing animation (on scroll up).");
-                animationTimeline.restart(true); // true를 추가하여 즉시 시작 지점으로 이동 후 재생
-            },
-            onLeaveBack: () => { // 스크롤을 위로 올려 트리거 영역을 벗어날 때
-                console.log("ScrollTrigger: onLeaveBack - reversing animation (on scroll up).");
-                animationTimeline.reverse();
-            }
+            onEnter: () => animationTimeline.restart(true), // true를 추가하여 즉시 시작 지점으로 이동 후 재생
+            onLeave: () => animationTimeline.reverse(), // 스크롤을 아래로 내려 트리거 영역을 벗어날 때
+            onEnterBack: () => animationTimeline.restart(true), // 스크롤을 위로 올려 트리거 영역으로 다시 들어올 때
+            onLeaveBack: () => animationTimeline.reverse() // 스크롤을 위로 올려 트리거 영역을 벗어날 때
         });
         
         // 페이지 로드 또는 BFcache 복원 시 그리드가 이미 뷰포트에 보이는 경우 애니메이션을 즉시 재생합니다.
@@ -154,5 +133,4 @@ function initializePortfolio() {
     }
 
     renderPortfolioItems(); // 초기 포트폴리오 아이템 렌더링
-    console.log("WORKS-SPECIFIC: Works page specific JavaScript loaded and updated.");
 }

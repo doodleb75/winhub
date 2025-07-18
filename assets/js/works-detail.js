@@ -17,7 +17,6 @@ if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(ScrollToPlugin, SplitText);
 }
 
-// --- Global Variables ---
 let subpageBodyElement = null;
 let heroSection = null;
 
@@ -31,9 +30,8 @@ const scrolledPastConfig = {
     gnbTextColor: "#fdfefe",
 };
 
-
 /**
- * Renders project details based on the ID from the URL.
+ * URL의 ID를 기반으로 프로젝트 세부 정보를 렌더링
  */
 function renderProjectDetails() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -62,7 +60,7 @@ function renderProjectDetails() {
 }
 
 /**
- * Sets up the initial visual state of the page.
+ * 페이지의 초기 시각적 상태를 설정
  */
 function initialPageVisualSetup() {
     subpageBodyElement = document.querySelector('.subpage-body');
@@ -76,7 +74,7 @@ function initialPageVisualSetup() {
 
 
 /**
- * [MODIFIED] Animates the appearance of detail content, showing the showcase image first.
+ * [수정됨] 쇼케이스 이미지를 먼저 표시하여 세부 콘텐츠의 등장 애니메이션을 적용
  */
 function animateDetailContent() {
     const title = document.querySelector('.project-title');
@@ -92,33 +90,28 @@ function animateDetailContent() {
         return;
     }
 
-    // Set initial states to hidden
     gsap.set([heroSection, showcaseSection], { autoAlpha: 0 });
-    // Also hide the inner content to prevent a flash
     gsap.set([title, '.project-meta', '.project-overview'], { autoAlpha: 0 });
 
     const tl = gsap.timeline();
 
-    // 1. Animate the main image showcase to appear first.
     tl.to(showcaseSection, {
         autoAlpha: 1,
         duration: 1.0,
         ease: "power3.out"
     });
 
-    // 2. After the image, fade in the entire hero section.
     tl.to(heroSection, {
         autoAlpha: 1,
         duration: 0.8,
         ease: "power2.inOut"
-    }, "-=0.5"); // Overlap for a smoother transition
+    }, "-=0.5");
 
-    // 3. Animate the text content within the hero section as it appears.
     const textTl = gsap.timeline();
 
     if (title) {
         const splitTitle = new SplitText(title, { type: "chars, words" });
-        gsap.set(title, { autoAlpha: 1 }); // Make container visible before animating chars
+        gsap.set(title, { autoAlpha: 1 });
         textTl.from(splitTitle.chars, {
             opacity: 0,
             y: 20,
@@ -154,12 +147,11 @@ function animateDetailContent() {
         }, ">-0.2");
     }
 
-    // Add the text animations to the main timeline, starting as the hero fades in.
     tl.add(textTl, "<0.3");
 }
 
 /**
- * Switches colors based on scroll position.
+ * 스크롤 위치에 따라 색상을 전환
  */
 function switchColors(isScrolledPast) {
     const gnbElements = gsap.utils.toArray(".com-name-logo, .menu-icon");
@@ -186,7 +178,7 @@ function switchColors(isScrolledPast) {
 }
 
 /**
- * Sets up the ScrollTrigger for color switching.
+ * 색상 전환을 위한 ScrollTrigger를 설정합니다.
  */
 function setupColorSwitcher() {
     if (!heroSection || typeof ScrollTrigger === 'undefined') return;
@@ -202,7 +194,7 @@ function setupColorSwitcher() {
 }
 
 /**
- * Sets up the 'Scroll to Top' button.
+ * '맨 위로 스크롤' 버튼을 설정합니다.
  */
 function setupScrollToTopButton() {
     const scrollToTopBtn = document.getElementById("scrollToTopBtn");
@@ -238,8 +230,8 @@ function setupScrollToTopButton() {
 }
 
 /**
- * Sets up navigation links to previous/next projects.
- * @param {string} currentProjectId - The ID of the current project.
+ * 이전/다음 프로젝트로의 네비게이션 링크를 설정합니다.
+ * @param {string} currentProjectId - 현재 프로젝트의 ID입니다.
  */
 function setupProjectNavigation(currentProjectId) {
     const prevProjectLink = document.querySelector('.prev-project');
@@ -275,7 +267,7 @@ function setupProjectNavigation(currentProjectId) {
 
 
 /**
- * Main function to initialize the detail page.
+ * 상세 페이지를 초기화하는 메인 함수
  */
 async function initializeDetailPage() {
     renderProjectDetails();
@@ -284,7 +276,6 @@ async function initializeDetailPage() {
     try {
         await runLoaderSequence('.subpage-container');
     } catch (error) {
-        console.warn("WORKS-DETAIL: Loader sequence failed, continuing...", error.message);
         const mainContent = document.querySelector('.subpage-container');
         if (mainContent) gsap.set(mainContent, {opacity: 1, visibility: 'visible'});
     }
@@ -309,8 +300,8 @@ async function initializeDetailPage() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // [새로운 해결책] 터치 기기에서 스크롤 동작을 정규화하여 뷰포트 변화 문제를 해결합니다.
-    // 모바일 브라우저에서 주소창이 사라지고 나타날 때 발생하는 스크롤 계산 오류를 방지합니다.
+    // [새로운 해결책] 터치 기기에서 스크롤 동작을 정규화하여 뷰포트 변화 문제를 해결
+    // 모바일 브라우저에서 주소창이 사라지고 나타날 때 발생하는 스크롤 계산 오류를 방지
     if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.isTouch) {
         ScrollTrigger.normalizeScroll(true);
     }
@@ -321,7 +312,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         await loadCommonUI();
         await initializeDetailPage();
     } catch (error) {
-        console.error("WORKS-DETAIL: Page initialization failed:", error);
         const loader = document.getElementById('loader');
         if (loader) gsap.to(loader, { autoAlpha: 0 });
         const mainContent = document.querySelector('.subpage-container');
@@ -333,7 +323,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
-            // 리사이즈 시 기존 트리거를 모두 제거하고 새로 설정합니다.
+            // 리사이즈 시 기존 트리거를 모두 제거하고 새로 설정
             killAllScrollTriggers(); 
             setupColorSwitcher();
             setupScrollToTopButton();

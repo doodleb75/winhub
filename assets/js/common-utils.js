@@ -1,23 +1,17 @@
 // assets/js/common-utils.js
 
-// --- Spline Runtime Import ---
 import { Application as SplineApplication } from 'https://unpkg.com/@splinetool/runtime/build/runtime.js';
-
-// --- [MODIFIED] Import and Export THREE.js from one central place ---
+// --- [수정됨] 한 곳에서 THREE.js를 가져오고 내보냅니다 ---
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
-export { THREE }; // Export for other modules to use
+export { THREE }; // 다른 모듈에서 사용할 수 있도록 내보내기
 
-// --- GSAP and Plugins ---
 import { ScrollTrigger } from "https://esm.sh/gsap/ScrollTrigger";
 import { ScrambleTextPlugin } from "https://esm.sh/gsap/ScrambleTextPlugin";
 
-if (typeof gsap === 'undefined') {
-    console.error("COMMON-UTILS: GSAP core library is not loaded. Please include it in your HTML. Effects will not work.");
-} else {
+if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 }
 
-// --- Scroll Restoration ---
 export function setupScrollRestoration() {
     window.scrollTo(0, 0);
     history.scrollRestoration = "manual";
@@ -29,7 +23,6 @@ export function buildUrl(path) {
     if (typeof path !== 'string') return '';
     return path.startsWith('/') ? path.substring(1) : path;
 }
-// --- Utility Functions ---
 export function degToRad(degrees) { return degrees * (Math.PI / 180); }
 export function responsiveScale(percentage, currentBaselineWidth = 1920) { return (percentage / 100) * (window.innerWidth / currentBaselineWidth); }
 export function responsiveX(percent) { const baselineWidth = 1920; return (percent / 100) * window.innerWidth; }
@@ -38,38 +31,37 @@ export function responsiveY(percent) { const baselineHeight = 1080; return (perc
 
 // [FIX] sessionStorage 접근 시 발생할 수 있는 오류를 방지하기 위한 헬퍼 함수
 /**
- * Safely retrieves an item from sessionStorage.
- * @param {string} key The key to retrieve.
- * @returns {string|null} The value, or null if an error occurs or the key doesn't exist.
+ * sessionStorage에서 안전하게 항목을 검색합니다.
+ * @param {string} key 검색할 키입니다.
+ * @returns {string|null} 값 또는 오류가 발생하거나 키가 존재하지 않으면 null을 반환합니다.
  */
 function safeSessionGet(key) {
     try {
         return sessionStorage.getItem(key);
     } catch (e) {
-        console.warn("Could not access sessionStorage. It might be disabled (e.g., in private browsing mode).", e);
         return null;
     }
 }
 
 /**
- * Safely sets an item in sessionStorage.
- * @param {string} key The key to set.
- * @param {string} value The value to store.
+ * sessionStorage에 안전하게 항목을 설정합니다.
+ * @param {string} key 설정할 키입니다.
+ * @param {string} value 저장할 값입니다.
  */
 function safeSessionSet(key, value) {
     try {
         sessionStorage.setItem(key, value);
     } catch (e) {
-        console.warn(`Could not write to sessionStorage. It might be disabled. (Key: ${key})`, e);
+        // 세션 스토리지에 쓸 수 없을 때의 경고는 제거합니다.
     }
 }
 
 
 /**
- * [MODIFIED & FINAL FIX] Executes the SVG loader animation sequence.
- * This version fixes both the mobile layout issue and the unclickable links problem.
- * @param {string} mainContentSelector - Selector for the main content area to show after loading.
- * @returns {Promise<void>} A promise that resolves when the loader animation is complete.
+ * [수정 및 최종 수정] SVG 로더 애니메이션 시퀀스를 실행합니다.
+ * 이 버전은 모바일 레이아웃 문제와 클릭 불가능한 링크 문제를 모두 해결합니다.
+ * @param {string} mainContentSelector - 로딩 후 표시할 메인 콘텐츠 영역의 선택자입니다.
+ * @returns {Promise<void>} 로더 애니메이션이 완료되면 resolve되는 프로미스를 반환합니다.
  */
 export function runLoaderSequence(mainContentSelector = '#main-content') {
     return new Promise((resolve) => {
@@ -81,7 +73,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         const mainContent = document.querySelector(mainContentSelector);
 
         if (!loader || !socket || !socketPath || !cable || !loaderText) {
-            console.warn("Loader elements not found. Skipping animation.");
             if (loader) gsap.set(loader, { autoAlpha: 0, display: 'none' });
             if (mainContent) gsap.set(mainContent, { autoAlpha: 1 });
             document.body.style.overflow = 'auto';
@@ -89,9 +80,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
             return;
         }
         
-        // --- Shared Completion Logic ---
         const completeAndShowContent = () => {
-            // Restore original styles
             document.documentElement.style.overflow = '';
             document.body.style.overflow = 'auto';
 
@@ -100,7 +89,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 opacity: 0,
                 duration: 0.5,
                 onComplete: () => {
-                    // ★★★ FINAL FIX 1: Completely hide the loader to make links clickable ★★★
+                    // ★★★ 최종 수정 1: 링크를 클릭할 수 있도록 로더를 완전히 숨깁니다 ★★★
                     loader.style.display = 'none'; 
                     
                     if (mainContent) {
@@ -120,16 +109,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
             });
         };
 
-        // --- Initial setup ---
         // ★★★ FIX: 모바일 높이 문제를 해결하기 위해 JS로 높이를 직접 제어하는 대신 CSS와 --vh 변수를 사용하도록 수정합니다. ★★★
-        // 아래의 불안정한 높이 고정 로직을 제거합니다.
-        /*
-        const viewportHeight = window.innerHeight;
-        document.documentElement.style.height = `${viewportHeight}px`;
-        document.body.style.height = `${viewportHeight}px`;
-        loader.style.height = '100%'; 
-        */
-       
         // 스크롤만 막도록 수정합니다. 높이는 CSS가 담당합니다.
         document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
@@ -147,7 +127,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         const finalCableTop = socketRect.top + yOffset;
 
         if (hasVisited) {
-            // --- SKIP ANIMATION ---
             gsap.set(socketPath, { strokeDashoffset: 0, fill: '#ffc400', stroke: '#ffc400' });
             gsap.set(cable, { top: finalCableTop, opacity: 1, scale: 1 });
             gsap.set(socket, { opacity: 1, scale: 1 });
@@ -164,7 +143,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
             });
 
         } else {
-            // --- FULL ANIMATION ---
             const socketPathLength = socketPath.getTotalLength();
             gsap.set(socketPath, {
                 strokeDasharray: socketPathLength,
@@ -183,7 +161,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 }
             });
 
-            // Original animation sequence
+            // 기존 애니메이션 시퀀스
             tl.to(socketPath, {
                 strokeDashoffset: 0,
                 duration: 1.5,
@@ -216,7 +194,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
 }
 
 /**
- * Hides the loader immediately in case of an error during initialization.
+ * 초기화 중 오류 발생 시 로더를 즉시 숨깁니다.
  */
 export function hideLoaderOnError() {
     const loader = document.getElementById('loader');
@@ -225,7 +203,7 @@ export function hideLoaderOnError() {
             duration: 0.3,
             opacity: 0,
             onComplete: () => {
-                // Also apply the display:none fix here
+                // 여기에도 display:none 수정을 적용합니다
                 loader.style.display = 'none';
                 document.documentElement.style.height = '';
                 document.documentElement.style.overflow = '';
@@ -236,13 +214,10 @@ export function hideLoaderOnError() {
     }
 }
 
-
-// --- HTML Fragment Loader ---
 export async function loadHTML(elementId, filePath) {
     try {
         const response = await fetch(filePath);
         if (!response.ok) {
-            console.error(`Failed to load HTML from ${filePath}: ${response.status} ${response.statusText}`);
             const element = document.getElementById(elementId);
             if(element) element.innerHTML = `<p style="color:red; text-align:center; padding:1rem;">Error loading: ${filePath.split('/').pop()}</p>`;
             return null;
@@ -253,18 +228,15 @@ export async function loadHTML(elementId, filePath) {
             element.innerHTML = text;
             return element;
         } else {
-            console.warn(`Element with ID '${elementId}' not found for ${filePath}.`);
             return null;
         }
     } catch (error) {
-        console.error(`Error loading HTML from ${filePath}:`, error);
         const element = document.getElementById(elementId);
         if(element) element.innerHTML = `<p style="color:red; text-align:center; padding:1rem;">Error loading content: ${error.message}</p>`;
         return null;
     }
 }
 
-// --- Common UI Loader and Script Initializer ---
 export async function loadCommonUI() {
     const baseCommonPath = 'assets/common/'; 
 
@@ -278,45 +250,36 @@ export async function loadCommonUI() {
 
         if (typeof setupMenu === 'function') {
             setupMenu("menu-toggle", "menu-overlay", "menu-close", ".menu-links .top-link a");
-        } else {
-            console.warn('setupMenu function is not defined or not accessible after loading common UI.');
         }
 
         if (typeof setupMenuLinkEffects === 'function') {
             setupMenuLinkEffects();
-        } else {
-            console.warn('setupMenuLinkEffects function is not defined or not accessible after loading common UI.');
         }
         
         activateCurrentNavLink();
 
     } catch (error) {
-        console.error("Error loading one or more common UI components:", error);
+        // 공통 UI 로딩 오류는 무시합니다.
     }
 }
 
 /**
- * [MODIFIED] Sets the active state for the current navigation link.
- * It also adds hover effects to temporarily remove and restore the active state
- * when the user interacts with any navigation link.
+ * [수정됨] 현재 네비게이션 링크의 활성 상태를 설정합니다.
+ * 또한 사용자가 네비게이션 링크와 상호 작용할 때 활성 상태를 일시적으로 제거하고 복원하는 호버 효과를 추가합니다.
  */
 function activateCurrentNavLink() {
-    const currentPath = window.location.pathname;
     const menuOverlayElement = document.getElementById('menu-overlay');
     if (!menuOverlayElement) {
-        console.warn("activateCurrentNavLink: Menu overlay element with ID 'menu-overlay' was not found.");
         return;
     }
 
     const navLinks = menuOverlayElement.querySelectorAll('.menu-links .top-link a');
     if (navLinks.length === 0) {
-        console.warn("activateCurrentNavLink: No navigation links found under '.menu-links .top-link a'.");
         return;
     }
 
     let activeLink = null;
-
-    // --- Find and set the active link based on the current URL path ---
+    const currentPath = window.location.pathname;
     const normalizedCurrentPath = currentPath.replace(/\/$/, '') || '/';
 
     navLinks.forEach(link => {
@@ -324,34 +287,32 @@ function activateCurrentNavLink() {
         const linkPath = linkUrl.pathname;
         const normalizedLinkPath = linkPath.replace(/\/$/, '') || '/';
 
-        // Condition for matching paths. Handles index page specifically.
+        // 경로 일치 조건. 인덱스 페이지를 특별히 처리합니다.
         const isCurrentIndex = normalizedCurrentPath === '/' || normalizedCurrentPath === '/index.html';
         const isLinkIndex = normalizedLinkPath === '/' || normalizedLinkPath === '/index.html';
 
         if ((isCurrentIndex && isLinkIndex) || (!isCurrentIndex && !isLinkIndex && normalizedCurrentPath === normalizedLinkPath)) {
-            activeLink = link; // Found the active link
+            activeLink = link; // 활성 링크를 찾았습니다
         }
     });
 
-    // --- Initial setup ---
-    // Add the active class to the correct link when the page loads.
+    // 페이지 로드 시 올바른 링크에 active 클래스를 추가합니다.
     if (activeLink) {
         activeLink.classList.add('active-nav-link');
     }
 
-    // --- Add hover event listeners to all navigation links for the visual effect ---
     navLinks.forEach(link => {
-        // When the mouse enters ANY link...
+        // 마우스가 어떤 링크에든 들어가면...
         link.addEventListener('mouseenter', () => {
-            // ...temporarily hide the active state.
+            // ...일시적으로 활성 상태를 숨깁니다.
             if (activeLink) {
                 activeLink.classList.remove('active-nav-link');
             }
         });
 
-        // When the mouse leaves ANY link...
+        // 마우스가 어떤 링크에서든 나가면...
         link.addEventListener('mouseleave', () => {
-            // ...restore the active state.
+            // ...활성 상태를 복원합니다.
             if (activeLink) {
                 activeLink.classList.add('active-nav-link');
             }
@@ -360,29 +321,26 @@ function activateCurrentNavLink() {
 }
 
 
-// InteractiveBackgroundSphere class (unchanged)
+// InteractiveBackgroundSphere 클래스 (변경 없음)
 export class InteractiveBackgroundSphere {
     constructor(containerSelector, config = {}) {
         this.container = document.getElementById(containerSelector);
         if (!this.container) {
-            console.error(`COMMON-UTILS: Three.js container '${containerSelector}' not found.`);
             this.valid = false;
             return;
         }
         
-        // [MODIFIED] Use the imported THREE object directly
+        // [수정됨] 가져온 THREE 객체를 직접 사용합니다
         this.THREE = THREE;
         this.valid = true;
 
         this.config = {
             cameraZ: 2.99,
-            // cameraZ: 2.95,
             sphereRadius: 2.5,
             sphereDetail: 6,
             wireframeColor: new this.THREE.Color(0xffffff),
             pointsColor: new this.THREE.Color(0xffffff),
             wireframeOpacity: 0.07, 
-            // wireframeOpacity: 0.1, 
             pointsOpacity: 0.05,  
             pointsSize: 0.035,
             sphereOffsetX: 0,
@@ -391,10 +349,8 @@ export class InteractiveBackgroundSphere {
             depthOpacityMinZ: 2.5,
             depthOpacityMaxZ: 4.0,
             minAlphaFactorForDepth: 0.35,
-            // minAlphaFactorForDepth: 0.25,
             mouseMoveSensitivity: 0.0025,
             mouseScaleSensitivity: 0.2,
-            // mouseScaleSensitivity: 0.2,
             rotationSmoothness: 0.6,
             scaleSmoothness: 0.8,
             ...config
@@ -551,12 +507,7 @@ export function setupMenu(toggleId, overlayId, closeId, linksSelector) {
     const menuOverlay = document.getElementById(overlayId);
     const menuClose = document.getElementById(closeId);
     
-    if (!menuToggle || !menuOverlay || !menuClose) {
-        console.warn("Menu elements not found, setup aborted.");
-        return;
-    }
-    if (typeof gsap === 'undefined') {
-        console.error("GSAP is not loaded for setupMenu.");
+    if (!menuToggle || !menuOverlay || !menuClose || typeof gsap === 'undefined') {
         return;
     }
 
@@ -577,7 +528,6 @@ export function setupMenu(toggleId, overlayId, closeId, linksSelector) {
     }
     const blindPanels = Array.from(panelWrapper.children);
 
-    // Set initial states for animations
     const initialY = 30;
     gsap.set(blindPanels, { yPercent: -100 });
     gsap.set(menuLinkElements, { opacity: 0, y: initialY });
@@ -610,14 +560,14 @@ export function setupMenu(toggleId, overlayId, closeId, linksSelector) {
             stagger: { each: 0.1 }
         }, "-=0.2"); 
 
-        // Animate menu-info in last, as requested
+        // 요청에 따라 마지막에 menu-info 애니메이션을 적용합니다
         if (menuInfo) {
             openTl.to(menuInfo, {
                 duration: 0.6,
                 opacity: 1,
                 y: 0,
                 ease: "power2.out"
-            }, "-=0.5"); // Overlap with link animation for a smooth effect
+            }, "-=0.5"); // 부드러운 효과를 위해 링크 애니메이션과 겹칩니다
         }
     };
 
@@ -629,13 +579,13 @@ export function setupMenu(toggleId, overlayId, closeId, linksSelector) {
                 if (menuToggle) menuToggle.style.display = "block"; 
                 document.body.style.overflow = "auto";
                 
-                // Reset states for next open
+                // 다음 열기를 위해 상태를 재설정합니다
                 gsap.set(menuLinkElements, { opacity: 0, y: initialY });
                 if(menuInfo) gsap.set(menuInfo, { opacity: 0, y: initialY });
             }
         });
 
-        // Animate elements out
+        // 요소들을 사라지게 하는 애니메이션
         closeTl.to([menuLinkElements, menuInfo], { 
             duration: 0.4, 
             opacity: 0, 
@@ -649,7 +599,7 @@ export function setupMenu(toggleId, overlayId, closeId, linksSelector) {
         
         closeTl.to(blindPanels, { 
             duration: 0.4, 
-            yPercent: 100, // Close downwards
+            yPercent: 100, // 아래쪽으로 닫습니다
             ease: "power2.in", 
             stagger: { each: 0.07, from: "end" } 
         }, "-=0.2");
@@ -663,17 +613,11 @@ export function setupMenu(toggleId, overlayId, closeId, linksSelector) {
 export function setupMenuLinkEffects() {
     const menuOverlayElement = document.getElementById('menu-overlay');
     if (!menuOverlayElement) {
-        console.warn("COMMON-UTILS: Menu overlay not found for link effects setup. Effects will not be applied.");
         return;
     }
     const menuAnchorElements = menuOverlayElement.querySelectorAll(".menu-links .top-link a");
 
-    if (menuAnchorElements.length === 0) {
-        console.warn("COMMON-UTILS: Menu anchor elements (.menu-links .top-link a) for effects not found.");
-        return;
-    }
-    if (typeof gsap === 'undefined' || !gsap.plugins.scrambleText) {
-        console.error("COMMON-UTILS: GSAP core or ScrambleTextPlugin is not properly registered. Scramble effect will not work.");
+    if (menuAnchorElements.length === 0 || typeof gsap === 'undefined' || !gsap.plugins.scrambleText) {
         return;
     }
 
@@ -744,7 +688,7 @@ export function setupMenuLinkEffects() {
                     const length = svgPath.getTotalLength();
                     gsap.set(svgPath, { strokeDasharray: length, strokeDashoffset: length });
                     data.pathLength = length; data.initialized = true; return true;
-                } catch (e) { console.error(`COMMON-UTILS: [Link ${index}] Error initializing SVG path for "${originalText}":`, e); return false; }
+                } catch (e) { return false; }
             }
             return data.initialized;
         };
@@ -839,12 +783,12 @@ export function setupMenuLinkEffects() {
 
 export async function loadSplineScene(canvasId, sceneUrl) {
     const canvas = document.getElementById(canvasId);
-    if (!canvas) { console.error(`COMMON-UTILS: Spline canvas with ID '${canvasId}' not found.`); return null; }
+    if (!canvas) { return null; }
     const app = new SplineApplication(canvas);
     try {
         await app.load(sceneUrl);
         return app;
-    } catch (error) { console.error(`COMMON-UTILS: Failed to load Spline scene from ${sceneUrl}:`, error); return null; }
+    } catch (error) { return null; }
 }
 
 export function killAllScrollTriggers() {

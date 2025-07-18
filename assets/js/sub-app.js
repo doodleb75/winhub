@@ -1,21 +1,17 @@
 // assets/js/sub-app.js
 
-// [REMOVED] Spline Runtime 중복 로딩 제거 (common-utils.js에서 관리)
-// import { Application as SplineRuntimeApp } from 'https://unpkg.com/@splinetool/runtime/build/runtime.js';
-
-// [REMOVED] Three.js 중복 로딩 제거
-// import * as THREE_MOD from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
-// window.THREE = THREE_MOD;
+// [제거됨] Spline Runtime 중복 로딩 제거 (common-utils.js에서 관리)
+// [제거됨] Three.js 중복 로딩 제거
 
 import { ScrollToPlugin } from "https://esm.sh/gsap/ScrollToPlugin";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
 
 if (typeof gsap !== 'undefined') {
-    // Register GSAP plugins
+    // GSAP 플러그인 등록
     gsap.registerPlugin(ScrollToPlugin, SplitText, ScrollTrigger);
-} else console.error("SUB-APP: GSAP core not loaded, cannot register plugins.");
+}
 
-// [MODIFIED] common-utils.js에서 중앙 관리되는 THREE 객체를 가져옵니다.
+// [수정됨] common-utils.js에서 중앙 관리되는 THREE 객체를 가져옵니다.
 import {
     THREE, // Three.js 객체 추가
     setupScrollRestoration,
@@ -32,7 +28,6 @@ import {
 // Spline 런타임이 window.THREE를 참조할 수 있도록 전역 스코프에 할당합니다.
 window.THREE = THREE;
 
-// --- Subpage Specific Global Variables ---
 let subpageSplineApp = null;
 let subPageBackgroundSphere = null;
 let subpageBodyElement = null;
@@ -82,11 +77,10 @@ const currentPageConfig = getCurrentPageConfig();
 
 
 /**
- * Sets up animations and parallax effects for decorative rectangles in the Mission section.
+ * Mission 섹션의 장식용 사각형에 대한 애니메이션 및 패럴랙스 효과를 설정합니다.
  */
 function setupDecorativeRectAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-        console.error("GSAP or ScrollTrigger not loaded for decorative animations.");
         return;
     }
 
@@ -199,8 +193,8 @@ function setupDecorativeRectAnimations() {
 }
 
 /**
- * [REVISED] Sets up ScrollTrigger to control the Lottie animation player.
- * The animation now loops and restarts from the beginning when scrolled into view.
+ * [수정됨] Lottie 애니메이션 플레이어를 제어하기 위해 ScrollTrigger를 설정합니다.
+ * 이제 애니메이션은 뷰로 스크롤될 때 반복되고 처음부터 다시 시작됩니다.
  */
 function setupLottieScrollTrigger() {
     const lottiePlayer = document.querySelector("#overview-lottie");
@@ -208,11 +202,11 @@ function setupLottieScrollTrigger() {
         return;
     }
 
-    // Ensure the player is set to loop
+    // 플레이어가 반복되도록 설정합니다
     lottiePlayer.loop = true;
 
     const st = ScrollTrigger.create({
-        trigger: lottiePlayer.parentElement, // Trigger based on the parent container for better accuracy
+        trigger: lottiePlayer.parentElement, // 더 나은 정확도를 위해 부모 컨테이너를 기반으로 트리거합니다
         start: "top 80%",
         end: "bottom 20%",
         id: 'lottie-overview-trigger',
@@ -226,17 +220,17 @@ function setupLottieScrollTrigger() {
             lottiePlayer.play();
         },
         onLeave: () => {
-            lottiePlayer.pause(); // Pause when it leaves the screen to save resources
+            lottiePlayer.pause(); // 리소스 절약을 위해 화면을 벗어나면 일시 중지합니다
         },
         onLeaveBack: () => {
             lottiePlayer.pause();
         },
-        enabled: false // Initially disabled until the player is ready
+        enabled: false // 플레이어가 준비될 때까지 초기에 비활성화됩니다
     });
 
-    // Enable the scroll trigger once the Lottie player is ready
+    // Lottie 플레이어가 준비되면 스크롤 트리거를 활성화합니다
     lottiePlayer.addEventListener('ready', () => {
-        lottiePlayer.stop(); // Stop any autoplay initially
+        lottiePlayer.stop(); // 초기에 모든 자동 재생을 중지합니다
         if (st) {
             st.enable();
         }
@@ -245,8 +239,8 @@ function setupLottieScrollTrigger() {
 
 
 /**
- * [REVISED] Sets up scroll animations for the new timeline entries.
- * Entries slide in from the sides.
+ * [수정됨] 새로운 타임라인 항목에 대한 스크롤 애니메이션을 설정합니다.
+ * 항목들이 양쪽에서 슬라이드 인 됩니다.
  */
 function setupHistoryTimelineAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
@@ -254,10 +248,10 @@ function setupHistoryTimelineAnimation() {
     if (!timelineEntries.length) return;
 
     timelineEntries.forEach(entry => {
-        // Determine animation direction based on class
+        // 클래스에 따라 애니메이션 방향을 결정합니다
         const xFrom = entry.classList.contains('left-entry') ? -100 : 100;
         
-        gsap.set(entry, { autoAlpha: 0, x: xFrom, y: 30 }); // Set initial state
+        gsap.set(entry, { autoAlpha: 0, x: xFrom, y: 30 }); // 초기 상태 설정
         gsap.to(entry, {
             autoAlpha: 1,
             x: 0,
@@ -276,7 +270,7 @@ function setupHistoryTimelineAnimation() {
 
 
 /**
- * [REVISED] Integrated function to set up animations for the History section.
+ * [수정됨] History 섹션에 대한 애니메이션을 설정하는 통합 함수입니다.
  */
 function setupHistorySectionAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
@@ -285,7 +279,7 @@ function setupHistorySectionAnimation() {
     const historyTitle = historySectionWrapper ? historySectionWrapper.querySelector('.section-title') : null;
 
     if (historyTitle) {
-        gsap.set(historyTitle, { opacity: 0, y: 50 }); // Set initial state for title
+        gsap.set(historyTitle, { opacity: 0, y: 50 }); // 제목의 초기 상태 설정
         gsap.to(historyTitle, {
             opacity: 1,
             y: 0,
@@ -300,11 +294,11 @@ function setupHistorySectionAnimation() {
         });
     }
 
-    setupHistoryTimelineAnimation(); // Call the new timeline animation function
+    setupHistoryTimelineAnimation(); // 새로운 타임라인 애니메이션 함수 호출
 }
 
 /**
- * [NEW] Sets up scroll animations for the Partners section.
+ * [신규] Partners 섹션에 대한 스크롤 애니메이션을 설정합니다.
  */
 function setupPartnersSectionAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
@@ -329,8 +323,6 @@ function setupPartnersSectionAnimation() {
     }
 }
 
-
-// --- Animation & Setup Functions (Existing functions) ---
 function initialPageVisualSetup(isResize = false) { 
     if (typeof gsap === 'undefined') return;
     subpageBodyElement = document.querySelector('.subpage-body'); if (!subpageBodyElement) return;
@@ -694,7 +686,6 @@ function setupHeroScrollSnap() {
     });
  }
 
-// --- Main Initialization ---
 async function initializeSubpage() {
     initialPageVisualSetup();
     
@@ -716,7 +707,6 @@ async function initializeSubpage() {
             }
         })
         .catch(error => {
-            console.error("SUB-APP: Error loading subpage Spline scene:", error);
             const splineContainer = document.getElementById("threejs-object-container");
             if (splineContainer) gsap.set(splineContainer, { display: 'none' });
         });
@@ -775,7 +765,7 @@ async function initializeSubpage() {
     setupDecorativeRectAnimations();
     setupLottieScrollTrigger();
     setupHistorySectionAnimation();
-    setupPartnersSectionAnimation(); // [NEW] Call animation setup for partners section
+    setupPartnersSectionAnimation();
     setupHeroParallax(); 
     setupHeroColorSwitcher();
     setupHeroScrollSnap();
@@ -816,7 +806,7 @@ function handleSubPageResize() {
         setupDecorativeRectAnimations();
         setupLottieScrollTrigger();
         setupHistorySectionAnimation();
-        setupPartnersSectionAnimation(); // [NEW] Call animation setup for partners section
+        setupPartnersSectionAnimation();
         setupHeroParallax(); 
         setupHeroColorSwitcher();
         setupHeroScrollSnap(); 
@@ -849,7 +839,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         await loadCommonUI();
         await initializeSubpage();
     } catch (error) {
-        console.error("SUB-APP: Initialization failed:", error);
         hideLoaderOnError();
     }
 
