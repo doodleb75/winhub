@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="ko">
-    <body>
-<footer class="subpage-footer"> <div class="footer-content-wrapper">
+<!-- _footer.html -->
+<footer class="subpage-footer">
+    <div class="footer-content-wrapper">
         <div class="footer-links">
-            <a href="#" class="content-class">이용약관</a>
-            <a href="#" class="content-class">개인정보취급방침</a>
-            <a href="#" class="content-class">이메일주소 무단수집거부</a>
+            <!-- 클릭 이벤트를 위한 클래스와 데이터 속성은 그대로 유지합니다. -->
+            <a href="#" data-popup-url="/page/popup/provision.html" class="popup-link">이용약관</a>
+            <a href="#" data-popup-url="/page/popup/privacy.html" class="popup-link">개인정보취급방침</a>
+            <a href="#" data-popup-url="/page/popup/no_email_collect.html" class="popup-link">이메일주소 무단수집거부</a>
         </div>
         <div class="footer-info">
             <div class="footer-info-group">
@@ -23,5 +23,22 @@
         </div>
     </div>
 </footer>
-</body>
-</html>
+
+<!-- Modal Popup HTML -->
+<!-- <div id="modal-popup" class="modal">
+    <div class="modal-content">
+        <span class="modal-close-btn">&times;</span>
+        <iframe id="modal-iframe" src="" frameborder="0" style="width:100%; height:100%;"></iframe>
+    </div>
+</div>
+ -->
+<div id="modal-popup" class="modal">
+    <div class="modal-content">
+        <dis class="modal-header">
+            <h2 id="modal-title"></h2>
+        <span class="modal-close-btn">&times;</span>
+        </dis>
+        <!-- 콘텐츠가 이 div 안에 로드됩니다. -->
+        <div id="modal-body"></div>
+    </div>
+</div>

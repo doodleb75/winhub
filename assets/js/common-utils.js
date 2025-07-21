@@ -802,3 +802,81 @@ export function killScrollTriggersByPattern(idPattern) {
         if (st.vars.id && st.vars.id.startsWith(idPattern)) { st.kill(); killedCount++; }
     });
 }
+
+
+      // --- 모달 로직 (수정됨) ---
+
+// 모달(팝업)을 여는 함수
+async function openModal(url) {
+    const modal = document.getElementById('modal-popup');
+    const modalBody = document.getElementById('modal-body');
+    const modalTitle = document.getElementById('modal-title');
+
+    if (!modal || !modalBody || !modalTitle) {
+        return;
+    }
+
+    // body에 modal-open 클래스를 추가하고 padding을 0으로 강제 설정
+    document.body.classList.add('modal-open');
+    document.body.style.setProperty('padding', '0px', 'important');
+
+    // 로딩 상태 표시 및 모달 열기
+    modalTitle.textContent = '로딩 중...';
+    modalBody.innerHTML = '';
+    modal.style.display = 'block';
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const htmlText = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+        
+        const pageTitle = doc.querySelector('title')?.textContent || '팝업 내용';
+        modalTitle.textContent = pageTitle;
+        
+        modalBody.innerHTML = '';
+        const popupStyles = doc.head.querySelectorAll('style');
+        popupStyles.forEach(style => modalBody.appendChild(style.cloneNode(true)));
+        modalBody.innerHTML += doc.body.innerHTML;
+
+    } catch (error) {
+        modalTitle.textContent = '오류';
+        modalBody.innerHTML = '<p style="text-align:center; padding:20px;">콘텐츠를 불러오는 데 실패했습니다.</p>';
+    }
+}
+
+// 모달(팝업)을 닫는 함수
+function closeModal() {
+    const modal = document.getElementById('modal-popup');
+
+    if (modal && modal.style.display !== 'none') {
+        modal.style.display = 'none';
+
+        // body에 추가했던 클래스와 인라인 스타일 모두 제거
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding');
+        
+        const modalBody = document.getElementById('modal-body');
+        const modalTitle = document.getElementById('modal-title');
+        if (modalBody) modalBody.innerHTML = '';
+        if (modalTitle) modalTitle.textContent = '';
+    }
+}
+
+// 클릭 이벤트를 사용하여 팝업 열기/닫기 제어
+document.addEventListener('click', function(event) {
+    const popupLink = event.target.closest('.popup-link');
+    const closeButton = event.target.closest('.modal-close-btn');
+    const modal = document.getElementById('modal-popup');
+
+    if (popupLink) {
+        event.preventDefault();
+        const url = popupLink.getAttribute('data-popup-url');
+        if (url) openModal(url);
+    } else if (closeButton || event.target === modal) {
+        closeModal();
+    }
+});
+
