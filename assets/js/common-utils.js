@@ -804,8 +804,6 @@ export function killScrollTriggersByPattern(idPattern) {
 }
 
 
-      // --- 모달 로직 (수정됨) ---
-
 // 모달(팝업)을 여는 함수
 async function openModal(url) {
     const modal = document.getElementById('modal-popup');
@@ -843,7 +841,7 @@ async function openModal(url) {
 
     } catch (error) {
         modalTitle.textContent = '오류';
-        modalBody.innerHTML = '<p style="text-align:center; padding:20px;">콘텐츠를 불러오는 데 실패했습니다.</p>';
+        modalBody.innerHTML = `<p style="text-align:center; padding:20px;">콘텐츠를 불러오는 데 실패했습니다: ${error.message}</p>`;
     }
 }
 
@@ -865,6 +863,7 @@ function closeModal() {
     }
 }
 
+// --- [수정된 부분] ---
 // 클릭 이벤트를 사용하여 팝업 열기/닫기 제어
 document.addEventListener('click', function(event) {
     const popupLink = event.target.closest('.popup-link');
