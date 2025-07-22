@@ -873,9 +873,15 @@ document.addEventListener('click', function(event) {
 
     if (popupLink) {
         event.preventDefault();
-        const url = popupLink.getAttribute('data-popup-url');
-        if (url) openModal(url);
+        const rawUrl = popupLink.getAttribute('data-popup-url');
+        if (rawUrl) {
+            // buildUrl 함수를 사용해 경로를 변환합니다.
+            // 이렇게 하면 모바일 환경에서도 경로를 올바르게 찾을 수 있습니다.
+            const finalUrl = buildUrl(rawUrl);
+            openModal(finalUrl);
+        }
     } else if (closeButton || event.target === modal) {
+        // 모달 바깥이나 닫기 버튼을 클릭하면 모달을 닫습니다.
         closeModal();
     }
 });
