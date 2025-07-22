@@ -15,49 +15,58 @@
     <style>
       /* [MODIFIED] 섹션의 자식요소인 사각형들이 화면 밖으로 넘어가 스크롤바가 생기는 것을 방지합니다. */
       #sub-section-1 {
-          position: relative;
-          overflow: hidden; 
-          z-index: 1;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
       }
       /* [MODIFIED] 왼쪽 사각형 스타일 및 패럴랙스 배경 컨테이너 */
       .rect-random {
-          position: absolute;
-          width: 38vw;
-          height: 92vh;
-          transform: rotate(45deg);
-          z-index: 0;
-          left: -18vw;
-          top: -43vh;
-          overflow: hidden;
+        position: absolute;
+        width: 38vw;
+        height: 92vh;
+        transform: rotate(45deg);
+        z-index: 0;
+        left: -18vw;
+        top: -43vh;
+        overflow: hidden;
       }
       /* [ADDED] 패럴랙스 효과가 적용될 배경 이미지 스타일 */
-     .parallax-bg {
-          position: absolute;
-          top: -25%; 
-          left: -25%;
-          width: 150%;
-          height: 150%;
-          /* 'IT Mission' 테마에 맞는 이미지로 교체했습니다. */
-          background-image: url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2232&auto=format&fit=crop');
-          background-size: cover;
-          background-position: center;
-          transform: rotate(-45deg); /* 부모의 회전을 상쇄 */
+      .parallax-bg {
+        position: absolute;
+        top: -25%;
+        left: -25%;
+        width: 150%;
+        height: 150%;
+        /* 'IT Mission' 테마에 맞는 이미지로 교체했습니다. */
+        background-image: url("/assets/images/overview-parallax01.jpg");
+        /* background-image: url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2232&auto=format&fit=crop'); */
+        background-size: cover;
+        background-position: center;
+        transform: rotate(-45deg); /* 부모의 회전을 상쇄 */
       }
       /* [MODIFIED] 오른쪽 사각형 스타일 */
       .rect-random2 {
-          position: absolute;
-          width: 40vw;
-          height: 110vh;
-          background: #cccccc45;
-          transform: rotate(45deg);
-          z-index: 0;
-          right: -18vw;
-          bottom: -50vh;
+        position: absolute;
+        width: 40vw;
+        height: 110vh;
+        background: #cccccc45;
+        transform: rotate(45deg);
+        z-index: 0;
+        right: -18vw;
+        bottom: -50vh;
+      }
+      section.content-section {
+        padding-top: 1.5rem !important;
+      }
+
+      @media (max-width: 768px) {
+        section.content-section {
+          padding-top: 8rem !important;
+        }
       }
     </style>
   </head>
   <body class="subpage-body">
-    
     <div id="loader-placeholder"></div>
     <div id="header-placeholder"></div>
     <div id="menu-overlay-placeholder"></div>
@@ -66,15 +75,14 @@
 
     <div class="subpage-container">
       <section id="sub-hero" class="subpage-section sub-hero-section">
-        
         <div class="sub-hero-content">
           <h1 class="page-title title-class">ABOUT US</h1>
           <p class="page-description content-class">
             WINHUB는 고객의 성장을 이끄는 기술 파트너입니다. 혁신적인 IT
-            솔루션으로 비즈니스에 최적화된 성과를 제공합니다. 
+            솔루션으로 비즈니스에 최적화된 성과를 제공합니다.
           </p>
         </div>
-        
+
         <div id="threejs-object-container" class="sub-spline-container">
           <canvas
             id="spline-canvas-subpage"
@@ -97,27 +105,53 @@
         </div>
         <div class="section-content-wrapper">
           <h2 class="content-class section-title">OVERVIEW</h2>
-          <div class="animated-content" style="display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap;">
-              <div style="flex: 1 1 400px; min-width: 300px;">
-                  <p class="content-class mission-text">
-                      저희 WINHUB는 최첨단 기술과 산업에 대한 깊이 있는 이해를 바탕으로
-                      고객사의 비즈니스 성장을 지원하는 것을 최우선 목표로 삼고
-                      있습니다. 우리는 단순히 솔루션을 제공하는 것을 넘어, 고객과의
-                      긴밀한 협력을 통해 각 기업의 고유한 특성과 요구사항에 부합하는
-                      맞춤형 시스템을 구축합니다. 이를 통해 운영 효율성을 극대화하고,
-                      데이터 기반의 의사결정을 지원하며, 새로운 비즈니스 가치를 창출할
-                      수 있도록 돕습니다. WINHUB는 고객의 성공이 곧 우리의 성공이라는
-                      믿음으로, 신뢰할 수 있는 기술과 끊임없는 혁신을 약속드립니다.
-                  </p>
-              </div>
-              <div style="flex: 1 1 1000px; display: flex; justify-content: center; align-items: center; min-width: 300px;">
-                  <lottie-player id="overview-lottie" src="../assets/images/overview-set.json" background="transparent" speed="1" style="width: 100%; height: auto; max-width: 100%;" loop autoplay>
-                  </lottie-player> 
-              </div>
+          <div
+            class="animated-content"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 2rem;
+              flex-wrap: wrap;
+            "
+          >
+            <div style="flex: 1 1 400px; min-width: 300px">
+              <p class="content-class mission-text">
+                저희 WINHUB는 최첨단 기술과 산업에 대한 깊이 있는 이해를
+                바탕으로 고객사의 비즈니스 성장을 지원하는 것을 최우선 목표로
+                삼고 있습니다. 우리는 단순히 솔루션을 제공하는 것을 넘어,
+                고객과의 긴밀한 협력을 통해 각 기업의 고유한 특성과 요구사항에
+                부합하는 맞춤형 시스템을 구축합니다. 이를 통해 운영 효율성을
+                극대화하고, 데이터 기반의 의사결정을 지원하며, 새로운 비즈니스
+                가치를 창출할 수 있도록 돕습니다. WINHUB는 고객의 성공이 곧
+                우리의 성공이라는 믿음으로, 신뢰할 수 있는 기술과 끊임없는
+                혁신을 약속드립니다.
+              </p>
+            </div>
+            <div
+              style="
+                flex: 1 1 1000px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-width: 300px;
+              "
+            >
+              <lottie-player
+                id="overview-lottie"
+                src="../assets/images/overview-set.json"
+                background="transparent"
+                speed="1"
+                style="width: 100%; height: auto; max-width: 100%"
+                loop
+                autoplay
+              >
+              </lottie-player>
+            </div>
           </div>
         </div>
         <div class="rect-random2">
-           <div class="parallax-bg"></div>
+          <div class="parallax-bg"></div>
         </div>
       </section>
 
@@ -127,66 +161,66 @@
           <h2 class="content-class section-title">COMPANY HISTORY</h2>
           <div class="history-timeline">
             <div class="timeline-entry left-entry">
-                <div class="timeline-content-container">
-                    <h3 class="history-year">2018</h3>
-                    <div class="history-details">
-                        <p>WINHUB 법인 설립 (06월)</p>
-                        <p>현대 L&C One-Stop 시스템 구축</p>
-                        <p>AK PLAZA 부가세 제외 시스템 구축</p>
-                        <p>TGCS 협력사 등록</p>
-                    </div>
+              <div class="timeline-content-container">
+                <h3 class="history-year">2018</h3>
+                <div class="history-details">
+                  <p>WINHUB 법인 설립 (06월)</p>
+                  <p>현대 L&C One-Stop 시스템 구축</p>
+                  <p>AK PLAZA 부가세 제외 시스템 구축</p>
+                  <p>TGCS 협력사 등록</p>
                 </div>
+              </div>
             </div>
             <div class="timeline-entry right-entry">
-                <div class="timeline-content-container">
-                    <h3 class="history-year">2019</h3>
-                    <div class="history-details">
-                        <p>AK PLAZA 우리카드 제휴 시스템 구축</p>
-                        <p>이마트 주차 자동정산 시스템 개발</p>
-                        <p>롯데컬처웍스 통합정산 분석/설계</p>
-                    </div>
+              <div class="timeline-content-container">
+                <h3 class="history-year">2019</h3>
+                <div class="history-details">
+                  <p>AK PLAZA 우리카드 제휴 시스템 구축</p>
+                  <p>이마트 주차 자동정산 시스템 개발</p>
+                  <p>롯데컬처웍스 통합정산 분석/설계</p>
                 </div>
+              </div>
             </div>
             <div class="timeline-entry left-entry">
-                <div class="timeline-content-container">
-                    <h3 class="history-year">2020</h3>
-                    <div class="history-details">
-                        <p>스타벅스 품질 관리(BDS) 시스템 구축</p>
-                        <p>이마트/스타필드/올리브영 POS 시스템 개발 및 개선</p>
-                        <p>비욘드 아이앤씨 배달 중계 플랫폼 개발</p>
-                    </div>
+              <div class="timeline-content-container">
+                <h3 class="history-year">2020</h3>
+                <div class="history-details">
+                  <p>스타벅스 품질 관리(BDS) 시스템 구축</p>
+                  <p>이마트/스타필드/올리브영 POS 시스템 개발 및 개선</p>
+                  <p>비욘드 아이앤씨 배달 중계 플랫폼 개발</p>
                 </div>
+              </div>
             </div>
             <div class="timeline-entry right-entry">
-                 <div class="timeline-content-container">
-                    <h3 class="history-year">2021-2022</h3>
-                    <div class="history-details">
-                        <p>신세계I&C 통합 관제(AMS) 및 서비스 개발</p>
-                        <p>LG 하우시스 스마트 공장 및 감리/평가 시스템 구축</p>
-                    </div>
+              <div class="timeline-content-container">
+                <h3 class="history-year">2021-2022</h3>
+                <div class="history-details">
+                  <p>신세계I&C 통합 관제(AMS) 및 서비스 개발</p>
+                  <p>LG 하우시스 스마트 공장 및 감리/평가 시스템 구축</p>
                 </div>
+              </div>
             </div>
             <div class="timeline-entry left-entry">
-                <div class="timeline-content-container">
-                    <h3 class="history-year">2023</h3>
-                    <div class="history-details">
-                        <p>LX 하우시스 판매 및 주문 시스템 고도화</p>
-                        <p>AK PLAZA VIP, 재무, 결제 시스템 구축</p>
-                        <p>신세계I&C 전기차 충전 솔루션 개발</p>
-                        <p>AKIS 및 LG CNS 협력사 등록</p>
-                    </div>
+              <div class="timeline-content-container">
+                <h3 class="history-year">2023</h3>
+                <div class="history-details">
+                  <p>LX 하우시스 판매 및 주문 시스템 고도화</p>
+                  <p>AK PLAZA VIP, 재무, 결제 시스템 구축</p>
+                  <p>신세계I&C 전기차 충전 솔루션 개발</p>
+                  <p>AKIS 및 LG CNS 협력사 등록</p>
                 </div>
+              </div>
             </div>
             <div class="timeline-entry right-entry">
-                <div class="timeline-content-container">
-                    <h3 class="history-year">2024-2025</h3>
-                    <div class="history-details">
-                        <p>ABC 마트 차세대 POS 시스템 구축</p>
-                        <p>LX 하우시스 IT 투자관리 시스템 구축</p>
-                        <p>신세계사이먼 정산 및 연동 API 개발</p>
-                        <p>AK PLAZA 신규 PDA 시스템 구축</p>
-                    </div>
+              <div class="timeline-content-container">
+                <h3 class="history-year">2024-2025</h3>
+                <div class="history-details">
+                  <p>ABC 마트 차세대 POS 시스템 구축</p>
+                  <p>LX 하우시스 IT 투자관리 시스템 구축</p>
+                  <p>신세계사이먼 정산 및 연동 API 개발</p>
+                  <p>AK PLAZA 신규 PDA 시스템 구축</p>
                 </div>
+              </div>
             </div>
           </div>
         </div>
@@ -222,9 +256,7 @@
               <div id="biz-tab1" class="tab-content active">
                 <div class="biz-domain-item">
                   <div class="biz-domain-item-header">
-                    <i
-                      class="fas fa-bullhorn biz-domain-item-icon"
-                    ></i>
+                    <i class="fas fa-bullhorn biz-domain-item-icon"></i>
                     <h4 class="content-class">
                       POP (Point Of Purchase Advertising) 시스템
                     </h4>
@@ -303,27 +335,119 @@
           <h2 class="content-class section-title">OUR PARTNERS</h2>
         </div>
         <div class="partners-slider">
-            <div class="partners-slide-track">
-                <!-- Original Logos -->
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/abc-logo.png" alt="ABC-MART 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/ak_logo.png" alt="AK PLAZA 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/ci_concept_logo.png" alt="Beyond 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/emart-logo.png" alt="E-Mart 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/hyd_lnc_logo.png" alt="Hyundai L&C 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/sinsegae-logo.png" alt="SHINSEGAE I&C 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/lx-haysys-logo.png" alt="LX Hausys 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/starbucks-logo.png" alt="Starbucks 로고"></a></div>
-                
-                <!-- Duplicated Logos for seamless loop -->
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/abc-logo.png" alt="ABC-MART 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/ak_logo.png" alt="AK PLAZA 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/ci_concept_logo.png" alt="Beyond 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/emart-logo.png" alt="E-Mart 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/hyd_lnc_logo.png" alt="Hyundai L&C 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/sinsegae-logo.png" alt="SHINSEGAE I&C 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/lx-haysys-logo.png" alt="LX Hausys 로고"></a></div>
-                <div class="partner-slide"><a href="#" target="_blank" rel="noopener noreferrer"><img src="assets/images/logos/starbucks-logo.png" alt="Starbucks 로고"></a></div>
+          <div class="partners-slide-track">
+            <!-- Original Logos -->
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/abc-logo.png"
+                  alt="ABC-MART 로고"
+              /></a>
             </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img src="assets/images/logos/ak_logo.png" alt="AK PLAZA 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/ci_concept_logo.png"
+                  alt="Beyond 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/emart-logo.png"
+                  alt="E-Mart 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/hyd_lnc_logo.png"
+                  alt="Hyundai L&C 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/sinsegae-logo.png"
+                  alt="SHINSEGAE I&C 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/lx-haysys-logo.png"
+                  alt="LX Hausys 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/starbucks-logo.png"
+                  alt="Starbucks 로고"
+              /></a>
+            </div>
+
+            <!-- Duplicated Logos for seamless loop -->
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/abc-logo.png"
+                  alt="ABC-MART 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img src="assets/images/logos/ak_logo.png" alt="AK PLAZA 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/ci_concept_logo.png"
+                  alt="Beyond 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/emart-logo.png"
+                  alt="E-Mart 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/hyd_lnc_logo.png"
+                  alt="Hyundai L&C 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/sinsegae-logo.png"
+                  alt="SHINSEGAE I&C 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/lx-haysys-logo.png"
+                  alt="LX Hausys 로고"
+              /></a>
+            </div>
+            <div class="partner-slide">
+              <a href="#" target="_blank" rel="noopener noreferrer"
+                ><img
+                  src="assets/images/logos/starbucks-logo.png"
+                  alt="Starbucks 로고"
+              /></a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -332,7 +456,7 @@
       </button>
     </div>
     <div id="footer-placeholder"></div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script type="module" src="assets/js/sub-app.js"></script>
