@@ -1,22 +1,66 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <body>
-    <div id="loader">
-        <!-- 소켓 SVG (먼저 그려짐) -->
-        <svg xmlns="http://www.w3.org/2000/svg" id="loader-socket" viewBox="0 0 61.42 59.61">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /*
+         * LOADER STYLES
+         * These styles ensure the new loader structure works correctly.
+         * The cable is now an "assembly" of a head (SVG) and a line (div).
+        */
+
+        /* This is the main container for the moving cable parts. */
+        #loader-cable-assembly {
+            position: absolute;
+            width: 43.1px; /* Match the original SVG width to maintain visual consistency. */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* GSAP animates the 'top' property of this container to make it slide up. */
+        }
+
+        /* The SVG for the connector head. Its aspect ratio is now preserved. */
+        #loader-cable-head {
+            width: 43.1px;
+            height: 52.4px; /* Fixed height based on the original path data's proportions. */
+            flex-shrink: 0; /* Prevents the head from being squashed or stretched. */
+            display: block;
+            overflow: visible;
+        }
+        
+        /* The line part of the cable, which is now a simple div that can stretch. */
+        #loader-cable-line {
+            width: 2.5px; /* A clear, visible width for the line. */
+            height: 100%; /* This allows the line to fill the remaining vertical space. */
+            background-color: #9d9d9d; /* Initial color, matching the old SVG stroke. */
+        }
+
+        /* The path inside the head SVG needs a class for GSAP to target its color. */
+        #loader-cable-head .fill-path {
+            fill: #9d9d9d; /* Initial color for the head. */
+        }
+    </style>
+</head>
+<body>
+<div id="loader">
+    <!-- Socket SVG (no changes here) -->
+    <svg xmlns="http://www.w3.org/2000/svg" id="loader-socket" viewBox="0 0 61.42 59.61">
         <path id="lan-hole-path" d="M0,0v59.61h61.42V0H0ZM52.26,40.9h-6.55v7.49H15.71v-7.49h-6.55V6.84h7.94v10.51h5.81V6.84h4.9v10.51h5.81V6.84h4.9v10.51h5.81V6.84h7.94v34.06Z"/>
+    </svg>
+
+    <!-- ★★★ FIX: Restructured the cable to preserve head aspect ratio ★★★ -->
+    <div id="loader-cable-assembly">
+        <!-- The head is now a separate SVG that maintains its aspect ratio. -->
+        <svg xmlns="http://www.w3.org/2000/svg" id="loader-cable-head" viewBox="0 0 43.1 52.4" preserveAspectRatio="xMidYMax meet">
+            <path class="fill-path" d="M0,0v40.9h6.6v11.5h30v-11.5h6.5V0H0ZM13.7,17.3h-5.8V6.8h5.8v10.5ZM24.4,17.3h-5.8V6.8h5.8v10.5ZM35.2,17.3h-5.8V6.8h5.8v10.5Z"/>
         </svg>
-        
-        <!-- 케이블 SVG (아래에서 올라옴) -->
-        <svg xmlns="http://www.w3.org/2000/svg" id="loader-cable" viewBox="0 0 43.1 1000" preserveAspectRatio="none"> 
-        <g id="lan-group">
-            <path id="jack" class="fill-path" d="M0,0v40.9h6.6v11.5h30v-11.5h6.5V0H0ZM13.7,17.3h-5.8V6.8h5.8v10.5ZM24.4,17.3h-5.8V6.8h5.8v10.5ZM35.2,17.3h-5.8V6.8h5.8v10.5Z"/>
-            <line id="line" class="line-path" x1="21.55" y1="48.39" x2="21.55" y2="1000"/>
-        </g>
-        </svg>
-        
-        <!-- 완료 텍스트 -->
-        <div id="loader-text">Connect to Winhub</div>
+        <!-- The line is now a simple div that can stretch vertically without distortion. -->
+        <div id="loader-cable-line"></div>
     </div>
-  </body>
+    
+    <!-- Loader Text (no changes here) -->
+    <div id="loader-text">Connect to Winhub</div>
+</div>
+</body>
 </html>

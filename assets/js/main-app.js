@@ -394,57 +394,136 @@ function setupMainPageBackgroundChangeAnimations() {
     });
  }
 
+// ★★★ FIX: Spline 오브젝트가 리사이즈에 반응하도록 수정된 함수 ★★★
 function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-    splineTimelines.forEach(tl => tl.kill()); splineTimelines = []; const currentScaleConfig = getScaleConfig(isDesktopView);
+    splineTimelines.forEach(tl => tl.kill()); 
+    splineTimelines = [];
+    const currentScaleConfig = getScaleConfig(isDesktopView);
     const isMobileView = !isDesktopView;
 
-    const heroTimeline = gsap.timeline({ scrollTrigger: { id: 'splineScrollTrigger-hero', trigger: "#hero", start: "top 10%", end: "bottom bottom", scrub: true, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = false), onLeaveBack: () => cableObj && (cableObj.visible = false), onRefresh: () => { if (ScrollTrigger.isInViewport("#hero") && (!document.querySelector("#part1") || !ScrollTrigger.isInViewport("#part1"))) cableObj && (cableObj.visible = false); }}});
+    // Hero Section Timeline
+    const heroTimeline = gsap.timeline({ 
+        scrollTrigger: { 
+            id: 'splineScrollTrigger-hero', 
+            trigger: "#hero", 
+            start: "top 10%", 
+            end: "bottom bottom", 
+            scrub: 0.5, // ★★★ CHANGE: scrub 값을 낮춰 반응성을 높입니다.
+            invalidateOnRefresh: true, 
+            onEnter: () => cableObj && (cableObj.visible = false), 
+            onLeaveBack: () => cableObj && (cableObj.visible = false), 
+            onRefresh: () => { 
+                if (ScrollTrigger.isInViewport("#hero") && (!document.querySelector("#part1") || !ScrollTrigger.isInViewport("#part1"))) {
+                    cableObj && (cableObj.visible = false);
+                }
+            }
+        }
+    });
+
     heroTimeline.to(winhubObj.position, {
-        x: getTargetWinhubX(isMobileView),
-        y: getTargetWinhubY(isMobileView),
+        // 값을 함수로 전달하여 ScrollTrigger가 refresh될 때마다 다시 계산하도록 합니다.
+        x: () => getTargetWinhubX(isMobileView),
+        y: () => getTargetWinhubY(isMobileView),
         z: WINHUB_INTRO_END_Z
     }, 0)
     .to(winhubObj.rotation, { x: degToRad(0), y: degToRad(90), z: degToRad(0) }, 0)
-    .to(winhubObj.scale, { x: responsiveScale(currentScaleConfig.hero), y: responsiveScale(currentScaleConfig.hero), z: responsiveScale(currentScaleConfig.hero) }, 0);
+    .to(winhubObj.scale, { 
+        // 스케일 값도 함수로 전달합니다.
+        x: () => responsiveScale(currentScaleConfig.hero), 
+        y: () => responsiveScale(currentScaleConfig.hero), 
+        z: () => responsiveScale(currentScaleConfig.hero) 
+    }, 0);
     splineTimelines.push(heroTimeline);
 
+    // Part 1 Section Timeline
     if (document.getElementById('part1')) {
-        const part1Timeline = gsap.timeline({ scrollTrigger: { id: 'splineScrollTrigger-part1', trigger: "#part1", start: "top 70%", end: "center bottom", scrub: 2, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = true), onEnterBack: () => cableObj && (cableObj.visible = true), onLeaveBack: () => cableObj && (cableObj.visible = false) }});
-        const part1Position = isMobileView ?
-            { x: responsiveX(-20), y: responsiveY(30), z: responsiveX(-10) } :
-            { x: responsiveX(-93.75), y: responsiveY(37.04), z: responsiveX(-31.25) };
-
-        part1Timeline.to(winhubObj.position, part1Position, 0)
-            .to(winhubObj.rotation, { x: degToRad(80.5), y: degToRad(60), z: degToRad(-65) }, 0)
-            .to(winhubObj.scale, { x: responsiveScale(currentScaleConfig.part1), y: responsiveScale(currentScaleConfig.part1), z: responsiveScale(currentScaleConfig.part1) }, 0);
+        const part1Timeline = gsap.timeline({ 
+            scrollTrigger: { 
+                id: 'splineScrollTrigger-part1', 
+                trigger: "#part1", 
+                start: "top 70%", 
+                end: "center bottom", 
+                scrub: 1, // ★★★ CHANGE: scrub 값을 낮춰 반응성을 높입니다.
+                invalidateOnRefresh: true, 
+                onEnter: () => cableObj && (cableObj.visible = true), 
+                onEnterBack: () => cableObj && (cableObj.visible = true), 
+                onLeaveBack: () => cableObj && (cableObj.visible = false) 
+            }
+        });
+        
+        part1Timeline.to(winhubObj.position, {
+            x: () => isMobileView ? responsiveX(-20) : responsiveX(-93.75),
+            y: () => isMobileView ? responsiveY(30) : responsiveY(37.04),
+            z: () => isMobileView ? responsiveX(-10) : responsiveX(-31.25)
+        }, 0)
+        .to(winhubObj.rotation, { x: degToRad(80.5), y: degToRad(60), z: degToRad(-65) }, 0)
+        .to(winhubObj.scale, { 
+            x: () => responsiveScale(currentScaleConfig.part1), 
+            y: () => responsiveScale(currentScaleConfig.part1), 
+            z: () => responsiveScale(currentScaleConfig.part1) 
+        }, 0);
         splineTimelines.push(part1Timeline);
     }
 
+    // Part 2 Section Timeline
     if (document.getElementById('part2')) {
-        const part2Timeline = gsap.timeline({ scrollTrigger: { id: "part2SplineScrollTrigger", trigger: "#part2", start: "top 85%", end: "top 30%", scrub: 2, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = true), onEnterBack: () => cableObj && (cableObj.visible = true) }});
-        const part2Position = isMobileView ?
-            { x: responsiveX(20), y: responsiveY(15), z: responsiveX(-5) } :
-            { x: responsiveX(50), y: responsiveY(10), z: responsiveX(-20) };
-
-        part2Timeline.to(winhubObj.position, part2Position, 0)
-            .to(winhubObj.rotation, { x: degToRad(40), y: degToRad(60), z: degToRad(-60) }, 0)
-            .to(winhubObj.scale, { x: responsiveScale(currentScaleConfig.part2 * 0.8), y: responsiveScale(currentScaleConfig.part2 * 0.8), z: responsiveScale(currentScaleConfig.part2 * 0.8) }, 0);
+        const part2Timeline = gsap.timeline({ 
+            scrollTrigger: { 
+                id: "part2SplineScrollTrigger", 
+                trigger: "#part2", 
+                start: "top 85%", 
+                end: "top 30%", 
+                scrub: 1, // ★★★ CHANGE: scrub 값을 낮춰 반응성을 높입니다.
+                invalidateOnRefresh: true, 
+                onEnter: () => cableObj && (cableObj.visible = true), 
+                onEnterBack: () => cableObj && (cableObj.visible = true) 
+            }
+        });
+        
+        part2Timeline.to(winhubObj.position, {
+            x: () => isMobileView ? responsiveX(20) : responsiveX(50),
+            y: () => isMobileView ? responsiveY(15) : responsiveY(10),
+            z: () => isMobileView ? responsiveX(-5) : responsiveX(-20)
+        }, 0)
+        .to(winhubObj.rotation, { x: degToRad(40), y: degToRad(60), z: degToRad(-60) }, 0)
+        .to(winhubObj.scale, { 
+            x: () => responsiveScale(currentScaleConfig.part2 * 0.8), 
+            y: () => responsiveScale(currentScaleConfig.part2 * 0.8), 
+            z: () => responsiveScale(currentScaleConfig.part2 * 0.8) 
+        }, 0);
         splineTimelines.push(part2Timeline);
     }
 
+    // Part 3 Section Timeline
     if (document.getElementById('part3')) {
-        const part3Timeline = gsap.timeline({ scrollTrigger: { id: 'splineScrollTrigger-part3', trigger: "#part3", start: "top 30%", end: "center bottom", scrub: 2, invalidateOnRefresh: true, onEnter: () => cableObj && (cableObj.visible = true) }});
-        const part3Position = isMobileView ?
-            { x: responsiveX(-30), y: responsiveY(70), z: 0 } :
-            { x: responsiveX(-61.67), y: responsiveY(80.11), z: 0 };
-
-        part3Timeline.to(winhubObj.position, part3Position, 0)
-            .to(winhubObj.rotation, { x: degToRad(90), y: degToRad(-25), z: degToRad(-20) }, 0)
-            .to(winhubObj.scale, { x: responsiveScale(currentScaleConfig.part3), y: responsiveScale(currentScaleConfig.part3), z: responsiveScale(currentScaleConfig.part3) }, 0);
+        const part3Timeline = gsap.timeline({ 
+            scrollTrigger: { 
+                id: 'splineScrollTrigger-part3', 
+                trigger: "#part3", 
+                start: "top 30%", 
+                end: "center bottom", 
+                scrub: 1, // ★★★ CHANGE: scrub 값을 낮춰 반응성을 높입니다.
+                invalidateOnRefresh: true, 
+                onEnter: () => cableObj && (cableObj.visible = true) 
+            }
+        });
+        
+        part3Timeline.to(winhubObj.position, {
+            x: () => isMobileView ? responsiveX(-30) : responsiveX(-61.67),
+            y: () => isMobileView ? responsiveY(70) : responsiveY(80.11),
+            z: 0
+        }, 0)
+        .to(winhubObj.rotation, { x: degToRad(90), y: degToRad(-25), z: degToRad(-20) }, 0)
+        .to(winhubObj.scale, { 
+            x: () => responsiveScale(currentScaleConfig.part3), 
+            y: () => responsiveScale(currentScaleConfig.part3), 
+            z: () => responsiveScale(currentScaleConfig.part3) 
+        }, 0);
         splineTimelines.push(part3Timeline);
     }
- }
+}
+
 
 function setupBarAnimations() {
     if (typeof gsap === 'undefined' || typeof MorphSVGPlugin === 'undefined' || typeof ScrollTrigger === 'undefined') return;

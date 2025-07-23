@@ -2541,7 +2541,7 @@ body.modal-open {
   width: 90%;
   max-width: 800px;
   max-height: 80vh;
-  min-height: 30vh;
+  /* min-height: 30vh; */
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -2610,6 +2610,13 @@ body.modal-open {
 .user-txt {
   font-size: 0.85rem;
   line-height: 1.45rem;
+}
+
+.user-txt .img-flex-box {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 1rem;
+  gap: 1.25rem;
 }
 
 /* Responsive adjustments */

@@ -68,11 +68,17 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         const loader = document.getElementById('loader');
         const socket = document.getElementById('loader-socket');
         const socketPath = document.getElementById('lan-hole-path');
-        const cable = document.getElementById('loader-cable');
+        // ★★★ FIX: Select the new cable assembly container and its parts ★★★
+        const cableAssembly = document.getElementById('loader-cable-assembly');
+        const cableHead = document.getElementById('loader-cable-head');
+        const cableLine = document.getElementById('loader-cable-line');
+        const cableHeadPath = cableHead ? cableHead.querySelector('.fill-path') : null;
         const loaderText = document.getElementById('loader-text');
         const mainContent = document.querySelector(mainContentSelector);
 
-        if (!loader || !socket || !socketPath || !cable || !loaderText) {
+        // Check for all new and old elements to ensure nothing breaks
+        if (!loader || !socket || !socketPath || !cableAssembly || !cableHead || !cableLine || !cableHeadPath || !loaderText) {
+            console.error("Loader elements missing. Aborting loader sequence.");
             if (loader) gsap.set(loader, { autoAlpha: 0, display: 'none' });
             if (mainContent) gsap.set(mainContent, { autoAlpha: 1 });
             document.body.style.overflow = 'auto';
@@ -89,7 +95,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 opacity: 0,
                 duration: 0.5,
                 onComplete: () => {
-                    // ★★★ 최종 수정 1: 링크를 클릭할 수 있도록 로더를 완전히 숨깁니다 ★★★
                     loader.style.display = 'none'; 
                     
                     if (mainContent) {
@@ -109,8 +114,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
             });
         };
 
-        // ★★★ FIX: 모바일 높이 문제를 해결하기 위해 JS로 높이를 직접 제어하는 대신 CSS와 --vh 변수를 사용하도록 수정합니다. ★★★
-        // 스크롤만 막도록 수정합니다. 높이는 CSS가 담당합니다.
         document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
 
@@ -128,12 +131,15 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
 
         if (hasVisited) {
             gsap.set(socketPath, { strokeDashoffset: 0, fill: '#ffc400', stroke: '#ffc400' });
-            gsap.set(cable, { top: finalCableTop, opacity: 1, scale: 1 });
+            // ★★★ FIX: Update visited animation for new elements ★★★
+            gsap.set(cableLine, { backgroundColor: '#ffc400' });
+            gsap.set(cableHeadPath, { fill: '#ffc400' });
+            gsap.set(cableAssembly, { top: finalCableTop, opacity: 1, scale: 1 });
             gsap.set(socket, { opacity: 1, scale: 1 });
             gsap.set(loaderText, { opacity: 1 });
 
             const tl = gsap.timeline({ onComplete: completeAndShowContent });
-            tl.to([socket, cable, loaderText], {
+            tl.to([socket, cableAssembly, loaderText], { // Use cableAssembly
                 delay: 0.2,
                 scale: 0.8,
                 opacity: 0,
@@ -151,8 +157,8 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 stroke: '#9d9d9d'
             });
             gsap.set(loaderText, { opacity: 0 });
-            gsap.set([socket, cable], { scale: 1, opacity: 1 });
-            gsap.set(cable, { top: '100vh' });
+            gsap.set([socket, cableAssembly], { scale: 1, opacity: 1 }); // Use cableAssembly
+            gsap.set(cableAssembly, { top: '100vh' }); // Animate the whole assembly
 
             const tl = gsap.timeline({
                 onComplete: () => {
@@ -161,13 +167,13 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 }
             });
 
-            // 기존 애니메이션 시퀀스
+            // ★★★ FIX: Update main animation sequence for new elements ★★★
             tl.to(socketPath, {
                 strokeDashoffset: 0,
                 duration: 1.5,
                 ease: "power1.inOut"
             })
-            .to(cable, {
+            .to(cableAssembly, { // Animate the whole assembly
                 top: finalCableTop,
                 duration: 2,
                 ease: "power2.out" 
@@ -177,11 +183,20 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 stroke: "#ffc400",
                 duration: 0.3
             }, "-=0.1")
+            // Also animate the cable color
+            .to(cableLine, {
+                backgroundColor: "#ffc400",
+                duration: 0.3
+            }, "<") // Animate at the same time as the socket
+            .to(cableHeadPath, {
+                fill: "#ffc400",
+                duration: 0.3
+            }, "<")
             .to(loaderText, {
                 opacity: 1,
                 duration: 0.5
             }, ">-0.2")
-            .to([socket, cable, loaderText], {
+            .to([socket, cableAssembly, loaderText], { // Use cableAssembly
                 delay: 0.5,
                 scale: 0.8,
                 opacity: 0,
@@ -203,7 +218,6 @@ export function hideLoaderOnError() {
             duration: 0.3,
             opacity: 0,
             onComplete: () => {
-                // 여기에도 display:none 수정을 적용합니다
                 loader.style.display = 'none';
                 document.documentElement.style.height = '';
                 document.documentElement.style.overflow = '';
@@ -884,4 +898,3 @@ document.addEventListener('click', function(event) {
         closeModal();
     }
 });
-
