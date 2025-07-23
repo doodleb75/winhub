@@ -16,8 +16,8 @@ html {
 body {
   background-color: #410b7a;
   overflow-x: hidden;
-  font-family: /* "Spoqa Han Sans Neo", */"Noto Sans KR", "Nanum Gothic Coding", "Bricolage Grotesque",
-    sans-serif;
+  font-family: /* "Spoqa Han Sans Neo", */ "Noto Sans KR", "Nanum Gothic Coding",
+    "Bricolage Grotesque", sans-serif;
   position: relative;
   line-height: 1.6;
 }
@@ -570,7 +570,7 @@ button.goto-work:hover {
   color: #fff;
 }
 button.goto-work:before {
-  content: '';
+  content: "";
   position: absolute;
   top: -2px;
   left: 0;
@@ -586,12 +586,13 @@ button.goto-work:before {
 }
 button.goto-work:hover:before {
   top: -4px;
-  border-color: #28a745;
+  /* border-color: #28a745;
   background: #28a745;
+    background: linear-gradient(0deg, #156b5c, #28a745); */
   transform: skewX(0deg);
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2)  ;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   border-radius: 7px;
-    background: linear-gradient(0deg, #156b5c, #28a745);
+  border: 1px solid #ffffff66;
 }
 
 .menu-link-hover-svg .arrow-path {
@@ -877,11 +878,10 @@ button.goto-work:hover:before {
   color: #fff;
   background: none;
   transform: translateY(-3px) scale(1.05);
-  /* box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); */
 }
 
 .cta-button:before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0px;
   left: 0;
@@ -897,13 +897,14 @@ button.goto-work:hover:before {
 }
 .cta-button:hover:before {
   top: -2px;
-  border-color: #a12268;
-  background: #a12268;
+  /* border-color: #a12268;
+  background: #a12268; */
   transform: skewX(0deg);
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2)  ;
-  
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   border-radius: 7px;
-    background: linear-gradient(0deg, #681247, #a12268);
+  border: 1px solid #ffffff66;
+  /* border-radius: 7px;
+    background: linear-gradient(0deg, #681247, #a12268); */
 }
 
 .subpage-body .subpage-container {
@@ -1655,10 +1656,7 @@ body.subpage-body.scrolled-past-hero-colors {
   color: #007bff;
 }
 
-.subpage-body.scrolled-past-hero-colors
-  .contact-info-item
-  .info-value
-  a:hover {
+.subpage-body.scrolled-past-hero-colors .contact-info-item .info-value a:hover {
   color: #0056b3;
 }
 
@@ -1726,8 +1724,9 @@ body.subpage-body.scrolled-past-hero-colors {
   font-weight: 500;
   pointer-events: none;
   cursor: text;
-  
-  transition: top 0.2s ease-in-out, font-size 0.2s ease-in-out, color 0.2s ease-in-out !important;
+
+  transition: top 0.2s ease-in-out, font-size 0.2s ease-in-out,
+    color 0.2s ease-in-out !important;
 }
 
 .subpage-body:not(.scrolled-past-hero-colors) .form-label {
@@ -1744,7 +1743,7 @@ body.subpage-body.scrolled-past-hero-colors {
 .form-textarea:not(:placeholder-shown) ~ .form-label {
   top: -22px;
   font-size: 13px;
-  color: #0056b3 !important;
+  color: #491e9b !important;
   cursor: default;
 }
 
@@ -1759,11 +1758,11 @@ body.subpage-body.scrolled-past-hero-colors {
 }
 
 .subpage-body:not(.scrolled-past-hero-colors) .form-group::before {
-  background-color: #4dabf7;
+  background-color: #491e9b;
 }
 
 .subpage-body.scrolled-past-hero-colors .form-group::before {
-  background-color: #007bff;
+  background-color: #491e9b;
 }
 
 .form-group:focus-within::before {
@@ -1771,7 +1770,10 @@ body.subpage-body.scrolled-past-hero-colors {
 }
 
 .form-submit-btn {
-  display: inline-flex;
+  position: relative;
+  color: #491e9b;
+  transition: all 0.2s;
+  /*   display: inline-flex;
   align-items: center;
   padding: 0.75rem 2rem;
   border-radius: 50px;
@@ -1779,7 +1781,22 @@ body.subpage-body.scrolled-past-hero-colors {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  border: none;
+  border: none; */
+}
+.form-submit-btn:before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: none;
+  border-top: 1px solid #44444466;
+  border-bottom: 1px solid #44444466;
+  transform: skewX(20deg);
+  z-index: -1;
+  transition: all 0.2s;
 }
 
 .subpage-body:not(.scrolled-past-hero-colors) .form-submit-btn {
@@ -1895,8 +1912,8 @@ section.content-section {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -180px);
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 11px;
+  font-weight: normal;
   color: #ffaa00;
   opacity: 0;
   white-space: nowrap;
@@ -2179,7 +2196,7 @@ section.content-section {
   .gnb-container {
     padding: 1.25rem;
   }
-  
+
   /* [ADDED] Mobile fix for partners section title alignment */
   #partners-section .section-content-wrapper {
     padding-left: 1rem;
@@ -2222,11 +2239,10 @@ section.content-section {
 }
 
 .mail-link:hover {
-  color: #4dabf7 !important;
+  color: #491e9b !important;
   text-decoration: none;
   transition: color 0.3s ease;
 }
-
 
 #hero,
 #loader,
@@ -2235,7 +2251,8 @@ section.content-section {
   overflow: hidden;
 }
 
-html, body {
+html,
+body {
   overscroll-behavior: none;
   /* touch-action: none; */
 }
@@ -2263,7 +2280,7 @@ body {
 }
 
 .history-timeline::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 1px;
   background-color: rgba(255, 255, 255, 0.15);
@@ -2272,7 +2289,7 @@ body {
   left: 50%;
   margin-left: -2px;
   transition: background-color 0.5s ease-in-out;
-  z-index: 1; 
+  z-index: 1;
 }
 
 .subpage-body.scrolled-past-hero-colors .history-timeline::after {
@@ -2299,7 +2316,7 @@ body {
 
 /* The circles on the timeline */
 .timeline-entry::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 20px;
   height: 20px;
@@ -2348,7 +2365,7 @@ body {
   transition: color 0.5s ease-in-out;
 }
 .subpage-body.scrolled-past-hero-colors .history-year {
-    color: #0056b3;
+  color: #0056b3;
 }
 
 .history-details p {
@@ -2357,7 +2374,7 @@ body {
   opacity: 0.9;
 }
 .history-details p:not(:last-child) {
-    margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 /* --- Responsive Layout for Timeline --- */
@@ -2413,15 +2430,27 @@ body {
 .partners-slider {
   width: 100%;
   position: relative;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%
+  );
 }
 
 .partners-slide-track {
   display: flex;
   align-items: center; /* Vertically center all logos in the track */
   /* (width of logo + horizontal margin) * number of logos * 2 */
-  width: calc( (200px + 80px) * 16); /* 8 original logos + 8 duplicates */
+  width: calc((200px + 80px) * 16); /* 8 original logos + 8 duplicates */
   animation: scroll 60s linear infinite;
 }
 
@@ -2435,7 +2464,7 @@ body {
   }
   100% {
     /* (width of logo + horizontal margin) * number of original logos */
-    transform: translateX(calc( (200px + 80px) * -8));
+    transform: translateX(calc((200px + 80px) * -8));
   }
 }
 
@@ -2450,33 +2479,31 @@ body {
 }
 
 .partner-slide img {
-    max-width: 100%;
-    max-height: 100px; /* Set a maximum height for all logos */
-    width: auto;
-    height: auto;
-    filter: grayscale(100%); /* Initially grayscale */
-    opacity: 0.7;
-    transition: all 0.4s ease;
-    mix-blend-mode: screen;
+  max-width: 100%;
+  max-height: 100px; /* Set a maximum height for all logos */
+  width: auto;
+  height: auto;
+  filter: grayscale(100%); /* Initially grayscale */
+  opacity: 0.7;
+  transition: all 0.4s ease;
+  mix-blend-mode: screen;
 }
 
 /* Adjust image style when scrolled past hero (light background) */
 .subpage-body.scrolled-past-hero-colors .partner-slide img {
-    mix-blend-mode: multiply;
-    filter: grayscale(100%) brightness(0.9);
-    opacity: 0.8;
+  mix-blend-mode: multiply;
+  filter: grayscale(100%) brightness(0.9);
+  opacity: 0.8;
 }
 
 /* [MODIFIED] Increased specificity for hover effect to override scrolled state */
 .partner-slide a:hover img,
 .subpage-body.scrolled-past-hero-colors .partner-slide a:hover img {
-    filter: grayscale(0); /* Revert to original color on hover */
-    opacity: 1;
-    transform: scale(1.1);
-    mix-blend-mode: normal;
+  filter: grayscale(0); /* Revert to original color on hover */
+  opacity: 1;
+  transform: scale(1.1);
+  mix-blend-mode: normal;
 }
-
-
 
 /* ================================================== */
 /* Modal Popup Styles                 */
@@ -2488,15 +2515,15 @@ body.modal-open {
 
 /* Modal Backdrop */
 .modal {
-  display: none; 
-  position: fixed; 
-  z-index: 1000; 
+  display: none;
+  position: fixed;
+  z-index: 1000;
   left: 0;
   top: 0;
-  width: 100%; 
-  height: 100%; 
+  width: 100%;
+  height: 100%;
   overflow: hidden; /* 스크롤은 modal-body에서 처리 */
-  background-color: rgba(0,0,0,0.6); 
+  background-color: rgba(0, 0, 0, 0.6);
   /* 부드러운 등장을 위한 트랜지션 */
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -2504,20 +2531,20 @@ body.modal-open {
 
 /* 팝업이 보일 때의 스타일 */
 .modal[style*="display: block"] {
-    opacity: 1;
+  opacity: 1;
 }
 
 /* Modal Content Box */
 .modal-content {
   background-color: #fefefe;
-  margin: 5% auto; 
+  margin: 5% auto;
   width: 90%;
   max-width: 800px;
-  max-height: 80vh;;
-  min-height: 30vh; 
+  max-height: 80vh;
+  min-height: 30vh;
   border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   /* 부드러운 등장을 위한 애니메이션 */
@@ -2526,7 +2553,7 @@ body.modal-open {
 }
 
 .modal[style*="display: block"] .modal-content {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 /* Modal Header */
@@ -2536,7 +2563,7 @@ body.modal-open {
   align-items: center;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #ddd;
-  flex-shrink: 0; 
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -2568,6 +2595,7 @@ body.modal-open {
   flex-grow: 1; /* 남은 공간을 모두 차지 */
   overflow-y: auto; /* 내용이 길어지면 수직 스크롤 생성 */
   padding: 1rem 1.5rem;
+  margin-bottom: 1.25rem;
   line-height: 1.7;
   color: #495057;
 }
@@ -2580,15 +2608,250 @@ body.modal-open {
 }
 
 .user-txt {
-  font-size: .85rem;
+  font-size: 0.85rem;
   line-height: 1.45rem;
 }
 
 /* Responsive adjustments */
 @media screen and (max-width: 768px) {
-    .modal-content {
-        width: 95%;
-        height: 90vh;
-        margin: 5% auto;
-    }
+  .modal-content {
+    width: 95%;
+    height: 90vh;
+    margin: 5% auto;
+  }
+}
+
+/* [추가됨] 커스텀 라디오 버튼 스타일 */
+.form-group-inline {
+  display: flex;
+  flex-wrap: wrap; /* 작은 화면에서 줄바꿈 허용 */
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1rem;
+}
+
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* 기본 라디오 버튼 숨기기 */
+.radio-option input[type="radio"] {
+  display: none;
+}
+
+/* 커스텀 라디오 버튼 레이블 스타일 */
+.radio-option label {
+  position: relative;
+  padding-left: 30px; /* 커스텀 버튼을 위한 공간 */
+  cursor: pointer;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  transition: color 0.3s ease;
+}
+
+/* 커스텀 라디오 버튼 원 */
+.radio-option label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid;
+  border-radius: 50%;
+  transition: border-color 0.3s ease;
+}
+
+/* 선택되었을 때의 내부 점 */
+.radio-option label::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  transform: translateY(-50%) scale(0); /* 기본적으로 숨김 */
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: transform 0.2s ease-in-out;
+}
+
+/* 어두운 배경일 때 스타일 */
+.subpage-body:not(.scrolled-past-hero-colors) .radio-option label {
+  color: #bdc3c7;
+}
+.subpage-body:not(.scrolled-past-hero-colors) .radio-option label::before {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.subpage-body:not(.scrolled-past-hero-colors)
+  .radio-option
+  input[type="radio"]:checked
+  + label {
+  color: #491e9b; /* 어두운 테마용 밝은 파란색 */
+  font-weight: 600;
+}
+.subpage-body:not(.scrolled-past-hero-colors) .radio-option label::after {
+  background-color: #491e9b;
+}
+.subpage-body:not(.scrolled-past-hero-colors)
+  .radio-option
+  input[type="radio"]:checked
+  + label::before {
+  border-color: #491e9b;
+}
+
+/* 밝은 배경일 때 스타일 */
+.subpage-body.scrolled-past-hero-colors .radio-option label {
+  color: #6c757d;
+}
+.subpage-body.scrolled-past-hero-colors .radio-option label::before {
+  border-color: #adb5bd;
+}
+.subpage-body.scrolled-past-hero-colors
+  .radio-option
+  input[type="radio"]:checked
+  + label {
+  color: #491e9b; /* 밝은 테마용 파란색 */
+  font-weight: 600;
+}
+.subpage-body.scrolled-past-hero-colors .radio-option label::after {
+  background-color: #491e9b;
+}
+.subpage-body.scrolled-past-hero-colors
+  .radio-option
+  input[type="radio"]:checked
+  + label::before {
+  border-color: #491e9b;
+}
+
+/* 선택 시 내부 점 표시 및 테두리 색상 변경 */
+.radio-option input[type="radio"]:checked + label::after {
+  transform: translateY(-50%) scale(1);
+}
+
+/* 호버 효과 */
+.radio-option:hover label::before {
+  border-color: #491e9b;
+}
+.subpage-body:not(.scrolled-past-hero-colors)
+  .radio-option:hover
+  label::before {
+  border-color: #491e9b;
+}
+
+/* ================================================== */
+/* [추가됨] Contact Form Submit Button Style        */
+/* ================================================== */
+
+.form-submit-btn-styled {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin: 0 auto ;
+  /* width: fit-content; */
+  width: 57%;
+  text-align: center;
+  justify-content: center;
+}
+
+/* 기울어진 보더 효과 */
+.form-submit-btn-styled:before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: none;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+  transform: skewX(20deg);
+  z-index: -1;
+  transition: all 0.3s ease;
+}
+
+
+/* 화살표 아이콘 컨테이너 (크기 수정) */
+.form-submit-btn-styled .menu-link-arrow {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0.5rem; /* 여백 조정 */
+  width: 15px; /* 너비 축소 */
+  transition: transform 0.3s ease;
+}
+
+/* SVG 화살표 스타일 */
+.form-submit-btn-styled .menu-link-hover-svg .arrow-path {
+  fill: none;
+  stroke: currentColor; /* 부모 요소(버튼)의 색상을 상속받음 */
+  stroke-miterlimit: 100;
+  stroke-width: 8px; /* 선 두께 살짝 증가 */
+}
+
+/* --- 밝은 테마 (스크롤 후) --- */
+.subpage-body.scrolled-past-hero-colors .form-submit-btn-styled {
+  color: #491e9b;
+}
+.subpage-body.scrolled-past-hero-colors .form-submit-btn-styled:before {
+  border-color: #491e9b;
+}
+
+/* --- 어두운 테마 (기본) --- */
+.subpage-body:not(.scrolled-past-hero-colors) .form-submit-btn-styled {
+  color: #4dabf7;
+}
+.subpage-body:not(.scrolled-past-hero-colors) .form-submit-btn-styled:before {
+  border-color: #4dabf7;
+}
+
+/* --- 호버 효과 --- */
+.form-submit-btn-styled:hover {
+  background: transparent;
+  color: #fff !important;
+  padding-left: 2rem; /* 텍스트 오른쪽으로 이동 */
+}
+
+.form-submit-btn-styled:hover:before {
+  /* top: -4px; */
+    background: #491e9b;
+  transform: skewX(0deg); /* 보더를 바로 세움 */
+  /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); */
+  /* border-radius: 7px; */
+}
+
+.form-submit-btn-styled:hover .menu-link-arrow {
+  transform: translateX(5px); /* 화살표 이동 */
+}
+
+/* --- 비활성화 상태 --- */
+.form-submit-btn-styled:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+.form-submit-btn-styled:disabled:hover {
+  padding-left: 1.5rem; /* 호버 효과 제거 */
+  color: inherit;
+}
+.form-submit-btn-styled:disabled:hover:before {
+  transform: skewX(20deg); /* 호버 효과 제거 */
+  box-shadow: none;
+}
+.form-submit-btn-styled:disabled:hover .menu-link-arrow {
+  transform: none; /* 호버 효과 제거 */
+}
+.form-submit-btn-styled:disabled span {
+  color: inherit !important;
+}
+.form-submit-btn-styled .menu-link-hover-svg {
+  width: 40px;
 }

@@ -6,13 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="../">
     <title>WINHUB - CONTACT</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="./assets/images/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets/images/favicon-16x16.png" />
+    <link rel="manifest" href="./assets/images/site.webmanifest" />
+    <link rel="icon" href="./assets/images/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="assets/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <!-- EmailJS 라이브러리 추가 -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
         // EmailJS 초기화. 페이지 로드 시 실행됩니다.
-        // "YOUR_PUBLIC_KEY" 부분을 EmailJS 계정의 Public Key로 교체해주세요.
         (function(){
             emailjs.init({
                 publicKey: "KP61W9VFSlI9aXaqE",
@@ -61,7 +65,7 @@
                         <div class="contact-info-item">
                             <span class="info-label content-class">E-MAIL</span>
                             <span class="info-value content-class">
-                                <a href="mailto:winhub@winhub.co.kr" class="content-class mail-link">winhub@winhub.co.kr</a>
+                                <a href="mailto:sales@winhub.co.kr" class="content-class mail-link">sales@winhub.co.kr</a>
                             </span>
                         </div>
                         <div class="contact-info-item">
@@ -71,7 +75,24 @@
                     </div>
                     <div class="contact-form-container">
                         <form id="contactForm">
-                            <!-- HTML 구조는 그대로 유지합니다. -->
+                            <div class="form-group-inline">
+                                <div class="radio-option">
+                                    <input type="radio" id="cat-web" name="contact_type" value="웹사이트 구축" checked>
+                                    <label for="cat-web">웹사이트 </label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="cat-mobile" name="contact_type" value="모바일 앱">
+                                    <label for="cat-mobile">모바일 앱</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="cat-promotion" name="contact_type" value="프로모션/이벤트">
+                                    <label for="cat-promotion">프로모션/이벤트</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="cat-etc" name="contact_type" value="기타 문의">
+                                    <label for="cat-etc">기타 </label>
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <input type="text" id="name" name="name" class="form-input" placeholder=" " required>
                                 <label for="name" class="form-label content-class">Name</label>
@@ -84,7 +105,16 @@
                                 <textarea id="message" name="message" rows="4" class="form-textarea" placeholder=" " required></textarea>
                                 <label for="message" class="form-label content-class">Message</label>
                             </div>
-                            <button type="submit" class="form-submit-btn">Send <span class="arrow-right">&rarr;</span></button>
+                             <button type="submit" class="form-submit-btn-styled">
+                                <span>Send</span>
+                                <span class="menu-link-arrow">
+                                    <svg class="menu-link-hover-svg" viewBox="0 0 217.41 63.21" aria-hidden="true">
+                                        <g>
+                                            <polyline class="arrow-path" points="0 62.21 215 62.21 153.5 .71"></polyline>
+                                        </g>
+                                    </svg>
+                                </span>
+                            </button>
                         </form>
                         <div id="form-status-message" class="form-status-message"></div>
                     </div>
@@ -93,7 +123,8 @@
         </section>
 
         <section id="map-section" class="subpage-section map-container">
-            <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=23c46de86bb70cdce2502d7d213bd765&libraries=services"></script>
+            <!-- [수정] Parser-blocking 경고 해결을 위해 autoload=false 추가 -->
+            <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=23c46de86bb70cdce2502d7d213bd765&libraries=services&autoload=false"></script>
             <div id="kakao-map" style="width:100%;height:100%;"></div>
         </section>
         
@@ -103,54 +134,58 @@
     <div id="footer-placeholder"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <!-- [참고] 'Multiple instances of Three.js' 경고는 아래 sub-app.js 파일에서 Three.js를 로드하는 방식과 카카오맵 SDK가 충돌하여 발생할 수 있습니다. -->
+    <!-- sub-app.js 파일 내에서 Three.js를 중복으로 로드하지 않는지 확인이 필요합니다. -->
     <script type="module" src="assets/js/sub-app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Kakao Map 초기화 (기존 코드 유지)
+            // [수정] autoload=false로 설정했기 때문에, kakao.maps.load를 사용하여 수동으로 지도를 초기화합니다.
             const mapContainer = document.getElementById('kakao-map');
             if (mapContainer && typeof kakao !== 'undefined' && kakao.maps) {
-                const mapOption = { 
-                    center: new kakao.maps.LatLng(37.647935, 126.908358),
-                    level: 3 
-                };
-                const map = new kakao.maps.Map(mapContainer, mapOption); 
-                const markerPosition  = new kakao.maps.LatLng(37.647935, 126.908358); 
-                const marker = new kakao.maps.Marker({
-                    position: markerPosition
-                });
-                marker.setMap(map);
-                const iwContent = '<div style="padding:5px; font-size:0.9rem;">WINHUB<br><a href="https://map.kakao.com/link/map/WINHUB,37.647935,126.908358" style="color:blue" target="_blank">큰지도보기</a> <a href="https://map.kakao.com/link/to/WINHUB,37.647935,126.908358" style="color:blue" target="_blank">길찾기</a></div>',
-                      iwPosition = new kakao.maps.LatLng(37.647935, 126.908358);
-                const infowindow = new kakao.maps.InfoWindow({
-                    position : iwPosition, 
-                    content : iwContent 
-                });
-                infowindow.open(map, marker); 
+                kakao.maps.load(function() {
+                    const mapOption = { 
+                        center: new kakao.maps.LatLng(37.647935, 126.908358),
+                        level: 3 
+                    };
+                    const map = new kakao.maps.Map(mapContainer, mapOption); 
+                    const markerPosition  = new kakao.maps.LatLng(37.647935, 126.908358); 
+                    const marker = new kakao.maps.Marker({
+                        position: markerPosition
+                    });
+                    marker.setMap(map);
+                    const iwContent = '<div style="padding:5px; font-size:0.9rem;">WINHUB<br><a href="https://map.kakao.com/link/map/WINHUB,37.647935,126.908358" style="color:blue" target="_blank">큰지도보기</a> <a href="https://map.kakao.com/link/to/WINHUB,37.647935,126.908358" style="color:blue" target="_blank">길찾기</a></div>',
+                          iwPosition = new kakao.maps.LatLng(37.647935, 126.908358);
+                    const infowindow = new kakao.maps.InfoWindow({
+                        position : iwPosition, 
+                        content : iwContent 
+                    });
+                    infowindow.open(map, marker); 
 
-                function resizeMap() {
-                    if (map) {
-                        map.relayout();
-                        map.setCenter(markerPosition);
+                    function resizeMap() {
+                        if (map) {
+                            map.relayout();
+                            map.setCenter(markerPosition);
+                        }
                     }
-                }
-                window.addEventListener('resize', resizeMap);
+                    window.addEventListener('resize', resizeMap);
 
-                const mapSection = document.getElementById('map-section');
-                if (mapSection) {
-                    const observer = new IntersectionObserver((entries) => {
-                        entries.forEach(entry => {
-                            if (entry.isIntersecting) {
-                                resizeMap();
-                            }
-                        });
-                    }, { threshold: 0.1 });
-                    observer.observe(mapSection);
-                }
+                    const mapSection = document.getElementById('map-section');
+                    if (mapSection) {
+                        const observer = new IntersectionObserver((entries) => {
+                            entries.forEach(entry => {
+                                if (entry.isIntersecting) {
+                                    resizeMap();
+                                }
+                            });
+                        }, { threshold: 0.1 });
+                        observer.observe(mapSection);
+                    }
+                });
             } else {
                 if (mapContainer) {
                     mapContainer.innerHTML = "<p style='text-align:center; padding:20px; color: var(--subpage-text-color, #ffffff);'>지도를 불러오는데 실패했습니다. Kakao Maps API 키를 확인해주세요.</p>";
                 }
-                console.error("Kakao Maps API가 로드되지 않았습니다.");
+                console.error("Kakao Maps API 스크립트가 로드되지 않았거나 kakao 객체를 찾을 수 없습니다.");
             }
 
             // --- EmailJS를 사용하도록 문의하기 폼 제출 처리 수정 ---
@@ -161,24 +196,19 @@
                 contactForm.addEventListener('submit', function(event) {
                     event.preventDefault();
 
-                    const submitBtn = this.querySelector('.form-submit-btn');
+                    const submitBtn = this.querySelector('.form-submit-btn-styled');
                     const originalBtnHTML = submitBtn.innerHTML;
                     
-                    // 유효성 검사
                     if (!this.checkValidity()) {
                         this.reportValidity();
                         return;
                     }
 
-                    // 전송 중 버튼 비활성화 및 텍스트 변경
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = 'Sending...';
                     
-                    // EmailJS를 사용하여 이메일 전송
-                    // 'YOUR_SERVICE_ID'와 'YOUR_TEMPLATE_ID'를 EmailJS에서 발급받은 ID로 교체해주세요.
                     emailjs.sendForm('service_cqy50dd', 'template_xwc8u4g', this)
                         .then(() => {
-                            // 성공 시
                             if (formStatusMessage) {
                                 formStatusMessage.textContent = '문의가 성공적으로 전송되었습니다.';
                                 formStatusMessage.className = 'form-status-message success';
@@ -186,7 +216,6 @@
                             }
                             contactForm.reset();
                         }, (error) => {
-                            // 실패 시
                             console.error('FAILED...', error);
                             if (formStatusMessage) {
                                 formStatusMessage.textContent = '전송에 실패했습니다. 잠시 후 다시 시도해주세요.';
@@ -195,11 +224,9 @@
                             }
                         })
                         .finally(() => {
-                            // 전송 완료 후 버튼 원래 상태로 복구
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = originalBtnHTML;
                             
-                            // 5초 후 상태 메시지 숨김
                             setTimeout(() => {
                                 if (formStatusMessage) formStatusMessage.style.display = 'none';
                             }, 5000);
