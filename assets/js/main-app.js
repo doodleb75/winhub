@@ -1,11 +1,6 @@
 // assets/js/main-app.js
 
-// Spline Runtime, THREE.js, GSAP Plugins
-// import * as THREE_MOD from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
-// window.THREE = THREE_MOD;
-
-import { THREE } from './common-utils.js';
-window.THREE = THREE; 
+// GSAP 플러그인들은 정적으로 로드합니다.
 import { Draggable } from "https://esm.sh/gsap/Draggable";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
 import { MorphSVGPlugin } from "https://esm.sh/gsap/MorphSVGPlugin";
@@ -17,7 +12,7 @@ if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin, Observer);
 }
 
-// Imports from common-utils
+// [수정] common-utils.js에서는 THREE 관련 클래스나 함수를 직접 가져오지 않습니다.
 import {
     setupScrollRestoration,
     degToRad,
@@ -27,11 +22,10 @@ import {
     runLoaderSequence,
     hideLoaderOnError,
     buildUrl,
-    InteractiveBackgroundSphere,
-    loadSplineScene,
-    killAllScrollTriggers,
-    loadCommonUI
+    loadCommonUI,
+    killAllScrollTriggers
 } from './common-utils.js';
+
 
 // 모바일 브라우저의 동적 주소창에 대응하여 실제 뷰포트 높이를 계산하고 CSS 변수(--vh)를 설정합니다.
 function setViewportHeight() {
@@ -65,7 +59,6 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
 
 // --- Configuration Variables ---
 const getScaleConfig = (isDesktopView) => ({ hero: isDesktopView ? 140 : 300, part1: isDesktopView ? 200 : 400, part2: isDesktopView ? 200 : 400, part3: isDesktopView ? 200 : 400 });
-const barShapesConfig = { initial: "M0 5 L0 5 L0 5 L0 5 Z", part1Enter: "M0,5 Q15,0 30,4 Q50,7 70,4 Q85,0 100,5 V5 Q85,10 70,6 Q50,3 30,6 Q15,10 0,5 Z", part2Enter: "M0,5 C20,-5 40,15 50,5 C60,-5 80,15 100,5 V5 C80,0 60,10 50,5 C40,0 20,10 0,5 Z", part3Enter: "M0,5 Q20,10 40,5 Q60,0 80,5 Q100,10 100,5 V5 Q80,0 60,5 Q40,10 20,5 Q0,0 0,5 Z", full: "M0,0 H100 V10 H0 Z" };
 const getTargetWinhubX = (isMobileView) => isMobileView ? responsiveX(70) : responsiveX(65);
 const getTargetWinhubY = (isMobileView) => isMobileView ? responsiveY(-10) : 0;
 const WINHUB_INTRO_END_Z = 0;
@@ -111,7 +104,7 @@ function enableScrollInteraction() {
 }
 
 
-// --- Animation Functions ---
+// --- Animation Functions (기존 함수들 유지) ---
 function playHeadlineCharsAnimation(animateIn) {
     if (typeof gsap === 'undefined' || typeof SplitText === 'undefined') return;
 
@@ -394,7 +387,6 @@ function setupMainPageBackgroundChangeAnimations() {
     });
  }
 
-// ★★★ FIX: Spline 오브젝트가 리사이즈에 반응하도록 수정된 함수 ★★★
 function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     splineTimelines.forEach(tl => tl.kill()); 
@@ -409,7 +401,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
             trigger: "#hero", 
             start: "top 10%", 
             end: "bottom bottom", 
-            scrub: 0.5, // ★★★ CHANGE: scrub 값을 낮춰 반응성을 높입니다.
+            scrub: 0.5,
             invalidateOnRefresh: true, 
             onEnter: () => cableObj && (cableObj.visible = false), 
             onLeaveBack: () => cableObj && (cableObj.visible = false), 
@@ -422,14 +414,12 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     });
 
     heroTimeline.to(winhubObj.position, {
-        // 값을 함수로 전달하여 ScrollTrigger가 refresh될 때마다 다시 계산하도록 합니다.
         x: () => getTargetWinhubX(isMobileView),
         y: () => getTargetWinhubY(isMobileView),
         z: WINHUB_INTRO_END_Z
     }, 0)
     .to(winhubObj.rotation, { x: degToRad(0), y: degToRad(90), z: degToRad(0) }, 0)
     .to(winhubObj.scale, { 
-        // 스케일 값도 함수로 전달합니다.
         x: () => responsiveScale(currentScaleConfig.hero), 
         y: () => responsiveScale(currentScaleConfig.hero), 
         z: () => responsiveScale(currentScaleConfig.hero) 
@@ -444,7 +434,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
                 trigger: "#part1", 
                 start: "top 70%", 
                 end: "center bottom", 
-                scrub: 1, // ★★★ CHANGE: scrub 값을 낮춰 반응성을 높입니다.
+                scrub: 1, 
                 invalidateOnRefresh: true, 
                 onEnter: () => cableObj && (cableObj.visible = true), 
                 onEnterBack: () => cableObj && (cableObj.visible = true), 
@@ -474,7 +464,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
                 trigger: "#part2", 
                 start: "top 85%", 
                 end: "top 30%", 
-                scrub: 1, // ★★★ CHANGE: scrub 값을 낮춰 반응성을 높입니다.
+                scrub: 1, 
                 invalidateOnRefresh: true, 
                 onEnter: () => cableObj && (cableObj.visible = true), 
                 onEnterBack: () => cableObj && (cableObj.visible = true) 
@@ -503,7 +493,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
                 trigger: "#part3", 
                 start: "top 30%", 
                 end: "center bottom", 
-                scrub: 1, // ★★★ CHANGE: scrub 값을 낮춰 반응성을 높입니다.
+                scrub: 1, 
                 invalidateOnRefresh: true, 
                 onEnter: () => cableObj && (cableObj.visible = true) 
             }
@@ -525,18 +515,6 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
 }
 
 
-function setupBarAnimations() {
-    if (typeof gsap === 'undefined' || typeof MorphSVGPlugin === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-    const barElement = document.getElementById("barElementPath"); if (!barElement) return; gsap.set(barElement, { morphSVG: barShapesConfig.initial });
-    const sections = [ { id: "hero", shape: barShapesConfig.initial, nextShape: barShapesConfig.part1Enter, color: "#FFD700" }, { id: "part1", shape: barShapesConfig.part1Enter, nextShape: barShapesConfig.part2Enter, color: "#87CEEB" }, { id: "part2", shape: barShapesConfig.part2Enter, nextShape: barShapesConfig.part3Enter, color: "#90EE90" }, { id: "part3", shape: barShapesConfig.part3Enter, nextShape: barShapesConfig.full, color: "#FFB6C1" } ];
-    sections.forEach((section, index) => { const triggerElement = document.getElementById(section.id); if (!triggerElement) return;
-        ScrollTrigger.create({ id: `barMorphTrigger-${section.id}`, trigger: triggerElement, start: "top 10%", end: "bottom top", invalidateOnRefresh: true,
-            onEnter: () => gsap.to(barElement, { morphSVG: section.shape, duration: 0.7, ease: "sine.inOut", attr: { fill: section.color } }),
-            onEnterBack: () => gsap.to(barElement, { morphSVG: section.shape, duration: 0.7, ease: "sine.inOut", attr: { fill: section.color } }),
-            onLeaveBack: () => { if (index > 0) gsap.to(barElement, { morphSVG: sections[index - 1].shape, duration: 0.7, ease: "sine.inOut", attr: { fill: sections[index - 1].color } }); else gsap.to(barElement, { morphSVG: barShapesConfig.initial, duration: 0.7, ease: "sine.inOut", attr: { fill: sections[0].color } }); }
-        });
-    });
- }
 
 function setupAdvantageCardAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
@@ -674,70 +652,110 @@ function populateWorksList() {
     });
  }
 
-// --- Main Sequence ---
-async function runMainPageSequence() {
-    if (typeof gsap === 'undefined' || typeof SplitText === 'undefined') {
-        hideLoaderOnError();
-        return;
-    }
 
-    const loaderPromise = runLoaderSequence('.part-container');
-
-    const splineCanvas = document.getElementById("canvas3d");
-    if (splineCanvas) gsap.set(splineCanvas, { autoAlpha: 0 });
-
+// [수정] 무거운 3D 에셋과 라이브러리를 비동기적으로 로드하는 함수
+async function initializeHeavyAssets() {
     try {
-        mainSplineApp = await loadSplineScene("canvas3d", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode");
+        // 1. 필요한 라이브러리를 동적으로 import 합니다.
+        const { Application } = await import('https://unpkg.com/@splinetool/runtime/build/runtime.js');
+        
+        // [수정] common-utils.js에서는 유틸리티 함수만 가져옵니다.
+        const { InteractiveBackgroundSphere, loadSplineScene } = await import('./common-utils.js');
+
+        // [수정] THREE.js 모듈 전체를 직접 동적으로 import 하여 오류를 해결합니다.
+        const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js');
+        window.THREE = THREE; // Spline 런타임이 참조할 수 있도록 전역에 할당
+
+        // 2. Spline 씬을 로드합니다.
+        const splineCanvas = document.getElementById("canvas3d");
+        if (splineCanvas) gsap.set(splineCanvas, { autoAlpha: 0 });
+
+        mainSplineApp = await loadSplineScene("canvas3d", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode", Application);
         
         if (mainSplineApp) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-
             winhub = mainSplineApp.findObjectByName("Winhub");
             cable = mainSplineApp.findObjectByName("cable");
-            
-            if (winhub) {
-                winhub.visible = false;
-            } else {
-                console.warn("MAIN-APP: 'Winhub' object not found in the Spline scene.");
-            }
-
-            if (cable) {
-                cable.visible = false;
-            } else {
-                console.warn("MAIN-APP: 'cable' object not found in the Spline scene.");
-            }
-
-            if (!winhub || !cable) {
-                console.error("MAIN-APP: Missing one or more critical Spline objects (Winhub, cable). The 3D animation might be degraded.");
-            }
+            if (winhub) winhub.visible = false;
+            if (cable) cable.visible = false;
         } else {
             console.error("MAIN-APP: Main Spline App could not be loaded.");
         }
+
+        // 3. Spline 씬 로딩 후 인트로 애니메이션을 실행합니다.
+        playSplineIntroAnimation();
+
+        // 4. 인터랙티브 배경 구체를 초기화하고 애니메이션을 적용합니다.
+        // [수정] 직접 import한 THREE 객체를 전달합니다.
+        mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', THREE);
+        if (mainPageBackgroundSphere.valid) {
+            mainPageBackgroundSphere.init().introAnimate();
+        }
+
+        // 5. 모든 스크롤 기반 애니메이션을 설정합니다.
+        if (!initialSetupDone) {
+            setupResponsiveScrollTriggers();
+            initialSetupDone = true;
+        } else {
+            if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+        }
+
     } catch (error) {
-        console.error("MAIN-APP: Error during critical loading:", error);
+        console.error("Error initializing heavy assets:", error);
     }
+}
 
-    await loaderPromise;
+// Spline 인트로 애니메이션을 별도 함수로 분리
+function playSplineIntroAnimation() {
+    const splineCanvas = document.getElementById("canvas3d");
+    if (!splineCanvas || !winhub) return;
 
-    disableScrollInteraction();
+    const isMobileViewInitial = window.innerWidth <= 767;
+    const introTl = gsap.timeline();
 
+    introTl.to(splineCanvas, { autoAlpha: 1, duration: 1 }, 0)
+        .call(() => winhub.visible = true, null, "<")
+        .fromTo(winhub.scale, 
+            { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5) }, 
+            { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), duration: 1.5, ease: "power3.out" }, 
+            "<+0.1")
+        .fromTo(winhub.rotation, 
+            { x: degToRad(90), y: degToRad(-360), z: degToRad(5) }, 
+            { x: degToRad(0), y: degToRad(90), z: degToRad(0), duration: 1.5, ease: "power3.out" }, 
+            "<")
+        .fromTo(winhub.position,
+            { x: 0, y: 0, z: WINHUB_INTRO_END_Z },
+            {
+                x: getTargetWinhubX(isMobileViewInitial),
+                y: getTargetWinhubY(isMobileViewInitial),
+                z: WINHUB_INTRO_END_Z,
+                duration: 1.5,
+                ease: "power3.out"
+            },
+            "<");
+}
+
+
+// 메인 시퀀스를 가벼운 초기화와 무거운 후처리로 분리
+async function runMainPageSequence() {
+    // 1. 로더를 실행하고, 완료되면 즉시 기본 콘텐츠를 보여줍니다.
+    await runLoaderSequence('.part-container');
+    enableScrollInteraction();
+
+    // 2. 가벼운 텍스트 인트로 애니메이션을 즉시 실행합니다.
     const comNameElement = document.querySelector(".com-name-ani");
     const heroTextBlock = document.querySelector('.hero-text-block');
 
     if (!comNameElement || !heroTextBlock) {
         console.error("Missing critical hero text elements for intro animation.");
-        hideLoaderOnError();
-        enableScrollInteraction();
         return;
     }
-
+    
     gsap.set(comNameElement, { autoAlpha: 0 });
     gsap.set(".headline", { autoAlpha: 0 });
     gsap.set(".headline div", { autoAlpha: 0 });
 
-    const masterIntroTimeline = gsap.timeline({ onComplete: onMasterIntroComplete });
-    const isMobileViewInitial = window.innerWidth <= 767;
-
+    const masterIntroTimeline = gsap.timeline({ onComplete: onLightIntroComplete });
+    
     if (comNameElement.parentNode !== heroTextBlock) {
         heroTextBlock.prepend(comNameElement);
     }
@@ -855,36 +873,12 @@ async function runMainPageSequence() {
         }
     }
 
-    if (splineCanvas && winhub) {
-        masterIntroTimeline.to(splineCanvas, { autoAlpha: 1, duration: 1 }, "-=0.5").call(() => winhub.visible = true, null, "<")
-            .fromTo(winhub.scale, { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero * 0.5) }, { x: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), y: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), z: responsiveScale(getScaleConfig(!isMobileViewInitial).hero), duration: 1.5, ease: "power3.out" }, "<+0.2")
-            .fromTo(winhub.rotation, { x: degToRad(90), y: degToRad(-360), z: degToRad(5) }, { x: degToRad(0), y: degToRad(90), z: degToRad(0), duration: 1.5, ease: "power3.out" }, "<")
-            .fromTo(winhub.position,
-                { x: 0, y: 0, z: WINHUB_INTRO_END_Z },
-                {
-                    x: getTargetWinhubX(isMobileViewInitial),
-                    y: getTargetWinhubY(isMobileViewInitial),
-                    z: WINHUB_INTRO_END_Z,
-                    duration: 1.5,
-                    ease: "power3.out"
-                },
-                "<");
-    }
+    // 3. 가벼운 인트로 완료 후, 무거운 에셋 로딩을 시작합니다.
+    masterIntroTimeline.eventCallback("onComplete", onLightIntroComplete);
 }
 
-function onMasterIntroComplete() {
-    enableScrollInteraction();
-
-    if (typeof window.THREE !== 'undefined') {
-        mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', { sphereOffsetX: .1, sphereOffsetY: 0 });
-        if (mainPageBackgroundSphere.valid && mainPageBackgroundSphere.init) mainPageBackgroundSphere.init().introAnimate();
-    }
-    if (!initialSetupDone) {
-        setupResponsiveScrollTriggers();
-        initialSetupDone = true;
-    } else {
-        if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
-    }
+// 가벼운 인트로가 완료된 후 호출될 콜백
+function onLightIntroComplete() {
     heroHeadlineTriggerEnabled = true;
     const menuIcon = document.querySelector(".menu-icon");
     if (menuIcon) gsap.to(menuIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.1 });
@@ -892,8 +886,12 @@ function onMasterIntroComplete() {
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.3 });
     
     window.scrollTo(0, 0);
+
+    // [핵심] 여기서 무거운 에셋 로딩 및 관련 애니메이션/스크롤 트리거 설정을 시작합니다.
+    initializeHeavyAssets();
 }
 
+// 모든 ScrollTrigger를 설정하는 함수
 function setupAllScrollTriggers(isDesktopView) {
     const elementsToClear = ["#part2 .part2-info", "#part2 .works-list", "#part2 .works-list-container"];
     elementsToClear.forEach(selector => { const el = document.querySelector(selector); if (el) gsap.set(el, { clearProps: "all" }); });
@@ -915,10 +913,9 @@ function setupAllScrollTriggers(isDesktopView) {
             transform: 'translateY(-100%)'
         });
     }
-
+    
     setupMainPageBackgroundChangeAnimations();
     if (mainSplineApp && winhub && cable) setupSplineScrollAnimations(winhub, cable, isDesktopView);
-    setupBarAnimations();
     setupAdvantageCardAnimations();
     setupOutroContentAnimation();
     setupHeaderLogoScrollAnimation();
@@ -935,6 +932,7 @@ function setupAllScrollTriggers(isDesktopView) {
     if (initialSetupDone) heroHeadlineTriggerEnabled = true;
 }
 
+// 반응형 ScrollTrigger 설정
 function setupResponsiveScrollTriggers() {
     if (typeof ScrollTrigger === 'undefined') return;
     ScrollTrigger.matchMedia({
@@ -975,13 +973,7 @@ function setupResponsiveScrollTriggers() {
     });
 }
 
-window.addEventListener('load', () => {
-  // 모든 리소스(이미지 등)가 로드된 후, 최종 레이아웃을 기준으로 ScrollTrigger 인스턴스를 다시 계산합니다.
-  if (typeof ScrollTrigger !== 'undefined') {
-    ScrollTrigger.refresh(true);
-  }
-});
-
+// --- Main Sequence ---
 document.addEventListener('DOMContentLoaded', async () => {
     setViewportHeight();
     window.scrollTo(0, 0);
@@ -1009,4 +1001,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         hideLoaderOnError();
         enableScrollInteraction();
     }
+});
+
+window.addEventListener('load', () => {
+  // 모든 리소스(이미지 등)가 로드된 후, 최종 레이아웃을 기준으로 ScrollTrigger 인스턴스를 다시 계산합니다.
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.refresh(true);
+  }
 });

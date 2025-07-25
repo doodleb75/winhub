@@ -1,0 +1,616 @@
+/* ================================================== */
+/* sub.css                                            */
+/* 서브 페이지 전용 스타일                             */
+/* ================================================== */
+
+/* --- 1. Sub Page Body & Layout --- */
+body.subpage-body {
+  background-image: none;
+  background-color: #292c35;
+  color: #fdfefe;
+  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+}
+.subpage-container {
+  position: relative;
+  z-index: 2;
+}
+section.content-section {
+    padding-top: 10rem !important;
+}
+.subpage-body .section-content-wrapper {
+    max-width: 900px;
+    width: 100%;
+    padding: 3rem 1.5rem;
+    text-align: left;
+    border-radius: 12px;
+    margin-bottom: 2.5rem;
+    color: var(--subpage-text-color, #ffffff);
+}
+.subpage-body .subpage-section {
+    width: 100%;
+    min-height: 100vh;
+    display: flex
+;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding: 3.75rem 1.25rem;
+    padding-bottom: 8rem;
+    box-sizing: border-box;
+}
+.subpage-section:first-of-type {
+  padding-top: 5rem;
+}
+.subpage-section.content-section {
+    background: #fff;
+}
+/* --- 2. Sub Page Hero --- */
+section#sub-hero {
+  position: relative;
+  height: 100vh;
+}
+.sub-hero-section {
+  position: relative; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; text-align: center;
+}
+.sub-hero-content {
+  max-width: 100%; text-align: center; z-index: 1; opacity: 1 !important;
+  transform: none !important; visibility: visible !important; position: absolute;
+  top: 30%; transform: translateY(-30%) !important;
+}
+.sub-hero-content .page-title {
+  font-size: clamp(2.5rem, 8vw, 7vw); margin-bottom: 1.25rem;
+  font-weight: 700; line-height: 1.15; text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+.sub-hero-content .page-description {
+  font-size: clamp(0.9rem, 4vw, 1.65rem); max-width: 600px;
+  line-height: 1.7; margin: 0 auto;
+}
+#threejs-object-container.sub-spline-container {
+  flex: 0 0 auto; width: 100vw; aspect-ratio: 16 / 9;
+  margin-top: 2rem; position: relative; overflow: hidden; position: absolute;
+}
+#spline-canvas-subpage {
+  width: 100%; height: 100%; position: absolute; top: 0; left: 0;
+  outline: none; cursor: default !important;
+}
+
+/* --- 3. Sub Page Content Sections --- */
+.section-content-wrapper {
+  max-width: 900px; width: 100%; padding: 3rem 1.5rem; text-align: left;
+  border-radius: 12px; margin-bottom: 2.5rem; color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.section-content-wrapper .section-title {
+  font-size: clamp(1.8rem, 6vw, 2.8rem); margin-bottom: 2rem;
+  font-weight: 700; padding-bottom: 1rem; border-bottom: 2px solid;
+  text-align: left;
+}
+.section-content-wrapper p,
+.section-content-wrapper .mission-text,
+.section-content-wrapper .service-intro-text {
+  font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+  line-height: 1.8; margin-bottom: 1.5rem;
+}
+.animated-content { opacity: 0; }
+
+/* --- 4. Sub Page Specific Components --- */
+/* Tabs (about.html) */
+.tabs-container { margin-top: 1.875rem; width: 100%; }
+.tab-buttons {
+  display: flex; justify-content: flex-start; margin-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2); overflow-x: auto;
+  -webkit-overflow-scrolling: touch; padding-bottom: 0.5rem;
+}
+.tab-button {
+  padding: 0.75rem 1.25rem; cursor: pointer; background-color: transparent;
+  border: none; font-size: clamp(0.9rem, 2.8vw, 1rem); font-weight: 500;
+  margin-right: 0.625rem; white-space: nowrap; border-bottom: 3px solid transparent;
+  transition: all 0.3s ease; border-radius: 6px 6px 0 0;
+  position: relative; bottom: -2px;
+}
+.tab-button.active { font-weight: 700; border-bottom-color: #4dabf7; background-color: rgba(255, 255, 255, 0.1); }
+.tab-content {
+  display: none; padding: 1.875rem 1.25rem; border-radius: 0 8px 8px 8px;
+  animation: fadeIn 0.5s ease-in-out; text-align: left; border-top: none;
+  background-color: rgba(0, 0, 0, 0.15); border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* History Timeline (about.html) */
+#history-section .section-content-wrapper { background-color: transparent !important; border: none !important; box-shadow: none !important; padding-top: 2rem; padding-bottom: 4rem; max-width: 1200px; }
+.history-timeline { position: relative; width: 90%; max-width: 1000px; margin: 4rem auto; padding: 2rem 0; }
+.history-timeline::after { content: ""; position: absolute; width: 1px; background-color: rgba(255, 255, 255, 0.15); top: 0; bottom: 0; left: 50%; margin-left: -2px; transition: background-color 0.5s ease-in-out; z-index: 1; }
+.timeline-entry { padding: 1rem 4rem; position: relative; width: 50%; opacity: 0; z-index: 2; }
+.timeline-entry.left-entry { left: 0; text-align: right; }
+.timeline-entry.right-entry { left: 50%; text-align: left; }
+.timeline-entry::after { content: ""; position: absolute; width: 20px; height: 20px; top: 25px; background-color: #fff; border: 4px solid #4dabf7; border-radius: 50%; z-index: 3; transition: all 0.5s ease-in-out; }
+.timeline-entry.left-entry::after { right: -11px; }
+.timeline-entry.right-entry::after { left: -16px; }
+.history-year { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.75rem; color: #74c0fc; transition: color 0.5s ease-in-out; }
+.history-details p { margin: 0; line-height: 1.7; opacity: 0.9; }
+.history-details p:not(:last-child) { margin-bottom: 0.5rem; }
+
+/* Partners Slider (about.html) */
+#partners-section { padding-left: 0; padding-right: 0; min-height: auto; }
+#partners-section .section-content-wrapper { padding-bottom: 0; margin-bottom: 3rem; background: transparent !important; border: none !important; box-shadow: none !important; padding-left: 1.5rem; padding-right: 1.5rem; }
+.partners-slider { width: 100%; position: relative; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%); }
+.partners-slide-track { display: flex; align-items: center; width: calc(280px * 16); animation: scroll 60s linear infinite; }
+.partners-slider:hover .partners-slide-track { animation-play-state: paused; }
+@keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(calc(-280px * 8)); } }
+.partner-slide { width: 200px; margin: 0 40px; display: flex; align-items: center; justify-content: center; min-height: 100px; }
+.partner-slide img { max-width: 100%; max-height: 100px; width: auto; height: auto; filter: grayscale(100%); opacity: 0.7; transition: all 0.4s ease; mix-blend-mode: screen; }
+.partner-slide a:hover img,
+.subpage-body.scrolled-past-hero-colors .partner-slide a:hover img { filter: grayscale(0); opacity: 1; transform: scale(1.1); mix-blend-mode: normal; }
+
+/* Contact Form (contact.html) */
+.contact-wrapper { max-width: 1100px; }
+.contact-main-content { display: flex; flex-direction: row; gap: 3rem; }
+.contact-info-container { flex: 1; display: flex; flex-direction: column; gap: 1.5rem}
+.contact-form-container { flex: 1.5; }
+.contact-info-item {    display: flex;    flex-direction: column;}
+.contact-intro {
+    text-align: left;
+    margin-bottom: 3rem;
+}
+.contact-section-title {
+    font-size: clamp(1.6rem, 5vw, 2.4rem) !important;
+    text-align: left !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0.5rem !important;
+}
+.contact-info-item .info-label {
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+.form-group {
+  position: relative;
+  margin-bottom: 2.7rem;
+}
+
+.form-input,
+.form-textarea {
+  display: block;
+  width: 100%;
+  padding: 10px 10px 10px 5px;
+  line-height: 1.5;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid;
+  border-radius: 0;
+  outline: none;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  transition: border-color 0.3s ease;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: transparent;
+}
+
+.subpage-body:not(.scrolled-past-hero-colors) .form-input,
+.subpage-body:not(.scrolled-past-hero-colors) .form-textarea {
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+  color: #ecf0f1;
+}
+
+.subpage-body.scrolled-past-hero-colors .form-input,
+.subpage-body.scrolled-past-hero-colors .form-textarea {
+  border-bottom-color: #ced4da;
+  color: #495057;
+}
+
+.form-label {
+  position: absolute;
+  top: 16px;
+  left: 5px;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-weight: 500;
+  pointer-events: none;
+  cursor: text;
+
+  transition: top 0.2s ease-in-out, font-size 0.2s ease-in-out,
+    color 0.2s ease-in-out !important;
+}
+
+.subpage-body:not(.scrolled-past-hero-colors) .form-label {
+  color: #bdc3c7;
+}
+
+.subpage-body.scrolled-past-hero-colors .form-label {
+  color: #6c757d;
+}
+
+.form-input:focus ~ .form-label,
+.form-input:not(:placeholder-shown) ~ .form-label,
+.form-textarea:focus ~ .form-label,
+.form-textarea:not(:placeholder-shown) ~ .form-label {
+  top: -22px;
+  font-size: 13px;
+  color: #491e9b !important;
+  cursor: default;
+}
+
+.form-group::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  transition: all 0.4s cubic-bezier(0.42, 0, 0.58, 1);
+}
+
+.subpage-body:not(.scrolled-past-hero-colors) .form-group::before {
+  background-color: #491e9b;
+}
+
+.subpage-body.scrolled-past-hero-colors .form-group::before {
+  background-color: #491e9b;
+}
+
+.form-group:focus-within::before {
+  width: 100%;
+}
+
+.form-submit-btn {
+  position: relative;
+  color: #491e9b;
+  transition: all 0.2s;
+  /*   display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: none; */
+}
+.form-submit-btn:before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: none;
+  border-top: 1px solid #44444466;
+  border-bottom: 1px solid #44444466;
+  transform: skewX(20deg);
+  z-index: -1;
+  transition: all 0.2s;
+}
+.form-submit-btn-styled {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin: 0 auto ;
+  /* width: fit-content; */
+  width: 57%;
+  text-align: center;
+  justify-content: center;
+}
+.subpage-body.scrolled-past-hero-colors .form-submit-btn-styled {
+    color: #491e9b;
+}
+.form-submit-btn-styled .menu-link-hover-svg {
+    width: 40px;
+}
+/* 기울어진 보더 효과 */
+.form-submit-btn-styled:before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: none;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+  transform: skewX(20deg);
+  z-index: -1;
+  transition: all 0.3s ease;
+}
+.form-submit-btn-styled:hover:before {
+    /* top: -4px; */
+    background: #491e9b;
+    transform: skewX(0deg);
+    /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); */
+    /* border-radius: 7px; */
+}
+.form-submit-btn-styled:hover {
+    background: transparent;
+    color: #fff !important;
+    padding-left: 2rem;
+}
+/* 화살표 아이콘 컨테이너 (크기 수정) */
+.form-submit-btn-styled .menu-link-arrow {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0.5rem; /* 여백 조정 */
+  width: 15px; /* 너비 축소 */
+  transition: transform 0.3s ease;
+}
+
+/* SVG 화살표 스타일 */
+.form-submit-btn-styled .menu-link-hover-svg .arrow-path {
+  fill: none;
+  stroke: currentColor; /* 부모 요소(버튼)의 색상을 상속받음 */
+  stroke-miterlimit: 100;
+  stroke-width: 8px; /* 선 두께 살짝 증가 */
+}
+
+.subpage-body:not(.scrolled-past-hero-colors) .form-submit-btn {
+  background-color: #4dabf7;
+  color: #ffffff;
+}
+
+.subpage-body:not(.scrolled-past-hero-colors) .form-submit-btn:hover {
+  background-color: #3598db;
+  transform: translateY(-2px);
+}
+
+.subpage-body.scrolled-past-hero-colors .form-submit-btn {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.subpage-body.scrolled-past-hero-colors .form-submit-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.form-submit-btn .arrow-right {
+  margin-left: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.form-submit-btn:hover .arrow-right {
+  transform: translateX(3px);
+}
+
+.form-status-message {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  display: none;
+}
+
+.form-status-message.success {
+  background-color: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.subpage-body:not(.scrolled-past-hero-colors) .form-status-message.success {
+  color: #a6e9d5;
+}
+
+.subpage-body.scrolled-past-hero-colors .form-status-message.success {
+  color: #155724;
+}
+.map-container { width: 100%; height: 500px; min-height: auto !important; padding: 0 !important; position: relative; }
+/* [추가됨] 커스텀 라디오 버튼 스타일 */
+.form-group-inline {
+  display: flex;
+  flex-wrap: wrap; /* 작은 화면에서 줄바꿈 허용 */
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1rem;
+}
+
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* 기본 라디오 버튼 숨기기 */
+.radio-option input[type="radio"] {
+  display: none;
+}
+
+/* 커스텀 라디오 버튼 레이블 스타일 */
+.radio-option label {
+  position: relative;
+  padding-left: 30px; /* 커스텀 버튼을 위한 공간 */
+  cursor: pointer;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  transition: color 0.3s ease;
+}
+
+/* 커스텀 라디오 버튼 원 */
+.radio-option label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid;
+  border-radius: 50%;
+  transition: border-color 0.3s ease;
+}
+
+/* 선택되었을 때의 내부 점 */
+.radio-option label::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  transform: translateY(-50%) scale(0); /* 기본적으로 숨김 */
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: transform 0.2s ease-in-out;
+}
+
+/* 어두운 배경일 때 스타일 */
+.subpage-body:not(.scrolled-past-hero-colors) .radio-option label {
+  color: #bdc3c7;
+}
+.subpage-body:not(.scrolled-past-hero-colors) .radio-option label::before {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.subpage-body:not(.scrolled-past-hero-colors)
+  .radio-option
+  input[type="radio"]:checked
+  + label {
+  color: #491e9b; /* 어두운 테마용 밝은 파란색 */
+  font-weight: 600;
+}
+.subpage-body:not(.scrolled-past-hero-colors) .radio-option label::after {
+  background-color: #491e9b;
+}
+.subpage-body:not(.scrolled-past-hero-colors)
+  .radio-option
+  input[type="radio"]:checked
+  + label::before {
+  border-color: #491e9b;
+}
+
+/* 밝은 배경일 때 스타일 */
+.subpage-body.scrolled-past-hero-colors .radio-option label {
+  color: #6c757d;
+}
+.subpage-body.scrolled-past-hero-colors .radio-option label::before {
+  border-color: #adb5bd;
+}
+.subpage-body.scrolled-past-hero-colors
+  .radio-option
+  input[type="radio"]:checked
+  + label {
+  color: #491e9b; /* 밝은 테마용 파란색 */
+  font-weight: 600;
+}
+.subpage-body.scrolled-past-hero-colors .radio-option label::after {
+  background-color: #491e9b;
+}
+.subpage-body.scrolled-past-hero-colors
+  .radio-option
+  input[type="radio"]:checked
+  + label::before {
+  border-color: #491e9b;
+}
+
+/* 선택 시 내부 점 표시 및 테두리 색상 변경 */
+.radio-option input[type="radio"]:checked + label::after {
+  transform: translateY(-50%) scale(1);
+}
+
+/* 호버 효과 */
+.radio-option:hover label::before {
+  border-color: #491e9b;
+}
+.subpage-body:not(.scrolled-past-hero-colors)
+  .radio-option:hover
+  label::before {
+  border-color: #491e9b;
+}
+
+/* --- 5. Scrolled State --- */
+body.subpage-body.scrolled-past-hero-colors { background-color: #f0f0f0; color: #2c3e50; }
+.subpage-body.scrolled-past-hero-colors .com-name-logo.logo-class,
+.subpage-body.scrolled-past-hero-colors .menu-icon { color: #2c3e50; }
+.subpage-body.scrolled-past-hero-colors .section-content-wrapper { background-color: #ffffff; color: #2c3e50; /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); */ }
+.subpage-body.scrolled-past-hero-colors .section-title { border-color: transparent; }
+.subpage-body.scrolled-past-hero-colors .tab-button { 
+      padding: 0.75rem 1.25rem;
+        cursor: pointer;
+        background-color: transparent;
+        border: none;
+        font-size: clamp(0.9rem, 2.8vw, 1rem);
+        font-weight: 500;
+        margin-right: 0.625rem;
+        white-space: nowrap;
+        border-bottom: 3px solid transparent;
+        transition: all .3s ease ;
+        border-radius: 6px 6px 0 0;
+        position: relative;
+        bottom: -2px;
+}
+.subpage-body.scrolled-past-hero-colors .tab-button.active { border-bottom-color: #007bff; background-color: #f8f9fa; }
+.subpage-body.scrolled-past-hero-colors .tab-content { background-color: #f8f9fa; border-color: #dee2e6; }
+.subpage-body.scrolled-past-hero-colors .history-timeline::after { background-color: #d0d0d0; }
+.subpage-body.scrolled-past-hero-colors .timeline-entry::after { border-color: #007bff; }
+.subpage-body.scrolled-past-hero-colors .history-year { color: #0056b3; }
+.subpage-body.scrolled-past-hero-colors .partner-slide img { mix-blend-mode: multiply; filter: grayscale(100%) brightness(0.9); opacity: 0.8; }
+.subpage-body.scrolled-past-hero-colors .form-input,
+.subpage-body.scrolled-past-hero-colors .form-textarea { border-bottom-color: #ced4da; color: #495057; }
+.subpage-body.scrolled-past-hero-colors .form-label { color: #6c757d; }
+.subpage-body.scrolled-past-hero-colors .subpage-footer { background-color: #e9ecef; color: #555; }
+
+/* bis-domain-tab-contents */
+.subpage-body .biz-domain-item {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+    transition: border-bottom-color 0.5s ease-in-out;
+}
+.biz-domain-item {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid;
+}
+.biz-domain-item:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.biz-domain-item-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.biz-domain-item-icon {
+  font-size: 1.8rem;
+  margin-right: 1rem;
+  width: 40px;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+.biz-domain-item h4 {
+  font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.biz-domain-item p.item-description {
+  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+  line-height: 1.7;
+  margin-left: 50px;
+}
+
+/* --- 6. Media Queries for Sub Pages --- */
+@media (max-width: 768px) {
+  .subpage-body .sub-hero-content .page-title { font-size: clamp(2rem, 4rem, 3.5rem); }
+  .subpage-body .sub-hero-content .page-description { font-size: clamp(0.85rem, 3.5vw, 2rem); max-width: 60vw; }
+  .history-timeline::after { left: 20px; margin-left: 0; }
+  .timeline-entry { width: 100%; padding-left: 70px; padding-right: 25px; }
+  .timeline-entry.left-entry, .timeline-entry.right-entry { left: 0; text-align: left; }
+  .timeline-entry.left-entry::after, .timeline-entry.right-entry::after { left: 6px; }
+  .contact-main-content { flex-direction: column; }
+}

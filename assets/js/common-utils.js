@@ -1,12 +1,16 @@
 // assets/js/common-utils.js
 
-import { Application as SplineApplication } from 'https://unpkg.com/@splinetool/runtime/build/runtime.js';
-// --- [수정됨] 한 곳에서 THREE.js를 가져오고 내보냅니다 ---
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
-export { THREE }; // 다른 모듈에서 사용할 수 있도록 내보내기
+// [성능 개선] SplineApplication과 THREE는 각 app 파일(main-app.js, sub-app.js)에서
+// 필요할 때 동적으로 import하여 사용하므로, 여기서는 정적 import를 제거합니다.
+// 대신, 이 라이브러리들을 사용하는 함수(loadSplineScene, InteractiveBackgroundSphere)가
+// 파라미터로 해당 라이브러리 객체를 받도록 수정합니다.
 
 import { ScrollTrigger } from "https://esm.sh/gsap/ScrollTrigger";
 import { ScrambleTextPlugin } from "https://esm.sh/gsap/ScrambleTextPlugin";
+
+// [수정] THREE.js 모듈은 이 파일에서 직접 내보내지 않습니다.
+// 각 app 파일(main-app, sub-app)이 필요에 따라 동적으로 직접 import합니다.
+// 이로써 의존성 관리가 명확해지고, 'THREE' 객체가 undefined가 되는 문제를 해결합니다.
 
 if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
@@ -30,11 +34,6 @@ export function responsiveY(percent) { const baselineHeight = 1080; return (perc
 
 
 // [FIX] sessionStorage 접근 시 발생할 수 있는 오류를 방지하기 위한 헬퍼 함수
-/**
- * sessionStorage에서 안전하게 항목을 검색합니다.
- * @param {string} key 검색할 키입니다.
- * @returns {string|null} 값 또는 오류가 발생하거나 키가 존재하지 않으면 null을 반환합니다.
- */
 function safeSessionGet(key) {
     try {
         return sessionStorage.getItem(key);
@@ -43,11 +42,6 @@ function safeSessionGet(key) {
     }
 }
 
-/**
- * sessionStorage에 안전하게 항목을 설정합니다.
- * @param {string} key 설정할 키입니다.
- * @param {string} value 저장할 값입니다.
- */
 function safeSessionSet(key, value) {
     try {
         sessionStorage.setItem(key, value);
@@ -56,19 +50,11 @@ function safeSessionSet(key, value) {
     }
 }
 
-
-/**
- * [수정 및 최종 수정] SVG 로더 애니메이션 시퀀스를 실행합니다.
- * 이 버전은 모바일 레이아웃 문제와 클릭 불가능한 링크 문제를 모두 해결합니다.
- * @param {string} mainContentSelector - 로딩 후 표시할 메인 콘텐츠 영역의 선택자입니다.
- * @returns {Promise<void>} 로더 애니메이션이 완료되면 resolve되는 프로미스를 반환합니다.
- */
 export function runLoaderSequence(mainContentSelector = '#main-content') {
     return new Promise((resolve) => {
         const loader = document.getElementById('loader');
         const socket = document.getElementById('loader-socket');
         const socketPath = document.getElementById('lan-hole-path');
-        // ★★★ FIX: Select the new cable assembly container and its parts ★★★
         const cableAssembly = document.getElementById('loader-cable-assembly');
         const cableHead = document.getElementById('loader-cable-head');
         const cableLine = document.getElementById('loader-cable-line');
@@ -76,7 +62,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         const loaderText = document.getElementById('loader-text');
         const mainContent = document.querySelector(mainContentSelector);
 
-        // Check for all new and old elements to ensure nothing breaks
         if (!loader || !socket || !socketPath || !cableAssembly || !cableHead || !cableLine || !cableHeadPath || !loaderText) {
             console.error("Loader elements missing. Aborting loader sequence.");
             if (loader) gsap.set(loader, { autoAlpha: 0, display: 'none' });
@@ -131,7 +116,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
 
         if (hasVisited) {
             gsap.set(socketPath, { strokeDashoffset: 0, fill: '#ffc400', stroke: '#ffc400' });
-            // ★★★ FIX: Update visited animation for new elements ★★★
             gsap.set(cableLine, { backgroundColor: '#ffc400' });
             gsap.set(cableHeadPath, { fill: '#ffc400' });
             gsap.set(cableAssembly, { top: finalCableTop, opacity: 1, scale: 1 });
@@ -139,7 +123,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
             gsap.set(loaderText, { opacity: 1 });
 
             const tl = gsap.timeline({ onComplete: completeAndShowContent });
-            tl.to([socket, cableAssembly, loaderText], { // Use cableAssembly
+            tl.to([socket, cableAssembly, loaderText], {
                 delay: 0.2,
                 scale: 0.8,
                 opacity: 0,
@@ -157,8 +141,8 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 stroke: '#9d9d9d'
             });
             gsap.set(loaderText, { opacity: 0 });
-            gsap.set([socket, cableAssembly], { scale: 1, opacity: 1 }); // Use cableAssembly
-            gsap.set(cableAssembly, { top: '100vh' }); // Animate the whole assembly
+            gsap.set([socket, cableAssembly], { scale: 1, opacity: 1 });
+            gsap.set(cableAssembly, { top: '100vh' });
 
             const tl = gsap.timeline({
                 onComplete: () => {
@@ -167,13 +151,12 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 }
             });
 
-            // ★★★ FIX: Update main animation sequence for new elements ★★★
             tl.to(socketPath, {
                 strokeDashoffset: 0,
                 duration: 1.5,
                 ease: "power1.inOut"
             })
-            .to(cableAssembly, { // Animate the whole assembly
+            .to(cableAssembly, {
                 top: finalCableTop,
                 duration: 2,
                 ease: "power2.out" 
@@ -183,11 +166,10 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 stroke: "#ffc400",
                 duration: 0.3
             }, "-=0.1")
-            // Also animate the cable color
             .to(cableLine, {
                 backgroundColor: "#ffc400",
                 duration: 0.3
-            }, "<") // Animate at the same time as the socket
+            }, "<")
             .to(cableHeadPath, {
                 fill: "#ffc400",
                 duration: 0.3
@@ -196,7 +178,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 opacity: 1,
                 duration: 0.5
             }, ">-0.2")
-            .to([socket, cableAssembly, loaderText], { // Use cableAssembly
+            .to([socket, cableAssembly, loaderText], {
                 delay: 0.5,
                 scale: 0.8,
                 opacity: 0,
@@ -208,9 +190,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
     });
 }
 
-/**
- * 초기화 중 오류 발생 시 로더를 즉시 숨깁니다.
- */
 export function hideLoaderOnError() {
     const loader = document.getElementById('loader');
     if (loader) {
@@ -277,56 +256,34 @@ export async function loadCommonUI() {
     }
 }
 
-/**
- * [수정됨] 현재 네비게이션 링크의 활성 상태를 설정합니다.
- * 또한 사용자가 네비게이션 링크와 상호 작용할 때 활성 상태를 일시적으로 제거하고 복원하는 호버 효과를 추가합니다.
- */
 function activateCurrentNavLink() {
     const menuOverlayElement = document.getElementById('menu-overlay');
-    if (!menuOverlayElement) {
-        return;
-    }
-
+    if (!menuOverlayElement) return;
     const navLinks = menuOverlayElement.querySelectorAll('.menu-links .top-link a');
-    if (navLinks.length === 0) {
-        return;
-    }
-
+    if (navLinks.length === 0) return;
     let activeLink = null;
     const currentPath = window.location.pathname;
     const normalizedCurrentPath = currentPath.replace(/\/$/, '') || '/';
-
     navLinks.forEach(link => {
         const linkUrl = new URL(link.href, window.location.origin);
         const linkPath = linkUrl.pathname;
         const normalizedLinkPath = linkPath.replace(/\/$/, '') || '/';
-
-        // 경로 일치 조건. 인덱스 페이지를 특별히 처리합니다.
         const isCurrentIndex = normalizedCurrentPath === '/' || normalizedCurrentPath === '/index.html';
         const isLinkIndex = normalizedLinkPath === '/' || normalizedLinkPath === '/index.html';
-
         if ((isCurrentIndex && isLinkIndex) || (!isCurrentIndex && !isLinkIndex && normalizedCurrentPath === normalizedLinkPath)) {
-            activeLink = link; // 활성 링크를 찾았습니다
+            activeLink = link;
         }
     });
-
-    // 페이지 로드 시 올바른 링크에 active 클래스를 추가합니다.
     if (activeLink) {
         activeLink.classList.add('active-nav-link');
     }
-
     navLinks.forEach(link => {
-        // 마우스가 어떤 링크에든 들어가면...
         link.addEventListener('mouseenter', () => {
-            // ...일시적으로 활성 상태를 숨깁니다.
             if (activeLink) {
                 activeLink.classList.remove('active-nav-link');
             }
         });
-
-        // 마우스가 어떤 링크에서든 나가면...
         link.addEventListener('mouseleave', () => {
-            // ...활성 상태를 복원합니다.
             if (activeLink) {
                 activeLink.classList.add('active-nav-link');
             }
@@ -334,18 +291,23 @@ function activateCurrentNavLink() {
     });
 }
 
-
-// InteractiveBackgroundSphere 클래스 (변경 없음)
+// [성능 개선] InteractiveBackgroundSphere 클래스가 THREE.js 객체를 생성자에서 주입받도록 수정
 export class InteractiveBackgroundSphere {
-    constructor(containerSelector, config = {}) {
+    constructor(containerSelector, THREE, config = {}) {
         this.container = document.getElementById(containerSelector);
         if (!this.container) {
             this.valid = false;
             return;
         }
         
-        // [수정됨] 가져온 THREE 객체를 직접 사용합니다
-        this.THREE = THREE;
+        // [수정] 생성자에서 주입받은 THREE 객체를 사용합니다.
+        // 이 THREE 객체는 undefined가 아니어야 합니다.
+        if (!THREE || typeof THREE.Color === 'undefined') {
+            console.error("InteractiveBackgroundSphere: THREE.js object is invalid or not provided.");
+            this.valid = false;
+            return;
+        }
+        this.THREE = THREE; 
         this.valid = true;
 
         this.config = {
@@ -574,14 +536,13 @@ export function setupMenu(toggleId, overlayId, closeId, linksSelector) {
             stagger: { each: 0.1 }
         }, "-=0.2"); 
 
-        // 요청에 따라 마지막에 menu-info 애니메이션을 적용합니다
         if (menuInfo) {
             openTl.to(menuInfo, {
                 duration: 0.6,
                 opacity: 1,
                 y: 0,
                 ease: "power2.out"
-            }, "-=0.5"); // 부드러운 효과를 위해 링크 애니메이션과 겹칩니다
+            }, "-=0.5");
         }
     };
 
@@ -593,13 +554,11 @@ export function setupMenu(toggleId, overlayId, closeId, linksSelector) {
                 if (menuToggle) menuToggle.style.display = "block"; 
                 document.body.style.overflow = "auto";
                 
-                // 다음 열기를 위해 상태를 재설정합니다
                 gsap.set(menuLinkElements, { opacity: 0, y: initialY });
                 if(menuInfo) gsap.set(menuInfo, { opacity: 0, y: initialY });
             }
         });
 
-        // 요소들을 사라지게 하는 애니메이션
         closeTl.to([menuLinkElements, menuInfo], { 
             duration: 0.4, 
             opacity: 0, 
@@ -613,7 +572,7 @@ export function setupMenu(toggleId, overlayId, closeId, linksSelector) {
         
         closeTl.to(blindPanels, { 
             duration: 0.4, 
-            yPercent: 100, // 아래쪽으로 닫습니다
+            yPercent: 100,
             ease: "power2.in", 
             stagger: { each: 0.07, from: "end" } 
         }, "-=0.2");
@@ -626,29 +585,20 @@ export function setupMenu(toggleId, overlayId, closeId, linksSelector) {
 
 export function setupMenuLinkEffects() {
     const menuOverlayElement = document.getElementById('menu-overlay');
-    if (!menuOverlayElement) {
-        return;
-    }
+    if (!menuOverlayElement) return;
     const menuAnchorElements = menuOverlayElement.querySelectorAll(".menu-links .top-link a");
-
-    if (menuAnchorElements.length === 0 || typeof gsap === 'undefined' || !gsap.plugins.scrambleText) {
-        return;
-    }
-
+    if (menuAnchorElements.length === 0 || typeof gsap === 'undefined' || !gsap.plugins.scrambleText) return;
     const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let currentActiveSVG = null; 
-
     const allSvgData = Array.from(menuAnchorElements).map((anchor, i) => {
         const svgElement = anchor.querySelector(".menu-link-hover-svg");
         const svgPath = svgElement ? svgElement.querySelector(".arrow-path") : null;
         const textSpanElement = anchor.querySelector(".menu-link-text");
         let originalText = textSpanElement ? textSpanElement.innerText.trim() : `[NoTextFound${i}]`;
-        
         let measuredWidth = 0;
         if (textSpanElement) {
             const parentA = textSpanElement.parentElement; 
             const clone = textSpanElement.cloneNode(true);
-            
             if (parentA) {
                 const parentStyles = window.getComputedStyle(parentA);
                 clone.style.fontFamily = parentStyles.fontFamily;
@@ -656,46 +606,23 @@ export function setupMenuLinkEffects() {
                 clone.style.fontWeight = parentStyles.fontWeight;
                 clone.style.letterSpacing = parentStyles.letterSpacing;
             }
-
             clone.style.visibility = 'hidden';
             clone.style.position = 'absolute';
             clone.style.whiteSpace = 'nowrap';
             clone.style.left = '-9999px';
-            
             document.body.appendChild(clone);
             measuredWidth = clone.offsetWidth;
             document.body.removeChild(clone);
         }
-        
-        return { 
-            anchor, 
-            svgElement, 
-            svgPath, 
-            textSpanElement, 
-            initialized: false, 
-            pathLength: 0, 
-            originalWidth: measuredWidth > 0 ? measuredWidth + 4 : 0, 
-            originalText: originalText
-        };
+        return { anchor, svgElement, svgPath, textSpanElement, initialized: false, pathLength: 0, originalWidth: measuredWidth > 0 ? measuredWidth + 4 : 0, originalText: originalText };
     });
-
     allSvgData.forEach(data => {
-        if (data.svgElement) {
-            gsap.set(data.svgElement, { opacity: 0, x: -10 });
-        }
-        if (data.textSpanElement && data.originalWidth > 0) {
-            gsap.set(data.textSpanElement, { minWidth: data.originalWidth + 'px' }); 
-        }
+        if (data.svgElement) gsap.set(data.svgElement, { opacity: 0, x: -10 });
+        if (data.textSpanElement && data.originalWidth > 0) gsap.set(data.textSpanElement, { minWidth: data.originalWidth + 'px' }); 
     });
-
-
     allSvgData.forEach((data, index) => {
         const { anchor, svgElement, svgPath, textSpanElement, originalText } = data; 
-
-        if (!textSpanElement && !svgPath) {
-            return;
-        }
-
+        if (!textSpanElement && !svgPath) return;
         const initializeCurrentSvgPath = () => {
             if (svgPath && !data.initialized) {
                 try {
@@ -706,7 +633,6 @@ export function setupMenuLinkEffects() {
             }
             return data.initialized;
         };
-        
         const hideOtherSVGs = (currentAnchor) => {
             allSvgData.forEach(otherData => {
                 if (otherData.anchor !== currentAnchor && otherData.svgElement) {
@@ -719,17 +645,14 @@ export function setupMenuLinkEffects() {
                 }
             });
         };
-
         const animateCurrentSvgIn = () => {
             if (svgPath && data.initialized) {
                  if (isNaN(data.pathLength) || (data.pathLength === 0 && svgPath.getBBox && svgPath.getBBox().width > 0)) {
                     gsap.killTweensOf(svgElement); gsap.set(svgElement, { opacity: 1, x: 0 }); return;
                  }
                  if (isNaN(data.pathLength)) return;
-                
                 hideOtherSVGs(anchor); 
                 currentActiveSVG = svgElement; 
-
                 gsap.killTweensOf(svgElement); gsap.killTweensOf(svgPath);
                 gsap.set(svgElement, { opacity: 0, x: -10 });
                 gsap.to(svgElement, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" });
@@ -738,7 +661,6 @@ export function setupMenuLinkEffects() {
                 animateCurrentSvgIn();
             }
         };
-
         const animateCurrentSvgOut = () => {
             if (svgPath && data.initialized) {
                 if (isNaN(data.pathLength)) return;
@@ -756,7 +678,6 @@ export function setupMenuLinkEffects() {
                 }
             }
         };
-        
         anchor.addEventListener('pointerenter', () => {
             allSvgData.forEach(otherData => {
                 if (otherData.anchor !== anchor && otherData.textSpanElement && gsap.isTweening(otherData.textSpanElement)) {
@@ -764,10 +685,8 @@ export function setupMenuLinkEffects() {
                     otherData.textSpanElement.innerText = otherData.originalText; 
                 }
             });
-            
             hideOtherSVGs(anchor); 
             const svgReady = initializeCurrentSvgPath();
-
             if (textSpanElement && originalText && !gsap.isTweening(textSpanElement) && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
                 gsap.to(textSpanElement, { 
                     duration: 0.8, 
@@ -781,7 +700,6 @@ export function setupMenuLinkEffects() {
                 animateCurrentSvgIn();
             }
         });
-
         anchor.addEventListener('pointerleave', () => {
             if (textSpanElement && gsap.isTweening(textSpanElement)) {
                  gsap.killTweensOf(textSpanElement);
@@ -789,13 +707,13 @@ export function setupMenuLinkEffects() {
             }
             animateCurrentSvgOut();
         });
-
         anchor.addEventListener('focus', () => anchor.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}))); 
         anchor.addEventListener('blur', () => anchor.dispatchEvent(new PointerEvent('pointerleave', {bubbles: true}))); 
     });
 }
 
-export async function loadSplineScene(canvasId, sceneUrl) {
+// [성능 개선] SplineApplication을 파라미터로 받아 의존성을 주입합니다.
+export async function loadSplineScene(canvasId, sceneUrl, SplineApplication) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) { return null; }
     const app = new SplineApplication(canvas);
@@ -817,59 +735,41 @@ export function killScrollTriggersByPattern(idPattern) {
     });
 }
 
-
-// 모달(팝업)을 여는 함수
+// 모달(팝업) 관련 함수들 (기존과 동일)
 async function openModal(url) {
     const modal = document.getElementById('modal-popup');
     const modalBody = document.getElementById('modal-body');
     const modalTitle = document.getElementById('modal-title');
-
-    if (!modal || !modalBody || !modalTitle) {
-        return;
-    }
-
-    // body에 modal-open 클래스를 추가하고 padding을 0으로 강제 설정
+    if (!modal || !modalBody || !modalTitle) return;
     document.body.classList.add('modal-open');
     document.body.style.setProperty('padding', '0px', 'important');
-
-    // 로딩 상태 표시 및 모달 열기
     modalTitle.textContent = '로딩 중...';
     modalBody.innerHTML = '';
     modal.style.display = 'block';
-
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
         const htmlText = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlText, 'text/html');
-        
         const pageTitle = doc.querySelector('title')?.textContent || '팝업 내용';
         modalTitle.textContent = pageTitle;
-        
         modalBody.innerHTML = '';
         const popupStyles = doc.head.querySelectorAll('style');
         popupStyles.forEach(style => modalBody.appendChild(style.cloneNode(true)));
         modalBody.innerHTML += doc.body.innerHTML;
-
     } catch (error) {
         modalTitle.textContent = '오류';
         modalBody.innerHTML = `<p style="text-align:center; padding:20px;">콘텐츠를 불러오는 데 실패했습니다: ${error.message}</p>`;
     }
 }
 
-// 모달(팝업)을 닫는 함수
 function closeModal() {
     const modal = document.getElementById('modal-popup');
-
     if (modal && modal.style.display !== 'none') {
         modal.style.display = 'none';
-
-        // body에 추가했던 클래스와 인라인 스타일 모두 제거
         document.body.classList.remove('modal-open');
         document.body.style.removeProperty('padding');
-        
         const modalBody = document.getElementById('modal-body');
         const modalTitle = document.getElementById('modal-title');
         if (modalBody) modalBody.innerHTML = '';
@@ -877,24 +777,18 @@ function closeModal() {
     }
 }
 
-// --- [수정된 부분] ---
-// 클릭 이벤트를 사용하여 팝업 열기/닫기 제어
 document.addEventListener('click', function(event) {
     const popupLink = event.target.closest('.popup-link');
     const closeButton = event.target.closest('.modal-close-btn');
     const modal = document.getElementById('modal-popup');
-
     if (popupLink) {
         event.preventDefault();
         const rawUrl = popupLink.getAttribute('data-popup-url');
         if (rawUrl) {
-            // buildUrl 함수를 사용해 경로를 변환합니다.
-            // 이렇게 하면 모바일 환경에서도 경로를 올바르게 찾을 수 있습니다.
             const finalUrl = buildUrl(rawUrl);
             openModal(finalUrl);
         }
     } else if (closeButton || event.target === modal) {
-        // 모달 바깥이나 닫기 버튼을 클릭하면 모달을 닫습니다.
         closeModal();
     }
 });

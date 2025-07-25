@@ -139,7 +139,7 @@
 
 /* 호버 시 이미지를 약간 확대하여 동적인 느낌 부여 */
 .portfolio-item:hover img {
-    transform: scale(1.05);
+    transform: scale(1.18);
 }
 
 .thumbnail-overlay {

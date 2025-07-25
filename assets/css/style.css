@@ -1102,8 +1102,7 @@ section#sub-hero {
   margin-right: 0.625rem;
   white-space: nowrap;
   border-bottom: 3px solid transparent;
-  transition: color 0.3s ease, border-bottom-color 0.3s ease,
-    background-color 0.3s ease;
+  transition: all .3s ease ;
   border-radius: 6px 6px 0 0;
   position: relative;
   bottom: -2px;

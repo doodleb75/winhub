@@ -1,33 +1,23 @@
 // assets/js/sub-app.js
 
-// [제거됨] Spline Runtime 중복 로딩 제거 (common-utils.js에서 관리)
-// [제거됨] Three.js 중복 로딩 제거
-
 import { ScrollToPlugin } from "https://esm.sh/gsap/ScrollToPlugin";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
 
 if (typeof gsap !== 'undefined') {
-    // GSAP 플러그인 등록
     gsap.registerPlugin(ScrollToPlugin, SplitText, ScrollTrigger);
 }
 
-// [수정됨] common-utils.js에서 중앙 관리되는 THREE 객체를 가져옵니다.
+// [수정] common-utils.js에서는 THREE 관련 클래스나 함수를 직접 가져오지 않습니다.
 import {
-    THREE, // Three.js 객체 추가
     setupScrollRestoration,
     degToRad,
-    responsiveY,
     runLoaderSequence,
     hideLoaderOnError,
-    InteractiveBackgroundSphere,
-    loadSplineScene,
     killAllScrollTriggers,
     loadCommonUI
 } from './common-utils.js';
 
-// Spline 런타임이 window.THREE를 참조할 수 있도록 전역 스코프에 할당합니다.
-window.THREE = THREE;
-
+// --- Global Variables for Sub Page ---
 let subpageSplineApp = null;
 let subPageBackgroundSphere = null;
 let subpageBodyElement = null;
@@ -41,15 +31,16 @@ let isResizing = false;
 let cachedWindowWidth = window.innerWidth;
 let originalWinhubState = null;
 
+// --- Configuration ---
 const HERO_AREA_BACKGROUND_COLOR = "#292c35";
 const pageColorConfigs = {
-    "default": { bodyBackgroundColorFallback: HERO_AREA_BACKGROUND_COLOR, sphereColor: new THREE.Color(0xffffff), textColor: "#ffffff" },
-    "about.html": { bodyBackgroundColorFallback: "#1f7277", sphereColor: new THREE.Color(0xeaf2f8), textColor: "#fdfefe" },
-    "works.html": { bodyBackgroundColorFallback: "#1f3477", sphereColor: new THREE.Color(0xaed6f1), textColor: "#ecf0f1" },
-    "contact.html": { bodyBackgroundColorFallback: "#491e9b", sphereColor: new THREE.Color(0xaed6f1), textColor: "#ecf0f1" },
+    "default": { bodyBackgroundColorFallback: HERO_AREA_BACKGROUND_COLOR, sphereColor: { r: 1, g: 1, b: 1 }, textColor: "#ffffff" },
+    "about.html": { bodyBackgroundColorFallback: "#1f7277", sphereColor: { r: 0.917, g: 0.949, b: 0.972 }, textColor: "#fdfefe" },
+    "works.html": { bodyBackgroundColorFallback: "#1f3477", sphereColor: { r: 0.682, g: 0.839, b: 0.945 }, textColor: "#ecf0f1" },
+    "contact.html": { bodyBackgroundColorFallback: "#491e9b", sphereColor: { r: 0.682, g: 0.839, b: 0.945 }, textColor: "#ecf0f1" },
 };
 const scrolledPastHeroColors = { 
-    sphereColor: new THREE.Color(0x999999),
+    sphereColor: { r: 0.6, g: 0.6, b: 0.6 },
     darkContentTextColor: "#2c3e50"
 }; 
 
@@ -71,14 +62,13 @@ function getResponsiveSplineProperties() {
 
 function getCurrentPageConfig() {
     const pathname = window.location.pathname.split('/').pop() || "default";
-    return pageColorConfigs[pathname] || pageColorConfigs["default"];
+    const config = pageColorConfigs[pathname] || pageColorConfigs["default"];
+    return config;
 }
 const currentPageConfig = getCurrentPageConfig();
 
 
-/**
- * Mission 섹션의 장식용 사각형에 대한 애니메이션 및 패럴랙스 효과를 설정합니다.
- */
+// --- Animation Functions (기존 함수들 유지) ---
 function setupDecorativeRectAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
         return;
@@ -192,21 +182,15 @@ function setupDecorativeRectAnimations() {
     }
 }
 
-/**
- * [수정됨] Lottie 애니메이션 플레이어를 제어하기 위해 ScrollTrigger를 설정합니다.
- * 이제 애니메이션은 뷰로 스크롤될 때 반복되고 처음부터 다시 시작됩니다.
- */
 function setupLottieScrollTrigger() {
     const lottiePlayer = document.querySelector("#overview-lottie");
     if (!lottiePlayer || typeof ScrollTrigger === 'undefined') {
         return;
     }
-
-    // 플레이어가 반복되도록 설정합니다
     lottiePlayer.loop = true;
 
     const st = ScrollTrigger.create({
-        trigger: lottiePlayer.parentElement, // 더 나은 정확도를 위해 부모 컨테이너를 기반으로 트리거합니다
+        trigger: lottiePlayer.parentElement,
         start: "top 80%",
         end: "bottom 20%",
         id: 'lottie-overview-trigger',
@@ -220,38 +204,31 @@ function setupLottieScrollTrigger() {
             lottiePlayer.play();
         },
         onLeave: () => {
-            lottiePlayer.pause(); // 리소스 절약을 위해 화면을 벗어나면 일시 중지합니다
+            lottiePlayer.pause();
         },
         onLeaveBack: () => {
             lottiePlayer.pause();
         },
-        enabled: false // 플레이어가 준비될 때까지 초기에 비활성화됩니다
+        enabled: false 
     });
 
-    // Lottie 플레이어가 준비되면 스크롤 트리거를 활성화합니다
     lottiePlayer.addEventListener('ready', () => {
-        lottiePlayer.stop(); // 초기에 모든 자동 재생을 중지합니다
+        lottiePlayer.stop();
         if (st) {
             st.enable();
         }
     });
 }
 
-
-/**
- * [수정됨] 새로운 타임라인 항목에 대한 스크롤 애니메이션을 설정합니다.
- * 항목들이 양쪽에서 슬라이드 인 됩니다.
- */
 function setupHistoryTimelineAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const timelineEntries = gsap.utils.toArray('.timeline-entry');
     if (!timelineEntries.length) return;
 
     timelineEntries.forEach(entry => {
-        // 클래스에 따라 애니메이션 방향을 결정합니다
         const xFrom = entry.classList.contains('left-entry') ? -100 : 100;
         
-        gsap.set(entry, { autoAlpha: 0, x: xFrom, y: 30 }); // 초기 상태 설정
+        gsap.set(entry, { autoAlpha: 0, x: xFrom, y: 30 });
         gsap.to(entry, {
             autoAlpha: 1,
             x: 0,
@@ -268,10 +245,6 @@ function setupHistoryTimelineAnimation() {
     });
 }
 
-
-/**
- * [수정됨] History 섹션에 대한 애니메이션을 설정하는 통합 함수입니다.
- */
 function setupHistorySectionAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     
@@ -279,7 +252,7 @@ function setupHistorySectionAnimation() {
     const historyTitle = historySectionWrapper ? historySectionWrapper.querySelector('.section-title') : null;
 
     if (historyTitle) {
-        gsap.set(historyTitle, { opacity: 0, y: 50 }); // 제목의 초기 상태 설정
+        gsap.set(historyTitle, { opacity: 0, y: 50 });
         gsap.to(historyTitle, {
             opacity: 1,
             y: 0,
@@ -294,12 +267,9 @@ function setupHistorySectionAnimation() {
         });
     }
 
-    setupHistoryTimelineAnimation(); // 새로운 타임라인 애니메이션 함수 호출
+    setupHistoryTimelineAnimation();
 }
 
-/**
- * [신규] Partners 섹션에 대한 스크롤 애니메이션을 설정합니다.
- */
 function setupPartnersSectionAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const section = document.querySelector("#partners-section");
@@ -407,7 +377,7 @@ function getOtherContentTextElements() {
         (el.textContent.trim() !== "" || el.children.length > 0 || ['IMG', 'SVG', 'I'].includes(el.tagName))
     );
  }
-function switchColors(isScrolledPast) {
+function switchColors(isScrolledPast, THREE) {
     const heroDependentElements = getHeroDependentElements();
     const otherContentTextElements = getOtherContentTextElements();
 
@@ -419,8 +389,8 @@ function switchColors(isScrolledPast) {
         subpageBodyElement.classList.remove('scrolled-past-hero-colors');
     }
     
-    const targetSphereColors = isScrolledPast ? scrolledPastHeroColors.sphereColor : currentPageConfig.sphereColor;
-    if (subPageBackgroundSphere) {
+    if (subPageBackgroundSphere && THREE) {
+        const targetSphereColors = isScrolledPast ? new THREE.Color(scrolledPastHeroColors.sphereColor.r, scrolledPastHeroColors.sphereColor.g, scrolledPastHeroColors.sphereColor.b) : new THREE.Color(currentPageConfig.sphereColor.r, currentPageConfig.sphereColor.g, currentPageConfig.sphereColor.b);
         subPageBackgroundSphere.updateColors({ 
             wireframeColor: targetSphereColors, 
             pointsColor: targetSphereColors 
@@ -442,7 +412,7 @@ function switchColors(isScrolledPast) {
         overwrite: "auto" 
     }));
  }
-function setupHeroColorSwitcher() {
+function setupHeroColorSwitcher(THREE) {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' || !subpageBodyElement || !heroSection) return;
 
     const existingTrigger = ScrollTrigger.getById("heroColorSwitcher");
@@ -453,8 +423,8 @@ function setupHeroColorSwitcher() {
         trigger: heroSection,
         start: "bottom 80%",
         toggleActions: "play none none reverse",
-        onEnter: () => switchColors(true),
-        onLeaveBack: () => switchColors(false),
+        onEnter: () => switchColors(true, THREE),
+        onLeaveBack: () => switchColors(false, THREE),
         invalidateOnRefresh: true,
     });
  }
@@ -686,40 +656,84 @@ function setupHeroScrollSnap() {
     });
  }
 
+// [수정] 무거운 3D 에셋을 비동기적으로 로드하는 함수
+async function initializeHeavyAssets() {
+    try {
+        // 1. 필요한 라이브러리를 동적으로 import 합니다.
+        const { Application } = await import('https://unpkg.com/@splinetool/runtime/build/runtime.js');
+        
+        // [수정] common-utils.js에서는 유틸리티 함수만 가져옵니다.
+        const { InteractiveBackgroundSphere, loadSplineScene } = await import('./common-utils.js');
+        
+        // [수정] THREE.js 모듈 전체를 직접 동적으로 import 하여 오류를 해결합니다.
+        const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js');
+        window.THREE = THREE; // Spline 런타임이 참조할 수 있도록 전역에 할당
+
+        // 2. Spline 씬을 로드합니다.
+        subpageSplineApp = await loadSplineScene("spline-canvas-subpage", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode", Application);
+        if (subpageSplineApp) {
+            const cableObject = subpageSplineApp.findObjectByName('cable');
+            if (cableObject) cableObject.visible = false;
+            const winhubObject = subpageSplineApp.findObjectByName('Winhub');
+            if (winhubObject && !originalWinhubState) {
+                originalWinhubState = {
+                    scale: { ...winhubObject.scale },
+                    position: { ...winhubObject.position }
+                };
+            }
+        }
+
+        // 3. 인터랙티브 배경 구체를 초기화합니다.
+        if (subpageBodyElement) {
+            const color = new THREE.Color(currentPageConfig.sphereColor.r, currentPageConfig.sphereColor.g, currentPageConfig.sphereColor.b);
+            // [수정] 직접 import한 THREE 객체를 전달합니다.
+            subPageBackgroundSphere = new InteractiveBackgroundSphere('fullscreen-threejs-bg', THREE, {
+                wireframeColor: color.clone(),
+                pointsColor: color.clone(),
+            });
+            if (subPageBackgroundSphere.init) {
+                subPageBackgroundSphere.init().introAnimate();
+            }
+        }
+
+        // 4. Spline 인트로 애니메이션을 재생하고, 모든 스크롤 관련 설정을 실행합니다.
+        playSplineIntroAnimation();
+        setupHeroColorSwitcher(THREE); // [수정] THREE 객체를 전달합니다.
+
+    } catch (error) {
+        console.error("Error initializing heavy assets on sub-page:", error);
+        const splineContainer = document.getElementById("threejs-object-container");
+        if (splineContainer) gsap.set(splineContainer, { display: 'none' });
+    }
+}
+
+// Spline 인트로 애니메이션 함수
+function playSplineIntroAnimation() {
+    const winhubObject = subpageSplineApp ? subpageSplineApp.findObjectByName("Winhub") : null;
+    const splineObjectContainer = document.getElementById("threejs-object-container");
+
+    if (splineObjectContainer && winhubObject && !splineIntroPlayed) {
+        splineIntroPlayed = true;
+        const responsiveProps = getResponsiveSplineProperties();
+        const targetScale = { x: originalWinhubState.scale.x * responsiveProps.scaleMultiplier, y: originalWinhubState.scale.y * responsiveProps.scaleMultiplier, z: originalWinhubState.scale.z * responsiveProps.scaleMultiplier };
+        const targetRotation = { x: degToRad(0), y: degToRad(90), z: degToRad(0) };
+        const targetPosition = { x: responsiveProps.positionX, y: originalWinhubState.position.y + responsiveProps.positionYOffset, z: originalWinhubState.position.z };
+
+        gsap.timeline()
+            .to(splineObjectContainer, { autoAlpha: 1, duration: 1 }, 0)
+            .call(() => { if (winhubObject) winhubObject.visible = true; }, null, 0)
+            .fromTo(winhubObject.scale, { x: targetScale.x * 0.5, y: targetScale.y * 0.5, z: targetScale.z * 0.5 }, { ...targetScale, duration: 1.5, ease: "power3.out" }, 0.2)
+            .fromTo(winhubObject.rotation, { x: degToRad(90), y: degToRad(-360), z: degToRad(5) }, { ...targetRotation, duration: 1.5, ease: "power3.out" }, 0.2)
+            .fromTo(winhubObject.position, { x: targetPosition.x - 200, y: targetPosition.y, z: targetPosition.z }, { ...targetPosition, duration: 1.5, ease: "power3.out" }, 0.2);
+    }
+}
+
+
+// 메인 초기화 함수를 수정하여 비동기 로딩을 적용
 async function initializeSubpage() {
     initialPageVisualSetup();
     
-    const loaderPromise = runLoaderSequence('.subpage-container');
-    
-    const splineLoadPromise = loadSplineScene("spline-canvas-subpage", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode")
-        .then(app => {
-            subpageSplineApp = app;
-            if (subpageSplineApp) {
-                const cableObject = subpageSplineApp.findObjectByName('cable');
-                if (cableObject) cableObject.visible = false;
-                const winhubObject = subpageSplineApp.findObjectByName('Winhub');
-                if (winhubObject && !originalWinhubState) {
-                    originalWinhubState = {
-                        scale: { ...winhubObject.scale },
-                        position: { ...winhubObject.position }
-                    };
-                }
-            }
-        })
-        .catch(error => {
-            const splineContainer = document.getElementById("threejs-object-container");
-            if (splineContainer) gsap.set(splineContainer, { display: 'none' });
-        });
-
-    if (typeof THREE !== 'undefined' && subpageBodyElement) {
-        subPageBackgroundSphere = new InteractiveBackgroundSphere('fullscreen-threejs-bg', {
-            wireframeColor: currentPageConfig.sphereColor.clone(),
-            pointsColor: currentPageConfig.sphereColor.clone(),
-        });
-        if (subPageBackgroundSphere.init) subPageBackgroundSphere.init();
-    }
-   
-    await Promise.all([loaderPromise, splineLoadPromise]);
+    await runLoaderSequence('.subpage-container');
 
     const logoElement = document.querySelector(".com-name-logo.logo-class");
     const menuIconElement = document.querySelector(".menu-icon");
@@ -735,39 +749,20 @@ async function initializeSubpage() {
     const subHeroContent = document.querySelector(".sub-hero-content");
     if (subHeroContent) {
         gsap.to(subHeroContent, { autoAlpha: 1, duration: 0.1, onComplete: () => {
-            animateHeroText().then(() => {
-                const winhubObject = subpageSplineApp ? subpageSplineApp.findObjectByName("Winhub") : null;
-                const splineObjectContainer = document.getElementById("threejs-object-container");
-
-                if (splineObjectContainer && winhubObject && !splineIntroPlayed) {
-                    splineIntroPlayed = true;
-                    const responsiveProps = getResponsiveSplineProperties();
-                    const targetScale = { x: originalWinhubState.scale.x * responsiveProps.scaleMultiplier, y: originalWinhubState.scale.y * responsiveProps.scaleMultiplier, z: originalWinhubState.scale.z * responsiveProps.scaleMultiplier };
-                    const targetRotation = { x: degToRad(0), y: degToRad(90), z: degToRad(0) };
-                    const targetPosition = { x: responsiveProps.positionX, y: originalWinhubState.position.y + responsiveProps.positionYOffset, z: originalWinhubState.position.z };
-
-                    gsap.timeline()
-                        .to(splineObjectContainer, { autoAlpha: 1, duration: 1 }, 0)
-                        .call(() => { if (winhubObject) winhubObject.visible = true; }, null, 0)
-                        .fromTo(winhubObject.scale, { x: targetScale.x * 0.5, y: targetScale.y * 0.5, z: targetScale.z * 0.5 }, { ...targetScale, duration: 1.5, ease: "power3.out" }, 0.2)
-                        .fromTo(winhubObject.rotation, { x: degToRad(90), y: degToRad(-360), z: degToRad(5) }, { ...targetRotation, duration: 1.5, ease: "power3.out" }, 0.2)
-                        .fromTo(winhubObject.position, { x: targetPosition.x - 200, y: targetPosition.y, z: targetPosition.z }, { ...targetPosition, duration: 1.5, ease: "power3.out" }, 0.2);
-                }
-            });
+            animateHeroText();
         }});
     }
+   
+    // [핵심] 무거운 에셋들은 페이지가 표시된 후에 로드합니다.
+    initializeHeavyAssets();
 
-    if (subPageBackgroundSphere && subPageBackgroundSphere.introAnimate) {
-        subPageBackgroundSphere.introAnimate();
-    }
-
+    // 스크롤 관련 설정은 모든 것이 준비된 후에 실행합니다.
     setupSubPageContentAnimations();
     setupDecorativeRectAnimations();
     setupLottieScrollTrigger();
     setupHistorySectionAnimation();
     setupPartnersSectionAnimation();
     setupHeroParallax(); 
-    setupHeroColorSwitcher();
     setupHeroScrollSnap();
     setupTabs();
     setupScrollToTopButton();
@@ -808,7 +803,13 @@ function handleSubPageResize() {
         setupHistorySectionAnimation();
         setupPartnersSectionAnimation();
         setupHeroParallax(); 
-        setupHeroColorSwitcher();
+        
+        // [수정] 리사이즈 시에도 THREE 객체를 전달하여 컬러 스위처를 재설정합니다.
+        // 단, THREE 객체가 로드되었는지 확인해야 합니다.
+        if (window.THREE) {
+            setupHeroColorSwitcher(window.THREE);
+        }
+
         setupHeroScrollSnap(); 
         setupSubPageScrollIconAnimation();
         setupScrollToTopButton();

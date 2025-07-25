@@ -1,0 +1,183 @@
+/* ================================================== */
+/* main.css                                           */
+/* 메인 페이지(index.html) 전용 스타일                 */
+/* ================================================== */
+
+body {
+  background-color: #410b7a;
+}
+
+/* --- 1. Hero Section --- */
+#hero {
+  position: relative; z-index: 10; width: 100%; display: flex;
+  padding: 0 1vw; align-items: center;
+  height: calc(var(--vh, 1vh) * 100);
+}
+.container { position: relative; width: 100%; padding-left: 60px; top: -1rem; }
+.hero-text-block { position: relative; }
+.headline { margin-top: clamp(2.5rem, 7vw, 8rem); }
+.headline div {
+  font-size: clamp(3.5rem, 7vw, 8rem); font-weight: 600; line-height: 0.9;
+  letter-spacing: -0.05em; white-space: nowrap; color: #fff;
+  position: relative; overflow: visible; opacity: 0;
+}
+.headline em.connect { font-style: normal; }
+.com-name-ani {
+  position: absolute; top: 0; left: 0; transform: translateY(-100%);
+  padding-bottom: 10px; font-size: clamp(2.5rem, 7vw, 8rem);
+  color: #fff; font-weight: 600; line-height: 1; letter-spacing: -0.03em;
+  opacity: 0; text-wrap: nowrap;
+}
+.com-name-ani a { color: inherit; text-decoration: none; }
+.com-name-ani a:hover { color: yellow; transition: color 0.5s ease-in-out; }
+.com-name-ani.scrolled { font-size: 24px !important; top: 1.7rem !important; }
+
+.scroll-icon {
+  position: absolute; bottom: 3.75rem; left: 50%; transform: translateX(-50%);
+  width: 2.1875rem; height: 3.125rem; border: 2px solid white; border-radius: 1.5625rem;
+  display: flex; align-items: flex-start; justify-content: center;
+  opacity: 0; visibility: hidden;
+}
+.scroll-icon:before {
+  position: absolute; content: "Scroll"; width: fit-content; bottom: -40px;
+  left: 50%; transform: translateX(-50%); color: #fff; animation: scrollTxtLoop 2s infinite;
+}
+.scroll {
+  width: 0.3125rem; height: 0.625rem; background: white; border-radius: 0.625rem;
+  margin-top: 0.5rem; animation: scrollLoop 2s infinite;
+}
+@keyframes scrollLoop {
+  0% { transform: translateY(0); opacity: 1; }
+  80% { transform: translateY(1.25rem); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes scrollTxtLoop {
+  0% { opacity: 1; }
+  80% { opacity: 0.25; }
+  100% { opacity: 1; }
+}
+
+/* --- 2. Page Sections (Part 1, 2, 3) --- */
+.part-container { width: 100%; }
+#part1, #part2, #part3 {
+  width: 100%; color: #fff; display: flex; flex-direction: column;
+  align-items: center; padding: 5rem 1.25rem; position: relative;
+}
+#part1, #part3 { justify-content: center; }
+#part2 { justify-content: flex-start; padding-top: 8vh; }
+.part1-info, .part3-info {
+  width: 90%; gap: 2.5rem; padding: 2rem 0; color: white;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.part2-info {
+  display: flex; flex-direction: column; width: 80%; max-width: 1200px;
+  padding: 1.25rem 0; margin: 0 auto;
+}
+.sub-title {
+  font-weight: 800; line-height: 1; letter-spacing: 0.02em;
+  font-size: clamp(2rem, 8vw, 4rem); color: #fff; text-align: center;
+  margin-bottom: 1.5rem; padding-top: 1.25rem; width: 100%;
+}
+
+/* Part 1: Advantage Section */
+#part1 .part1-info { align-items: center; width: 90%; max-width: 1200px; }
+.advantage-cards-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+  width: 100%; margin-top: 2.5rem; margin-bottom: 3rem;
+}
+.advantage-card {
+  background-color: rgba(255, 255, 255, 0.03); padding: 2rem 1.5rem;
+  border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left; opacity: 0; transform: translateY(30px);
+  min-height: 300px; display: flex; flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.advantage-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); }
+.advantage-icon { font-size: 2.8rem; color: #4dabf7; margin-bottom: 1.2rem; text-align: center; height: 50px; display: flex; align-items: center; justify-content: center; }
+.advantage-card h2 { font-size: clamp(1.2rem, 3.5vw, 1.5rem); color: #e8e8e8; margin-bottom: 0.8rem; font-weight: 600; text-align: center; }
+.advantage-card p { font-size: clamp(0.85rem, 2.2vw, 0.95rem); color: #ffffffba; line-height: 1.75; flex-grow: 1; text-align: center; }
+.integrated-value-card {
+  background-color: rgba(77, 171, 247, 0.1); border: 1px solid rgba(77, 171, 247, 0.3);
+  padding: 2.5rem 2rem; border-radius: 12px; width: 100%; text-align: center;
+  opacity: 0; transform: translateY(30px); margin-top: 1rem;
+}
+.integrated-value-icon { font-size: 3rem; color: #74c0fc; margin-bottom: 1rem; }
+.integrated-value-card h2 { font-size: clamp(1.4rem, 4vw, 1.8rem); color: #d0eaff; margin-bottom: 1rem; font-weight: 600; }
+.integrated-value-card p { font-size: clamp(0.9rem, 2.5vw, 1.05rem); color: #ffffffba; line-height: 1.8; max-width: 800px; margin: 0 auto; }
+
+/* Part 2: Works Section */
+.works-list-container {
+  width: 100%; height: auto; overflow: hidden; margin: 1.875rem 0;
+  position: relative; padding-bottom: 1rem; touch-action: pan-y;
+}
+.works-list {
+  display: flex; flex-direction: row; width: max-content; flex-wrap: nowrap;
+  padding: 1.25rem 0; margin: 0; list-style: none; position: relative; align-items: stretch;
+}
+.work-item {
+  flex-shrink: 0; width: clamp(280px, 30vw, 360px); height: auto; min-height: 380px;
+  margin-right: 1.5rem; background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px; overflow: hidden; position: relative;
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex; border: 1px solid rgba(255, 255, 255, 0.1); flex-direction: column;
+}
+.work-item a { display: flex; flex-direction: column; text-decoration: none; color: inherit; height: 100%; width: 100%; }
+.work-item-thumbnail { width: 100%; height: 0; padding-bottom: 60%; position: relative; overflow: hidden; background-color: #333; }
+.work-item-thumbnail img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
+.work-item-caption { padding: 1.25rem; text-align: left; flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start; background-color: rgba(255, 255, 255, 0.03); transition: all 0.3s ease; }
+.work-item-caption h3 { margin: 0 0 0.5rem 0; font-size: clamp(1.1rem, 3vw, 1.4rem); color: #e0e0e0; font-weight: 600; }
+.work-item-caption p { margin: 0; font-size: clamp(0.8rem, 2vw, 0.9rem); color: #ffffffba; line-height: 1.4; }
+.work-item-caption:hover h3, .work-item-caption:hover p { color: #fff; }
+button.goto-work { position: relative; color: #fff; transition: all 0.2s; }
+button.goto-work:hover { background: none; padding-left: 2.5rem; font-weight: bold; color: #fff; }
+button.goto-work:before {
+  content: ""; position: absolute; top: -2px; left: 0; display: block;
+  width: 100%; height: 100%; background: none; border-top: 1px solid #ffffff66;
+  border-bottom: 1px solid #ffffff66; transform: skewX(20deg);
+  z-index: -1; transition: all 0.2s;
+}
+button.goto-work:hover:before { top: -4px; transform: skewX(0deg); box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); border-radius: 7px; border: 1px solid #ffffff66; }
+.goto-works { width: 50px; }
+
+/* Part 3: Outro Section */
+#part3 .part3-info { align-items: center; }
+.outro-content { width: 100%; max-width: 800px; text-align: center; margin-top: 1.5rem; opacity: 0; transform: translateY(30px); }
+.outro-content h2 { font-size: clamp(1.5rem, 5vw, 2.2rem); color: #e0e0e0; margin-bottom: 1.5rem; font-weight: 600; text-align: left; line-height: 1.4; }
+.outro-content p { font-size: clamp(0.9rem, 2.8vw, 1.1rem); color: #cccccc; line-height: 1.8; margin-bottom: 1.5rem; text-align: left; }
+.cta-button {
+  padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 600; color: #ffffff;
+  border: none; border-radius: 50px; cursor: pointer; margin-top: 1.5rem;
+  display: inline-block; text-decoration: none; transition: all 0.3s ease-in-out;
+}
+.cta-button:hover { color: #fff; background: none; transform: translateY(-3px) scale(1.05); }
+.cta-button:before {
+  content: ""; position: absolute; top: 0px; left: 0; display: block;
+  width: 100%; height: 100%; background: none; border-top: 1px solid #ffffff66;
+  border-bottom: 1px solid #ffffff66; transform: skewX(20deg);
+  z-index: -1; transition: all 0.2s;
+}
+.cta-button:hover:before { top: -2px; transform: skewX(0deg); box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); border-radius: 7px; border: 1px solid #ffffff66; }
+
+/* --- 3. Media Queries for Main Page --- */
+@media (max-width: 1024px) {
+  .advantage-cards-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .advantage-card { min-height: 280px; }
+  .works-list-container { max-height: 480px; }
+}
+@media (max-width: 768px) {
+  .container { padding-left: 20px; top: -6rem; }
+  .com-name-ani { font-size: 3.5rem !important; }
+  .headline div { line-height: 1; }
+  #part1 .part1-info { width: 95%; padding: 1.5rem 0; }
+  .advantage-cards-grid { grid-template-columns: 1fr; }
+  .advantage-card { min-height: auto; padding: 1.5rem; }
+  .work-item { width: clamp(250px, 80vw, 320px); margin-right: 1rem; min-height: 340px; }
+  .sub-title { font-size: clamp(1.8rem, 7vw, 3rem); }
+  .scroll-icon { width: 1.5rem; height: 2.1rem; bottom: 4.5rem; border-width: 1px; }
+  .scroll { width: 0.2125rem; height: 0.525rem; margin-top: 0.4rem; }
+}
+@media (max-width: 480px) {
+  .headline div { line-height: 1.1; letter-spacing: -0.02em; }
+  .work-item { width: clamp(220px, 85vw, 280px); }
+  .sub-title { font-size: clamp(1.5rem, 6vw, 2.5rem); }
+}
