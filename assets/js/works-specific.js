@@ -2,23 +2,34 @@
 
 import { worksData } from './works-data.js';
 
-// 페이지 로드 및 pageshow (뒤로가기/앞으로가기 캐시) 시 호출될 메인 초기화 함수
-window.addEventListener('load', initializePortfolio);
+// [수정] 'load' 이벤트 리스너를 제거합니다. 
+// 초기화는 이제 sub-app.js에서 동적으로 호출됩니다.
+
+// 'pageshow' 이벤트는 브라우저의 뒤로/앞으로 가기 캐시(bfcache)에서 
+// 페이지가 복원될 때를 대비하여 유지합니다.
 window.addEventListener('pageshow', function(event) {
     // 페이지가 브라우저의 BFcache에서 복원되었는지 확인
     if (event.persisted) {
+        // 페이지 상태가 불안정할 수 있으므로, 모든 스크롤 트리거를 제거하고
+        // 애니메이션을 다시 초기화합니다.
+        if(typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.getAll().forEach(t => t.kill());
+        }
         initializePortfolio(); // 메인 초기화 함수를 다시 실행하여 애니메이션 재생
+        // GSAP의 상태를 새로고침합니다.
+        if(typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.refresh();
+        }
     }
 });
 
-function initializePortfolio() {
+// [수정] sub-app.js에서 import할 수 있도록 함수를 export 합니다.
+export function initializePortfolio() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
         return;
     }
 
-    // [수정] 기존 로컬 데이터 대신 import한 worksData를 사용합니다.
     const portfolioItemsData = worksData;
-
     const portfolioGrid = document.getElementById('portfolio-grid');
     const filterButtons = document.querySelectorAll('.filter-button');
 
@@ -34,7 +45,6 @@ function initializePortfolio() {
         filteredItems.forEach(item => {
             const itemElement = document.createElement('a');
             itemElement.className = 'portfolio-item transition-link';
-            // 프로젝트의 고유 ID로 상세 페이지 템플릿에 링크
             itemElement.href = `page/works_details/works-detail.html?id=${item.id}`; 
             itemElement.dataset.category = item.category;
 
@@ -88,10 +98,9 @@ function initializePortfolio() {
         });
         
         // 페이지 로드 또는 BFcache 복원 시 그리드가 이미 뷰포트에 보이는 경우 애니메이션을 즉시 재생합니다.
-        const rect = portfolioGrid.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
-            // 애니메이션이 아직 재생되지 않았거나 완전히 끝나지 않은 상태라면 재생
-            if (animationTimeline.progress() === 0 || animationTimeline.reversed()) { 
+        // 이 코드는 이제 페이지가 완전히 표시된 후에 실행되므로 정확하게 작동합니다.
+        if (portfolioGrid.getBoundingClientRect().top < window.innerHeight) {
+            if (!animationTimeline.isActive()) {
                 animationTimeline.play();
             }
         }

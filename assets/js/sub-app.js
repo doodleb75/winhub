@@ -7,14 +7,16 @@ if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(ScrollToPlugin, SplitText, ScrollTrigger);
 }
 
-// [수정] common-utils.js에서는 THREE 관련 클래스나 함수를 직접 가져오지 않습니다.
+// [수정] common-utils.js에서 스크롤 제어 함수를 포함한 모든 유틸리티를 가져옵니다.
 import {
     setupScrollRestoration,
     degToRad,
     runLoaderSequence,
     hideLoaderOnError,
     killAllScrollTriggers,
-    loadCommonUI
+    loadCommonUI,
+    disableScrollInteraction, // 스크롤 비활성화 함수 import
+    enableScrollInteraction   // 스크롤 활성화 함수 import
 } from './common-utils.js';
 
 // --- Global Variables for Sub Page ---
@@ -734,6 +736,8 @@ async function initializeSubpage() {
     initialPageVisualSetup();
     
     await runLoaderSequence('.subpage-container');
+    
+    enableScrollInteraction(); // [수정] 로더 시퀀스 완료 후 스크롤 활성화
 
     const logoElement = document.querySelector(".com-name-logo.logo-class");
     const menuIconElement = document.querySelector(".menu-icon");
@@ -768,9 +772,26 @@ async function initializeSubpage() {
     setupScrollToTopButton();
     setupSubPageScrollIconAnimation();
 
+    // [수정 START] works.html 페이지를 위한 특정 스크립트를 동적으로 로드하고 실행합니다.
+    // 이로써 페이지 로딩 및 스크롤 활성화가 완료된 후에 포트폴리오 애니메이션이 설정되도록 보장합니다.
+    if (window.location.pathname.includes('works.html')) {
+        try {
+            // works-specific.js 모듈을 동적으로 가져옵니다.
+            const worksModule = await import('./works-specific.js');
+            if (worksModule && typeof worksModule.initializePortfolio === 'function') {
+                // 모듈에서 export된 initializePortfolio 함수를 호출합니다.
+                worksModule.initializePortfolio();
+            }
+        } catch (error) {
+            console.error("works.html의 특정 스크립트를 로드하는 데 실패했습니다:", error);
+        }
+    }
+    // [수정 END]
+
     window.scrollTo(0, 0);
-    ScrollTrigger.refresh(true);
-    if(subpageBodyElement) subpageBodyElement.style.overflow = 'auto';
+    if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.refresh(true);
+    }
 }
 
 function handleSubPageResize() {
@@ -815,7 +836,9 @@ function handleSubPageResize() {
         setupScrollToTopButton();
 
         gsap.delayedCall(0.5, () => {
-            ScrollTrigger.refresh(true);
+            if (typeof ScrollTrigger !== 'undefined') {
+                ScrollTrigger.refresh(true);
+            }
             isResizing = false; 
             const subHeroContentOnResize = document.querySelector(".sub-hero-content");
             if (subHeroContentOnResize) {
@@ -832,6 +855,7 @@ function handleSubPageResize() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     setupScrollRestoration();
+    disableScrollInteraction(); // [수정] 페이지 로드 시 스크롤 비활성화
     splineIntroPlayed = false;
     originalWinhubState = null;
     cachedWindowWidth = window.innerWidth;
@@ -841,6 +865,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         await initializeSubpage();
     } catch (error) {
         hideLoaderOnError();
+        enableScrollInteraction(); // [수정] 에러 발생 시 스크롤 활성화
     }
 
     let resizeTimer;

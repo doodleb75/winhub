@@ -10,6 +10,9 @@ import {
     runLoaderSequence,
     killAllScrollTriggers,
     loadCommonUI,
+    hideLoaderOnError,
+    disableScrollInteraction, // 스크롤 비활성화 함수 import
+    enableScrollInteraction   // 스크롤 활성화 함수 import
 } from './common-utils.js';
 import { worksData } from './works-data.js';
 
@@ -275,9 +278,11 @@ async function initializeDetailPage() {
 
     try {
         await runLoaderSequence('.subpage-container');
+        enableScrollInteraction(); // [수정] 로더 시퀀스 완료 후 스크롤 활성화
     } catch (error) {
         const mainContent = document.querySelector('.subpage-container');
         if (mainContent) gsap.set(mainContent, {opacity: 1, visibility: 'visible'});
+        enableScrollInteraction(); // [수정] 에러 발생 시에도 스크롤 활성화
     }
 
     animateDetailContent();
@@ -307,16 +312,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     setupScrollRestoration();
+    disableScrollInteraction(); // [수정] 페이지 로드 시 스크롤 비활성화
     
     try {
         await loadCommonUI();
         await initializeDetailPage();
     } catch (error) {
-        const loader = document.getElementById('loader');
-        if (loader) gsap.to(loader, { autoAlpha: 0 });
-        const mainContent = document.querySelector('.subpage-container');
-        if(mainContent) gsap.set(mainContent, {autoAlpha: 1});
-        document.body.style.overflow = 'auto';
+        hideLoaderOnError();
+        enableScrollInteraction(); // [수정] 에러 발생 시 스크롤 활성화
     }
 
     if (typeof ScrollTrigger !== 'undefined') {

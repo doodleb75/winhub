@@ -12,7 +12,7 @@ if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin, Observer);
 }
 
-// [수정] common-utils.js에서는 THREE 관련 클래스나 함수를 직접 가져오지 않습니다.
+// [수정] common-utils.js에서 스크롤 제어 함수를 포함한 모든 유틸리티를 가져옵니다.
 import {
     setupScrollRestoration,
     degToRad,
@@ -23,7 +23,9 @@ import {
     hideLoaderOnError,
     buildUrl,
     loadCommonUI,
-    killAllScrollTriggers
+    killAllScrollTriggers,
+    disableScrollInteraction, // 스크롤 비활성화 함수 import
+    enableScrollInteraction   // 스크롤 활성화 함수 import
 } from './common-utils.js';
 
 
@@ -46,10 +48,8 @@ let initialSetupDone = false;
 let headlineCharsAnim = null;
 let heroHeadlineTriggerEnabled = false;
 
-// --- Scroll Prevention Variables ---
-const SCROLL_PREVENTION_OPTIONS = { passive: false };
-let isScrollCurrentlyDisabled = false;
-let wasNormalizeScrollActive = false;
+// --- [삭제] Scroll Prevention Variables ---
+// 스크롤 관련 변수와 함수들을 common-utils.js로 이동했으므로 여기서는 삭제합니다.
 
 if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
     ScrollTrigger.config({
@@ -64,44 +64,8 @@ const getTargetWinhubY = (isMobileView) => isMobileView ? responsiveY(-10) : 0;
 const WINHUB_INTRO_END_Z = 0;
 const partBackgroundColors = { hero: "#410b7a", part1: "#0b2c7a", part2: "#0b7a48", part3: "#7a063c" };
 
-// --- Scroll Prevention Functions ---
-function preventScroll(event) {
-    if (isScrollCurrentlyDisabled) event.preventDefault();
-}
-function preventKeyboardScroll(event) {
-    if (isScrollCurrentlyDisabled && ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.code)) {
-        event.preventDefault();
-    }
-}
-
-function disableScrollInteraction() {
-    if (isScrollCurrentlyDisabled) return;
-    isScrollCurrentlyDisabled = true;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('wheel', preventScroll, SCROLL_PREVENTION_OPTIONS);
-    window.addEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
-    window.addEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
-    if (typeof ScrollTrigger !== 'undefined') {
-        const currentNormalizeConfig = ScrollTrigger.normalizeScroll();
-        wasNormalizeScrollActive = !!currentNormalizeConfig;
-        if (wasNormalizeScrollActive) ScrollTrigger.normalizeScroll(false);
-        ScrollTrigger.disable(false, true);
-    }
-}
-
-function enableScrollInteraction() {
-    if (!isScrollCurrentlyDisabled) return;
-    isScrollCurrentlyDisabled = false;
-    document.documentElement.style.overflow = '';
-    document.body.style.overflow = '';
-    window.removeEventListener('wheel', preventScroll, SCROLL_PREVENTION_OPTIONS);
-    window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
-    window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
-    if (typeof ScrollTrigger !== 'undefined') {
-        ScrollTrigger.enable();
-    }
-}
+// --- [삭제] Scroll Prevention Functions ---
+// 스크롤 관련 함수들을 common-utils.js로 이동했으므로 여기서는 삭제합니다.
 
 
 // --- Animation Functions (기존 함수들 유지) ---
@@ -739,8 +703,7 @@ function playSplineIntroAnimation() {
 async function runMainPageSequence() {
     // 1. 로더를 실행하고, 완료되면 즉시 기본 콘텐츠를 보여줍니다.
     await runLoaderSequence('.part-container');
-    enableScrollInteraction();
-
+    
     // 2. 가벼운 텍스트 인트로 애니메이션을 즉시 실행합니다.
     const comNameElement = document.querySelector(".com-name-ani");
     const heroTextBlock = document.querySelector('.hero-text-block');
@@ -879,6 +842,7 @@ async function runMainPageSequence() {
 
 // 가벼운 인트로가 완료된 후 호출될 콜백
 function onLightIntroComplete() {
+    enableScrollInteraction(); // [수정] 애니메이션 완료 후 스크롤 활성화
     heroHeadlineTriggerEnabled = true;
     const menuIcon = document.querySelector(".menu-icon");
     if (menuIcon) gsap.to(menuIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.1 });
@@ -978,6 +942,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setViewportHeight();
     window.scrollTo(0, 0);
     setupScrollRestoration();
+    disableScrollInteraction(); // [수정] 페이지 로드 시 스크롤 비활성화
     
     try {
         await loadCommonUI();
@@ -989,7 +954,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         runMainPageSequence().catch(error => {
             console.error("Error in runMainPageSequence:", error);
             hideLoaderOnError();
-            enableScrollInteraction();
+            enableScrollInteraction(); // 에러 발생 시 스크롤 활성화
             window.scrollTo(0, 0);
             if (!initialSetupDone) {
                 setupResponsiveScrollTriggers();
@@ -999,7 +964,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         console.error("Failed to load common UI or initialize its scripts:", error);
         hideLoaderOnError();
-        enableScrollInteraction();
+        enableScrollInteraction(); // 에러 발생 시 스크롤 활성화
     }
 });
 

@@ -16,6 +16,54 @@ if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 }
 
+// --- [새 기능] 스크롤 제어 유틸리티 ---
+const SCROLL_PREVENTION_OPTIONS = { passive: false };
+let isScrollCurrentlyDisabled = false;
+
+function preventScroll(event) {
+    if (isScrollCurrentlyDisabled) event.preventDefault();
+}
+function preventKeyboardScroll(event) {
+    if (isScrollCurrentlyDisabled && ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.code)) {
+        event.preventDefault();
+    }
+}
+
+/**
+ * 페이지의 모든 스크롤 상호작용(마우스 휠, 터치, 키보드)을 비활성화합니다.
+ * GSAP의 ScrollTrigger도 비활성화합니다.
+ */
+export function disableScrollInteraction() {
+    if (isScrollCurrentlyDisabled) return;
+    isScrollCurrentlyDisabled = true;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('wheel', preventScroll, SCROLL_PREVENTION_OPTIONS);
+    window.addEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
+    window.addEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
+    if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.disable(false, true);
+    }
+}
+
+/**
+ * 비활성화되었던 스크롤 상호작용을 다시 활성화합니다.
+ */
+export function enableScrollInteraction() {
+    if (!isScrollCurrentlyDisabled) return;
+    isScrollCurrentlyDisabled = false;
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    window.removeEventListener('wheel', preventScroll, SCROLL_PREVENTION_OPTIONS);
+    window.removeEventListener('touchmove', preventScroll, SCROLL_PREVENTION_OPTIONS);
+    window.removeEventListener('keydown', preventKeyboardScroll, SCROLL_PREVENTION_OPTIONS);
+    if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.enable();
+    }
+}
+// --- 스크롤 제어 유틸리티 끝 ---
+
+
 export function setupScrollRestoration() {
     window.scrollTo(0, 0);
     history.scrollRestoration = "manual";
@@ -66,15 +114,11 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
             console.error("Loader elements missing. Aborting loader sequence.");
             if (loader) gsap.set(loader, { autoAlpha: 0, display: 'none' });
             if (mainContent) gsap.set(mainContent, { autoAlpha: 1 });
-            document.body.style.overflow = 'auto';
             resolve();
             return;
         }
         
         const completeAndShowContent = () => {
-            document.documentElement.style.overflow = '';
-            document.body.style.overflow = 'auto';
-
             window.scrollTo(0, 0); 
             gsap.to(loader, {
                 opacity: 0,
@@ -99,9 +143,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
             });
         };
 
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
-
         gsap.set(loader, { opacity: 1, visibility: 'visible', display: 'flex' });
         if (mainContent) {
              gsap.set(mainContent, { opacity: 0, visibility: 'hidden' });
@@ -113,11 +154,16 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         const socketRect = socket.getBoundingClientRect();
         const yOffset = 6; 
         const finalCableTop = socketRect.top + yOffset;
+        
+        // [색상 수정] 연결 완료(노란색)와 헤더(보라색) 색상을 분리합니다.
+        const connectionColor = "#ffc400";
+        const headColor = "#903bebff";
 
         if (hasVisited) {
-            gsap.set(socketPath, { strokeDashoffset: 0, fill: '#ffc400', stroke: '#ffc400' });
-            gsap.set(cableLine, { backgroundColor: '#ffc400' });
-            gsap.set(cableHeadPath, { fill: '#ffc400' });
+            // 재방문 시, 연결된 상태의 색상을 바로 적용합니다.
+            gsap.set(socketPath, { strokeDashoffset: 0, fill: connectionColor, stroke: connectionColor });
+            gsap.set(cableLine, { backgroundColor: connectionColor });
+            gsap.set(cableHeadPath, { fill: headColor }); // 헤더만 보라색으로 설정
             gsap.set(cableAssembly, { top: finalCableTop, opacity: 1, scale: 1 });
             gsap.set(socket, { opacity: 1, scale: 1 });
             gsap.set(loaderText, { opacity: 1 });
@@ -133,6 +179,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
             });
 
         } else {
+            // 첫 방문 시 애니메이션을 실행합니다.
             const socketPathLength = socketPath.getTotalLength();
             gsap.set(socketPath, {
                 strokeDasharray: socketPathLength,
@@ -161,17 +208,18 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 duration: 2,
                 ease: "power2.out" 
             }, "-=1.0")
+            // [색상 수정] 소켓과 라인은 노란색으로, 헤더만 보라색으로 변경합니다.
             .to(socketPath, {
-                fill: "#ffc400",
-                stroke: "#ffc400",
+                fill: connectionColor,
+                stroke: connectionColor,
                 duration: 0.3
             }, "-=0.1")
             .to(cableLine, {
-                backgroundColor: "#ffc400",
+                backgroundColor: connectionColor,
                 duration: 0.3
             }, "<")
             .to(cableHeadPath, {
-                fill: "#ffc400",
+                fill: headColor,
                 duration: 0.3
             }, "<")
             .to(loaderText, {
@@ -198,10 +246,7 @@ export function hideLoaderOnError() {
             opacity: 0,
             onComplete: () => {
                 loader.style.display = 'none';
-                document.documentElement.style.height = '';
-                document.documentElement.style.overflow = '';
-                document.body.style.height = '';
-                document.body.style.overflow = 'auto';
+                enableScrollInteraction(); // 에러 발생 시 스크롤 활성화
             }
         });
     }
