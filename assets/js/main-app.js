@@ -12,7 +12,7 @@ if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin, Observer);
 }
 
-// [수정] common-utils.js에서 스크롤 제어 함수를 포함한 모든 유틸리티를 가져옵니다.
+// common-utils.js에서 스크롤 제어 함수를 포함한 모든 유틸리티를 가져옵니다.
 import {
     setupScrollRestoration,
     degToRad,
@@ -24,8 +24,8 @@ import {
     buildUrl,
     loadCommonUI,
     killAllScrollTriggers,
-    disableScrollInteraction, // 스크롤 비활성화 함수 import
-    enableScrollInteraction   // 스크롤 활성화 함수 import
+    disableScrollInteraction,
+    enableScrollInteraction
 } from './common-utils.js';
 
 
@@ -48,9 +48,6 @@ let initialSetupDone = false;
 let headlineCharsAnim = null;
 let heroHeadlineTriggerEnabled = false;
 
-// --- [삭제] Scroll Prevention Variables ---
-// 스크롤 관련 변수와 함수들을 common-utils.js로 이동했으므로 여기서는 삭제합니다.
-
 if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
     ScrollTrigger.config({
         autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize"
@@ -63,9 +60,6 @@ const getTargetWinhubX = (isMobileView) => isMobileView ? responsiveX(70) : resp
 const getTargetWinhubY = (isMobileView) => isMobileView ? responsiveY(-10) : 0;
 const WINHUB_INTRO_END_Z = 0;
 const partBackgroundColors = { hero: "#410b7a", part1: "#0b2c7a", part2: "#0b7a48", part3: "#7a063c" };
-
-// --- [삭제] Scroll Prevention Functions ---
-// 스크롤 관련 함수들을 common-utils.js로 이동했으므로 여기서는 삭제합니다.
 
 
 // --- Animation Functions (기존 함수들 유지) ---
@@ -617,16 +611,12 @@ function populateWorksList() {
  }
 
 
-// [수정] 무거운 3D 에셋과 라이브러리를 비동기적으로 로드하는 함수
+// 무거운 3D 에셋과 라이브러리를 로딩만 하는 함수
 async function initializeHeavyAssets() {
     try {
         // 1. 필요한 라이브러리를 동적으로 import 합니다.
         const { Application } = await import('https://unpkg.com/@splinetool/runtime/build/runtime.js');
-        
-        // [수정] common-utils.js에서는 유틸리티 함수만 가져옵니다.
         const { InteractiveBackgroundSphere, loadSplineScene } = await import('./common-utils.js');
-
-        // [수정] THREE.js 모듈 전체를 직접 동적으로 import 하여 오류를 해결합니다.
         const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js');
         window.THREE = THREE; // Spline 런타임이 참조할 수 있도록 전역에 할당
 
@@ -645,30 +635,16 @@ async function initializeHeavyAssets() {
             console.error("MAIN-APP: Main Spline App could not be loaded.");
         }
 
-        // 3. Spline 씬 로딩 후 인트로 애니메이션을 실행합니다.
-        playSplineIntroAnimation();
-
-        // 4. 인터랙티브 배경 구체를 초기화하고 애니메이션을 적용합니다.
-        // [수정] 직접 import한 THREE 객체를 전달합니다.
+        // 3. 인터랙티브 배경 구체를 인스턴스화만 합니다. init() 호출은 애니메이션 시작 시점으로 이동합니다.
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', THREE);
-        if (mainPageBackgroundSphere.valid) {
-            mainPageBackgroundSphere.init().introAnimate();
-        }
-
-        // 5. 모든 스크롤 기반 애니메이션을 설정합니다.
-        if (!initialSetupDone) {
-            setupResponsiveScrollTriggers();
-            initialSetupDone = true;
-        } else {
-            if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
-        }
 
     } catch (error) {
         console.error("Error initializing heavy assets:", error);
+        return Promise.reject(error); // 에셋 로딩 실패 시 Promise를 reject
     }
 }
 
-// Spline 인트로 애니메이션을 별도 함수로 분리
+// Spline 인트로 애니메이션을 별도 함수로 분리 (변경 없음)
 function playSplineIntroAnimation() {
     const splineCanvas = document.getElementById("canvas3d");
     if (!splineCanvas || !winhub) return;
@@ -698,18 +674,22 @@ function playSplineIntroAnimation() {
             "<");
 }
 
-
-// 메인 시퀀스를 가벼운 초기화와 무거운 후처리로 분리
+// [개선] 메인 시퀀스: 성능과 애니메이션 순서를 모두 최적화
 async function runMainPageSequence() {
     // 1. 로더를 실행하고, 완료되면 즉시 기본 콘텐츠를 보여줍니다.
     await runLoaderSequence('.part-container');
     
-    // 2. 가벼운 텍스트 인트로 애니메이션을 즉시 실행합니다.
+    // 2. 무거운 에셋 로딩을 백그라운드에서 시작합니다.
+    const heavyAssetsPromise = initializeHeavyAssets();
+
+    // 3. 가벼운 텍스트 인트로 애니메이션을 실행합니다.
     const comNameElement = document.querySelector(".com-name-ani");
     const heroTextBlock = document.querySelector('.hero-text-block');
 
     if (!comNameElement || !heroTextBlock) {
         console.error("Missing critical hero text elements for intro animation.");
+        // 에셋 로딩 Promise를 onLightIntroComplete에 전달하여 스크롤을 활성화하도록 합니다.
+        onLightIntroComplete(heavyAssetsPromise); 
         return;
     }
     
@@ -717,8 +697,10 @@ async function runMainPageSequence() {
     gsap.set(".headline", { autoAlpha: 0 });
     gsap.set(".headline div", { autoAlpha: 0 });
 
-    const masterIntroTimeline = gsap.timeline({ onComplete: onLightIntroComplete });
+    // onLightIntroComplete를 onComplete 콜백으로 설정하고, 에셋 로딩 Promise를 전달합니다.
+    const masterIntroTimeline = gsap.timeline({ onComplete: onLightIntroComplete, onCompleteParams: [heavyAssetsPromise] });
     
+    // 이 부분은 원래 코드의 복잡한 위치 계산 로직을 유지하여 애니메이션 느낌을 보존합니다.
     if (comNameElement.parentNode !== heroTextBlock) {
         heroTextBlock.prepend(comNameElement);
     }
@@ -762,6 +744,7 @@ async function runMainPageSequence() {
         console.error("Failed to split text for animation:", e);
     }
 
+    // com-name-ani 애니메이션
     if (splitComName && splitComName.chars && finalPositions.length === splitComName.chars.length) {
         masterIntroTimeline.from(splitComName.chars, {
             y: -50,
@@ -796,29 +779,28 @@ async function runMainPageSequence() {
         masterIntroTimeline.to(comNameElement, { autoAlpha: 1, duration: 1 });
     }
 
-    const headlineStartTime = "<+=0.02";
+    // headline 애니메이션 (com-name-ani 다음에 순차적으로 실행)
+    const headlineStartTime = ">-0.2"; // 이전 애니메이션이 끝나기 직전에 시작
     masterIntroTimeline
-        .set(".headline", { autoAlpha: 1, xPercent: -50, left: "50%" }, headlineStartTime)
-        .to(".headline", { xPercent: 0, left: "0%", duration: .5, ease: "power3.inOut" })
-        .addLabel("startHeadlineChars", ">-0.1");
+        .set(".headline", { autoAlpha: 1 }, headlineStartTime)
+        .from(".headline", { xPercent: -100, duration: 0.8, ease: "power3.out" }, "<")
+        .addLabel("startHeadlineChars", ">-0.2");
+
     const headlineDivs = document.querySelectorAll(".headline div");
     if (headlineDivs.length > 0) {
-        if (splitHeadlineChars.length !== headlineDivs.length || (splitHeadlineChars.length > 0 && (!splitHeadlineChars[0].chars || !splitHeadlineChars[0].chars.length))) {
-            splitHeadlineChars.forEach(st => st?.revert());
-            splitHeadlineChars = [];
-            headlineDivs.forEach((divElement) => {
-                gsap.set(divElement, { autoAlpha: 1, overflow: 'hidden' });
-                try {
-                    const lineSplit = new SplitText(divElement, { type: "chars", charsClass: "headline-char" });
-                    if (lineSplit.chars && lineSplit.chars.length > 0) {
-                        splitHeadlineChars.push(lineSplit);
-                    }
-                } catch (e) {
-                    console.error("Error splitting headline chars in intro:", e);
-                    gsap.set(divElement, { autoAlpha: 1 });
+        splitHeadlineChars.forEach(st => st?.revert());
+        splitHeadlineChars = [];
+        headlineDivs.forEach((divElement) => {
+            gsap.set(divElement, { autoAlpha: 1, overflow: 'hidden' });
+            try {
+                const lineSplit = new SplitText(divElement, { type: "chars", charsClass: "headline-char" });
+                if (lineSplit.chars && lineSplit.chars.length > 0) {
+                    splitHeadlineChars.push(lineSplit);
                 }
-            });
-        }
+            } catch (e) {
+                console.error("Error splitting headline chars in intro:", e);
+            }
+        });
 
         splitHeadlineChars.forEach((lineSplit, lineIndex) => {
             if (lineSplit.chars && lineSplit.chars.length > 0) {
@@ -835,14 +817,13 @@ async function runMainPageSequence() {
             masterIntroTimeline.to(emElements, { color: "#FFFF00", duration: 0.3, stagger: 0.05, ease: "power1.inOut" }, ">-0.2");
         }
     }
-
-    // 3. 가벼운 인트로 완료 후, 무거운 에셋 로딩을 시작합니다.
-    masterIntroTimeline.eventCallback("onComplete", onLightIntroComplete);
 }
 
-// 가벼운 인트로가 완료된 후 호출될 콜백
-function onLightIntroComplete() {
-    enableScrollInteraction(); // [수정] 애니메이션 완료 후 스크롤 활성화
+
+// [개선] 가벼운 인트로 완료 후, 로딩된 에셋의 애니메이션을 시작하는 콜백
+async function onLightIntroComplete(heavyAssetsPromise) {
+    // 텍스트 애니메이션 완료 후 UI 상호작용 활성화
+    enableScrollInteraction();
     heroHeadlineTriggerEnabled = true;
     const menuIcon = document.querySelector(".menu-icon");
     if (menuIcon) gsap.to(menuIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out", delay: 0.1 });
@@ -851,8 +832,41 @@ function onLightIntroComplete() {
     
     window.scrollTo(0, 0);
 
-    // [핵심] 여기서 무거운 에셋 로딩 및 관련 애니메이션/스크롤 트리거 설정을 시작합니다.
-    initializeHeavyAssets();
+    try {
+        // 백그라운드에서 로딩 중이던 무거운 에셋이 완료되기를 기다립니다.
+        if (heavyAssetsPromise) {
+            await heavyAssetsPromise;
+        }
+
+        // 에셋 로딩이 모두 완료된 후에야 3D 애니메이션을 시작합니다.
+        
+        // 배경 구체 애니메이션 시작
+        if (mainPageBackgroundSphere && mainPageBackgroundSphere.valid) {
+            mainPageBackgroundSphere.init().introAnimate();
+        }
+
+        // Spline 오브젝트 애니메이션 시작
+        if (mainSplineApp) {
+            playSplineIntroAnimation();
+        }
+
+        // 스크롤 트리거 설정
+        if (!initialSetupDone) {
+            setupResponsiveScrollTriggers();
+            initialSetupDone = true;
+        } else {
+            if (typeof ScrollTrigger !== 'undefined') {
+                ScrollTrigger.refresh();
+            }
+        }
+    } catch (error) {
+        console.error("Failed to start animations for heavy assets:", error);
+        // 에러가 발생해도 스크롤 트리거는 설정되도록 합니다.
+        if (!initialSetupDone) {
+            setupResponsiveScrollTriggers();
+            initialSetupDone = true;
+        }
+    }
 }
 
 // 모든 ScrollTrigger를 설정하는 함수
@@ -942,7 +956,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setViewportHeight();
     window.scrollTo(0, 0);
     setupScrollRestoration();
-    disableScrollInteraction(); // [수정] 페이지 로드 시 스크롤 비활성화
+    disableScrollInteraction(); // 페이지 로드 시 스크롤 비활성화
     
     try {
         await loadCommonUI();
