@@ -2,13 +2,13 @@
 
 export const worksData = [
   {
-    id: 'abc-mart-pos',
+    id: 'starbucks-bds',
     category: 'web',
-    title: 'ABC 마트 차세대 POS 시스템 구축AA',
-    client: 'ABC 마트',
-    date: '2024.03', // 스크린샷에는 연도만 있어 월은 임의로 지정
-    service: 'POS System・System Integration・UI/UX Design',
-    overview: 'PC POS, SCO(셀프 계산대), 모바일 등 다양한 환경을 지원하는 ABC 마트의 차세대 판매 시점 정보 관리(POS) 시스템을 구축하여 결제 프로세스를 혁신하고 사용자 경험을 개선했습니다.',
+    title: '스타벅스 품질 관리 시스템(BDS) 구축',
+    client: '스타벅스',
+    date: '2020.07',
+    service: 'System Development・Real-time Monitoring・UI/UX',
+    overview: '음료의 재고를 실시간으로 공유하고 점검하는 품질 관리 시스템(BDS)을 구축하여, 스타벅스의 모든 매장에서 일관된 최고 품질의 음료를 제공할 수 있도록 지원합니다.',
     mainImage: 'assets/images/works/project/prod-starbucks.png',
     listImage: 'assets/images/works/thumbnail/thumb-starbucks.png'
   },
@@ -100,15 +100,15 @@ export const worksData = [
     mainImage: 'https://placehold.co/1200x3700/f8d000/fff?text=E-Mart+PDS',
     listImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop'
   },
-  {
-    id: 'starbucks-bds',
+  {    
+    id: 'abc-mart-pos',
     category: 'web',
-    title: '스타벅스 품질 관리 시스템(BDS) 구축',
-    client: '스타벅스',
-    date: '2020.07',
-    service: 'System Development・Real-time Monitoring・UI/UX',
-    overview: '음료의 재고를 실시간으로 공유하고 점검하는 품질 관리 시스템(BDS)을 구축하여, 스타벅스의 모든 매장에서 일관된 최고 품질의 음료를 제공할 수 있도록 지원합니다.',
-    mainImage: 'https://placehold.co/1200x3400/036635/fff?text=Starbucks+BDS',
+    title: 'ABC 마트 차세대 POS 시스템 구축AA',
+    client: 'ABC 마트',
+    date: '2024.03', // 스크린샷에는 연도만 있어 월은 임의로 지정
+    service: 'POS System・System Integration・UI/UX Design',
+    overview: 'PC POS, SCO(셀프 계산대), 모바일 등 다양한 환경을 지원하는 ABC 마트의 차세대 판매 시점 정보 관리(POS) 시스템을 구축하여 결제 프로세스를 혁신하고 사용자 경험을 개선했습니다.',
+    mainImage: 'https://placehold.co/1200x3400/036635/fff?text=ABC MART',
     listImage: 'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=800&auto=format&fit=crop'
   }
 ];
