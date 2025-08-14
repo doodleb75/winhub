@@ -7,7 +7,7 @@ if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(ScrollToPlugin, SplitText, ScrollTrigger);
 }
 
-// [수정] common-utils.js에서 스크롤 제어 함수를 포함한 모든 유틸리티를 가져옵니다.
+// [개선] common-utils.js에서 필요한 유틸리티 함수들을 가져옵니다.
 import {
     setupScrollRestoration,
     degToRad,
@@ -15,8 +15,8 @@ import {
     hideLoaderOnError,
     killAllScrollTriggers,
     loadCommonUI,
-    disableScrollInteraction, // 스크롤 비활성화 함수 import
-    enableScrollInteraction   // 스크롤 활성화 함수 import
+    disableScrollInteraction,
+    enableScrollInteraction
 } from './common-utils.js';
 
 // --- Global Variables for Sub Page ---
@@ -41,10 +41,10 @@ const pageColorConfigs = {
     "works.html": { bodyBackgroundColorFallback: "#1f3477", sphereColor: { r: 0.682, g: 0.839, b: 0.945 }, textColor: "#ecf0f1" },
     "contact.html": { bodyBackgroundColorFallback: "#491e9b", sphereColor: { r: 0.682, g: 0.839, b: 0.945 }, textColor: "#ecf0f1" },
 };
-const scrolledPastHeroColors = { 
+const scrolledPastHeroColors = {
     sphereColor: { r: 0.6, g: 0.6, b: 0.6 },
     darkContentTextColor: "#2c3e50"
-}; 
+};
 
 function getResponsiveSplineProperties() {
     const isMobile = window.innerWidth <= 768;
@@ -85,9 +85,9 @@ function setupDecorativeRectAnimations() {
     const parallaxBg2 = rect2 ? rect2.querySelector(".parallax-bg") : null;
 
     if (rect1) {
-        gsap.set(rect1, { 
-            clipPath: 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)', 
-            autoAlpha: 1 
+        gsap.set(rect1, {
+            clipPath: 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)',
+            autoAlpha: 1
         });
 
         ScrollTrigger.create({
@@ -96,25 +96,25 @@ function setupDecorativeRectAnimations() {
             end: "bottom 25%",
             id: 'rect1-anim',
             invalidateOnRefresh: true,
-            onEnter: () => gsap.to(rect1, { 
+            onEnter: () => gsap.to(rect1, {
                 clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-                duration: 1.2, 
-                ease: 'expo.out' 
+                duration: 1.2,
+                ease: 'expo.out'
             }),
-            onLeave: () => gsap.to(rect1, { 
+            onLeave: () => gsap.to(rect1, {
                 clipPath: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)',
-                duration: 0.8, 
-                ease: 'power3.in' 
+                duration: 0.8,
+                ease: 'power3.in'
             }),
-            onEnterBack: () => gsap.to(rect1, { 
+            onEnterBack: () => gsap.to(rect1, {
                 clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-                duration: 1.2, 
-                ease: 'expo.out' 
+                duration: 1.2,
+                ease: 'expo.out'
             }),
-            onLeaveBack: () => gsap.to(rect1, { 
+            onLeaveBack: () => gsap.to(rect1, {
                 clipPath: 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)',
-                duration: 0.8, 
-                ease: 'power3.in' 
+                duration: 0.8,
+                ease: 'power3.in'
             })
         });
 
@@ -149,9 +149,9 @@ function setupDecorativeRectAnimations() {
     }
 
     if (rect2) {
-        gsap.set(rect2, { 
+        gsap.set(rect2, {
             clipPath: 'polygon(100% 100%, 100% 100%, 0% 100%, 0% 100%)',
-            autoAlpha: 1 
+            autoAlpha: 1
         });
 
         ScrollTrigger.create({
@@ -160,25 +160,25 @@ function setupDecorativeRectAnimations() {
             end: "bottom 30%",
             id: 'rect2-anim',
             invalidateOnRefresh: true,
-            onEnter: () => gsap.to(rect2, { 
+            onEnter: () => gsap.to(rect2, {
                 clipPath: 'polygon(100% 0%, 100% 100%, 0% 100%, 0% 0%)',
-                duration: 1.2, 
+                duration: 1.2,
                 ease: 'expo.out'
             }),
-            onLeave: () => gsap.to(rect2, { 
+            onLeave: () => gsap.to(rect2, {
                 clipPath: 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)',
-                duration: 0.8, 
-                ease: 'power3.in' 
+                duration: 0.8,
+                ease: 'power3.in'
             }),
-            onEnterBack: () => gsap.to(rect2, { 
+            onEnterBack: () => gsap.to(rect2, {
                 clipPath: 'polygon(100% 0%, 100% 100%, 0% 100%, 0% 0%)',
-                duration: 1.2, 
-                ease: 'expo.out' 
+                duration: 1.2,
+                ease: 'expo.out'
             }),
-            onLeaveBack: () => gsap.to(rect2, { 
+            onLeaveBack: () => gsap.to(rect2, {
                 clipPath: 'polygon(100% 100%, 100% 100%, 0% 100%, 0% 100%)',
-                duration: 0.8, 
-                ease: 'power3.in' 
+                duration: 0.8,
+                ease: 'power3.in'
             })
         });
     }
@@ -211,7 +211,7 @@ function setupLottieScrollTrigger() {
         onLeaveBack: () => {
             lottiePlayer.pause();
         },
-        enabled: false 
+        enabled: false
     });
 
     lottiePlayer.addEventListener('ready', () => {
@@ -229,7 +229,7 @@ function setupHistoryTimelineAnimation() {
 
     timelineEntries.forEach(entry => {
         const xFrom = entry.classList.contains('left-entry') ? -100 : 100;
-        
+
         gsap.set(entry, { autoAlpha: 0, x: xFrom, y: 30 });
         gsap.to(entry, {
             autoAlpha: 1,
@@ -249,7 +249,7 @@ function setupHistoryTimelineAnimation() {
 
 function setupHistorySectionAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-    
+
     const historySectionWrapper = document.querySelector("#history-section .section-content-wrapper");
     const historyTitle = historySectionWrapper ? historySectionWrapper.querySelector('.section-title') : null;
 
@@ -278,7 +278,7 @@ function setupPartnersSectionAnimation() {
     if (!section) return;
 
     const wrapper = section.querySelector(".section-content-wrapper");
-    
+
     if (wrapper) {
         gsap.set(wrapper, { opacity: 0, y: 50 });
 
@@ -295,7 +295,7 @@ function setupPartnersSectionAnimation() {
     }
 }
 
-function initialPageVisualSetup(isResize = false) { 
+function initialPageVisualSetup(isResize = false) {
     if (typeof gsap === 'undefined') return;
     subpageBodyElement = document.querySelector('.subpage-body'); if (!subpageBodyElement) return;
     heroSection = document.getElementById("sub-hero");
@@ -390,28 +390,28 @@ function switchColors(isScrolledPast, THREE) {
     } else {
         subpageBodyElement.classList.remove('scrolled-past-hero-colors');
     }
-    
+
     if (subPageBackgroundSphere && THREE) {
         const targetSphereColors = isScrolledPast ? new THREE.Color(scrolledPastHeroColors.sphereColor.r, scrolledPastHeroColors.sphereColor.g, scrolledPastHeroColors.sphereColor.b) : new THREE.Color(currentPageConfig.sphereColor.r, currentPageConfig.sphereColor.g, currentPageConfig.sphereColor.b);
-        subPageBackgroundSphere.updateColors({ 
-            wireframeColor: targetSphereColors, 
-            pointsColor: targetSphereColors 
+        subPageBackgroundSphere.updateColors({
+            wireframeColor: targetSphereColors,
+            pointsColor: targetSphereColors
         });
     }
 
     const logoMenuColorScrolledPast = scrolledPastHeroColors.darkContentTextColor;
-    const logoMenuColorInHero = currentPageConfig.textColor; 
-    heroDependentElements.forEach(el => gsap.to(el, { 
-        color: isScrolledPast ? logoMenuColorScrolledPast : logoMenuColorInHero, 
-        duration: duration, 
-        overwrite: "auto" 
+    const logoMenuColorInHero = currentPageConfig.textColor;
+    heroDependentElements.forEach(el => gsap.to(el, {
+        color: isScrolledPast ? logoMenuColorScrolledPast : logoMenuColorInHero,
+        duration: duration,
+        overwrite: "auto"
     }));
 
     const contentTargetTextColor = isScrolledPast ? scrolledPastHeroColors.darkContentTextColor : currentPageConfig.textColor;
-    otherContentTextElements.forEach(el => gsap.to(el, { 
-        color: contentTargetTextColor, 
-        duration: duration, 
-        overwrite: "auto" 
+    otherContentTextElements.forEach(el => gsap.to(el, {
+        color: contentTargetTextColor,
+        duration: duration,
+        overwrite: "auto"
     }));
  }
 function setupHeroColorSwitcher(THREE) {
@@ -419,7 +419,7 @@ function setupHeroColorSwitcher(THREE) {
 
     const existingTrigger = ScrollTrigger.getById("heroColorSwitcher");
     if (existingTrigger) existingTrigger.kill();
-    
+
     ScrollTrigger.create({
         id: "heroColorSwitcher",
         trigger: heroSection,
@@ -483,14 +483,14 @@ function setupSubPageContentAnimations() {
     sections.forEach((section) => {
         let animatedElement;
         const contentWrapper = section.querySelector(".section-content-wrapper");
-        
+
         if (contentWrapper) {
             const specificAnimatedContent = contentWrapper.querySelector(".animated-content");
             animatedElement = specificAnimatedContent || contentWrapper;
         } else {
             animatedElement = section;
         }
-        
+
         gsap.set(animatedElement, { opacity: 0, y: 50 });
 
         if (section.id === 'contact-section' || section.id === 'map-section') {
@@ -560,23 +560,23 @@ function animateHeroText() {
 
     const masterTextAnimationTl = gsap.timeline();
 
-    if (pageTitle && pageTitle.offsetParent !== null) { 
+    if (pageTitle && pageTitle.offsetParent !== null) {
         if (typeof SplitText !== 'undefined') {
             try {
-                splitTitle = new SplitText(pageTitle, { type: "chars" }); 
-                masterTextAnimationTl.fromTo(splitTitle.chars, 
+                splitTitle = new SplitText(pageTitle, { type: "chars" });
+                masterTextAnimationTl.fromTo(splitTitle.chars,
                     { autoAlpha: 0, y: -200 },
                     { duration: .5, autoAlpha: 1, y: 0, ease: "back.out(1.7)", stagger: 0.1 }
                 );
-            } catch (e) { 
+            } catch (e) {
                 masterTextAnimationTl.from(pageTitle, { duration: 0.7, autoAlpha: 0, y: -50, ease: "power2.out" });
             }
-        } else { 
+        } else {
             masterTextAnimationTl.from(pageTitle, { duration: 0.7, autoAlpha: 0, y: -50, ease: "power2.out" });
         }
     }
 
-    if (pageDescription && pageDescription.offsetParent !== null) { 
+    if (pageDescription && pageDescription.offsetParent !== null) {
         if (typeof SplitText !== 'undefined') {
             try {
                 splitDescription = new SplitText(pageDescription, { type: "lines" });
@@ -596,7 +596,7 @@ function setupScrollToTopButton() {
     const scrollToTopBtn = document.getElementById("scrollToTopBtn");
     const heroSection = document.getElementById('sub-hero');
     if (!scrollToTopBtn || !heroSection) return;
-    
+
     if (typeof ScrollTrigger !== 'undefined') {
         ScrollTrigger.create({
             trigger: heroSection,
@@ -612,7 +612,7 @@ function setupSubPageScrollIconAnimation() {
     if (!scrollIcon || typeof ScrollTrigger === 'undefined') return;
 
     gsap.to(scrollIcon, { autoAlpha: 1, duration: 0.5, delay: 1.5 });
-    
+
     ScrollTrigger.create({
         id: 'subPageScrollIconVisibilityTrigger',
         start: 1,
@@ -626,14 +626,14 @@ function setupHeroScrollSnap() {
     const heroSection = document.getElementById('sub-hero');
     const firstContentSection = document.querySelector('.subpage-section:not(#sub-hero)');
     if (!heroSection || !firstContentSection) return;
-    
+
     ScrollTrigger.create({
         id: 'heroScrollSnapTrigger',
         trigger: heroSection,
         start: "top top-1",
         end: "bottom top",
         onEnter: self => {
-            if (isSnapping || self.direction !== 1 || isResizing) return; 
+            if (isSnapping || self.direction !== 1 || isResizing) return;
             isSnapping = true;
             gsap.to(window, {
                 scrollTo: { y: firstContentSection },
@@ -658,20 +658,14 @@ function setupHeroScrollSnap() {
     });
  }
 
-// [수정] 무거운 3D 에셋을 비동기적으로 로드하는 함수
+// [개선] 3D 에셋 로딩 함수 (애니메이션 시작은 분리)
 async function initializeHeavyAssets() {
     try {
-        // 1. 필요한 라이브러리를 동적으로 import 합니다.
         const { Application } = await import('https://unpkg.com/@splinetool/runtime/build/runtime.js');
-        
-        // [수정] common-utils.js에서는 유틸리티 함수만 가져옵니다.
         const { InteractiveBackgroundSphere, loadSplineScene } = await import('./common-utils.js');
-        
-        // [수정] THREE.js 모듈 전체를 직접 동적으로 import 하여 오류를 해결합니다.
         const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js');
-        window.THREE = THREE; // Spline 런타임이 참조할 수 있도록 전역에 할당
+        window.THREE = THREE;
 
-        // 2. Spline 씬을 로드합니다.
         subpageSplineApp = await loadSplineScene("spline-canvas-subpage", "https://prod.spline.design/0FDfaGjmdgz0JYwR/scene.splinecode", Application);
         if (subpageSplineApp) {
             const cableObject = subpageSplineApp.findObjectByName('cable');
@@ -685,29 +679,61 @@ async function initializeHeavyAssets() {
             }
         }
 
-        // 3. 인터랙티브 배경 구체를 초기화합니다.
         if (subpageBodyElement) {
             const color = new THREE.Color(currentPageConfig.sphereColor.r, currentPageConfig.sphereColor.g, currentPageConfig.sphereColor.b);
-            // [수정] 직접 import한 THREE 객체를 전달합니다.
             subPageBackgroundSphere = new InteractiveBackgroundSphere('fullscreen-threejs-bg', THREE, {
                 wireframeColor: color.clone(),
                 pointsColor: color.clone(),
             });
             if (subPageBackgroundSphere.init) {
-                subPageBackgroundSphere.init().introAnimate();
+                // 애니메이션 없이 초기화만 실행
+                subPageBackgroundSphere.init();
+                // Sphere 메쉬는 처음엔 보이지 않도록 설정
+                if(subPageBackgroundSphere.mesh) subPageBackgroundSphere.mesh.visible = false;
             }
         }
 
-        // 4. Spline 인트로 애니메이션을 재생하고, 모든 스크롤 관련 설정을 실행합니다.
-        playSplineIntroAnimation();
-        setupHeroColorSwitcher(THREE); // [수정] THREE 객체를 전달합니다.
+        setupHeroColorSwitcher(THREE);
+        return true; // 로딩 성공 시 true 반환
 
     } catch (error) {
         console.error("Error initializing heavy assets on sub-page:", error);
         const splineContainer = document.getElementById("threejs-object-container");
         if (splineContainer) gsap.set(splineContainer, { display: 'none' });
+        return false; // 로딩 실패 시 false 반환
     }
 }
+
+// [신규] Sphere 인트로 애니메이션 함수
+function animateSphereIntro() {
+    // Sphere 객체나 메쉬가 없으면 실행하지 않음
+    if (!subPageBackgroundSphere || !subPageBackgroundSphere.mesh) {
+        // Sphere가 없더라도 Spline 애니메이션은 실행되도록 처리
+        playSplineIntroAnimation();
+        return;
+    };
+
+    const sphereMesh = subPageBackgroundSphere.mesh;
+    sphereMesh.visible = true; // 애니메이션 시작 직전에 보이도록 설정
+
+    gsap.timeline({
+        onComplete: () => {
+            // Sphere 애니메이션이 끝나면 Spline 애니메이션을 시작
+            playSplineIntroAnimation();
+        }
+    })
+    .fromTo(sphereMesh.scale,
+        { x: 1.5, y: 1.5, z: 1.5 },
+        { x: 1, y: 1, z: 1, duration: 1.2, ease: "power2.out" },
+        0 // 타임라인 시작과 동시에
+    )
+    .fromTo(sphereMesh.rotation,
+        { y: -Math.PI / 2 },
+        { y: 0, duration: 1.5, ease: "power2.out" },
+        0 // 타임라인 시작과 동시에
+    );
+}
+
 
 // Spline 인트로 애니메이션 함수
 function playSplineIntroAnimation() {
@@ -731,62 +757,81 @@ function playSplineIntroAnimation() {
 }
 
 
-// 메인 초기화 함수를 수정하여 비동기 로딩을 적용
+// [개선] 메인 초기화 함수 - 애니메이션 순서 제어 로직 강화
 async function initializeSubpage() {
     initialPageVisualSetup();
-    
+
     await runLoaderSequence('.subpage-container');
-    
-    enableScrollInteraction(); // [수정] 로더 시퀀스 완료 후 스크롤 활성화
+
+    enableScrollInteraction();
+
+    // --- Intro Animation Sequence ---
 
     const logoElement = document.querySelector(".com-name-logo.logo-class");
     const menuIconElement = document.querySelector(".menu-icon");
     if (logoElement && menuIconElement) {
-        gsap.to([logoElement, menuIconElement], { 
-            duration: 0.8, 
+        gsap.to([logoElement, menuIconElement], {
+            duration: 0.8,
             autoAlpha: 1,
-            ease: "power2.out", 
-            delay: 0.2 
+            ease: "power2.out",
+            delay: 0.2
         });
     }
 
     const subHeroContent = document.querySelector(".sub-hero-content");
     if (subHeroContent) {
-        gsap.to(subHeroContent, { autoAlpha: 1, duration: 0.1, onComplete: () => {
-            animateHeroText();
-        }});
-    }
-   
-    // [핵심] 무거운 에셋들은 페이지가 표시된 후에 로드합니다.
-    initializeHeavyAssets();
+        // 3D 에셋 로딩을 미리 시작 (애니메이션은 아직 안 함)
+        const assetsPromise = initializeHeavyAssets();
 
-    // 스크롤 관련 설정은 모든 것이 준비된 후에 실행합니다.
+        gsap.to(subHeroContent, {
+            autoAlpha: 1,
+            duration: 0.1,
+            delay: 0.4,
+            onComplete: () => {
+                const textAnim = animateHeroText();
+                // 텍스트 애니메이션이 끝나면,
+                textAnim.eventCallback("onComplete", () => {
+                    // 에셋 로딩이 완료되기를 기다렸다가 3D 애니메이션 시작
+                    assetsPromise.then(loaded => {
+                        if (loaded) {
+                            // Sphere 애니메이션을 먼저 시작 (이후 Spline이 연달아 실행됨)
+                            animateSphereIntro();
+                        }
+                    });
+                });
+            }
+        });
+    } else {
+        // Hero 텍스트가 없으면 바로 3D 에셋 로딩 및 애니메이션 시작
+        initializeHeavyAssets().then(loaded => {
+            if (loaded) {
+                animateSphereIntro();
+            }
+        });
+    }
+
+    // --- 나머지 스크립트 설정 ---
     setupSubPageContentAnimations();
     setupDecorativeRectAnimations();
     setupLottieScrollTrigger();
     setupHistorySectionAnimation();
     setupPartnersSectionAnimation();
-    setupHeroParallax(); 
+    setupHeroParallax();
     setupHeroScrollSnap();
     setupTabs();
     setupScrollToTopButton();
     setupSubPageScrollIconAnimation();
 
-    // [수정 START] works.html 페이지를 위한 특정 스크립트를 동적으로 로드하고 실행합니다.
-    // 이로써 페이지 로딩 및 스크롤 활성화가 완료된 후에 포트폴리오 애니메이션이 설정되도록 보장합니다.
     if (window.location.pathname.includes('works.html')) {
         try {
-            // works-specific.js 모듈을 동적으로 가져옵니다.
             const worksModule = await import('./works-specific.js');
             if (worksModule && typeof worksModule.initializePortfolio === 'function') {
-                // 모듈에서 export된 initializePortfolio 함수를 호출합니다.
                 worksModule.initializePortfolio();
             }
         } catch (error) {
-            console.error("works.html의 특정 스크립트를 로드하는 데 실패했습니다:", error);
+            console.error("Failed to load works-specific scripts:", error);
         }
     }
-    // [수정 END]
 
     window.scrollTo(0, 0);
     if (typeof ScrollTrigger !== 'undefined') {
@@ -796,10 +841,10 @@ async function initializeSubpage() {
 
 function handleSubPageResize() {
     if (window.innerWidth !== cachedWindowWidth) {
-        isResizing = true; 
+        isResizing = true;
         cachedWindowWidth = window.innerWidth;
         window.scrollTo({top: 0, behavior: "auto"});
-        killAllScrollTriggers(); 
+        killAllScrollTriggers();
 
         if (splitTitle) splitTitle.revert();
         if (splitDescription) splitDescription.revert();
@@ -814,24 +859,22 @@ function handleSubPageResize() {
             gsap.to(winhubObject.scale, { ...targetScale, duration: 0.5, ease: "power2.out", overwrite: true });
             gsap.to(winhubObject.position, { ...targetPosition, duration: 0.5, ease: "power2.out", overwrite: true });
         }
-        
-        initialPageVisualSetup(true); 
-        
+
+        initialPageVisualSetup(true);
+
         setupSubPageContentAnimations();
         setupTabs();
         setupDecorativeRectAnimations();
         setupLottieScrollTrigger();
         setupHistorySectionAnimation();
         setupPartnersSectionAnimation();
-        setupHeroParallax(); 
-        
-        // [수정] 리사이즈 시에도 THREE 객체를 전달하여 컬러 스위처를 재설정합니다.
-        // 단, THREE 객체가 로드되었는지 확인해야 합니다.
+        setupHeroParallax();
+
         if (window.THREE) {
             setupHeroColorSwitcher(window.THREE);
         }
 
-        setupHeroScrollSnap(); 
+        setupHeroScrollSnap();
         setupSubPageScrollIconAnimation();
         setupScrollToTopButton();
 
@@ -839,7 +882,7 @@ function handleSubPageResize() {
             if (typeof ScrollTrigger !== 'undefined') {
                 ScrollTrigger.refresh(true);
             }
-            isResizing = false; 
+            isResizing = false;
             const subHeroContentOnResize = document.querySelector(".sub-hero-content");
             if (subHeroContentOnResize) {
                 gsap.set(subHeroContentOnResize, { autoAlpha: 1 });
@@ -855,7 +898,7 @@ function handleSubPageResize() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     setupScrollRestoration();
-    disableScrollInteraction(); // [수정] 페이지 로드 시 스크롤 비활성화
+    disableScrollInteraction(); // 페이지 로드 시 스크롤 비활성화
     splineIntroPlayed = false;
     originalWinhubState = null;
     cachedWindowWidth = window.innerWidth;
@@ -865,7 +908,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         await initializeSubpage();
     } catch (error) {
         hideLoaderOnError();
-        enableScrollInteraction(); // [수정] 에러 발생 시 스크롤 활성화
+        enableScrollInteraction(); // 에러 발생 시 스크롤 활성화
     }
 
     let resizeTimer;

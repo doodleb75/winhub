@@ -10,27 +10,49 @@
     <link rel="icon" type="image/png" sizes="16x16" href="./assets/images/favicon-16x16.png" />
     <link rel="manifest" href="./assets/images/site.webmanifest" />
     <link rel="icon" href="./assets/images/favicon.ico" type="image/x-icon" />
-        <!-- 새로운 CSS 링크 추가 -->
-    <link rel="stylesheet" href="assets/css/common.css" />
-    <link rel="stylesheet" href="assets/css/main.css" />
-    <!-- <link rel="stylesheet" href="assets/css/style.css" /> -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <!-- ★★★ FIX: 모바일 뷰포트 문제 해결을 위한 스타일 추가 ★★★ -->
+
+    <!-- ================================================== -->
+    <!-- 개선 사항 1: 폰트 및 CSS 로딩 최적화                -->
+    <!-- ================================================== -->
+
+    <!-- 1. 주요 폰트/리소스 서버와 미리 연결하여 DNS 조회 시간을 줄입니다. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="//spoqa.github.io">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <!-- 2. 폰트 파일을 비동기적으로 로드하고, 로딩 중에는 기본 폰트를 보여줍니다 (display=swap). -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="//fonts.googleapis.com/earlyaccess/nanumgothiccoding.css" media="print" onload="this.media='all'">
+
+    <!-- 3. CSS 파일을 비동기적으로 로드하여 렌더링을 차단하지 않도록 합니다. -->
+    <link rel="stylesheet" href="assets/css/common.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="assets/css/main.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" media="print" onload="this.media='all'">
+
+    <!-- 4. 페이지 로딩에 필수적인 최소한의 CSS(로더 등)를 인라인으로 삽입하여 깜빡임을 방지합니다. -->
     <style>
       :root {
-        /* setViewportHeight 함수가 설정할 --vh 변수의 기본값을 정의합니다. */
         --vh: 1vh;
       }
-      /* 로더가 동적으로 계산된 실제 뷰포트 높이(--vh)를 사용하도록 설정합니다.
-        이제 자바스크립트가 아닌 CSS가 로더의 높이를 제어하여,
-        주소창 유무에 관계없이 항상 전체 화면을 채우게 됩니다.
-        이 규칙은 style.css 파일의 #loader 스타일에 추가하거나 덮어써야 합니다.
-      */
+      body {
+        /* background-color: #1a1a1a; */
+        overflow-x: hidden;
+        font-family: "Noto Sans KR", "Nanum Gothic Coding", "Bricolage Grotesque", sans-serif;
+        position: relative;
+        line-height: 1.6;
+        overscroll-behavior: none;
+      }
       #loader {
+        position: fixed; top: 0; left: 0; width: 100%;
+        background: #1a1a1a; z-index: 9999; display: flex;
+        justify-content: center; align-items: center; opacity: 1; visibility: visible;
         height: calc(var(--vh, 1vh) * 100);
+      }
+      .part-container, .subpage-container {
+          opacity: 0;
+          visibility: hidden;
       }
     </style>
   </head>
@@ -51,14 +73,13 @@
     <section class="part-container">
       <div id="hero" class="flex row">
         <div class="container">
-          <!-- MODIFIED: Wrapper for hero text elements for better positioning control -->
           <div class="hero-text-block">
             <div class="com-name-ani">WINHUB</div>
             <div class="headline">
               <div>CONNECTS</div>
               <div>TO EMPOWER</div>
               <div>YOUR</div>
-              <div>SUCCESS</div>
+              <div><em>SUCCESS</em></div>
             </div>
           </div>
         </div>
@@ -196,8 +217,11 @@
       <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script type="module" src="./assets/js/main-app.js"></script>
+    <!-- ================================================== -->
+    <!-- 개선 사항 2: 스크립트 로딩 최적화                     -->
+    <!-- ================================================== -->
+    <!-- defer 속성을 추가하여 HTML 파싱을 막지 않고 병렬로 다운로드합니다. -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script type="module" src="./assets/js/main-app.js" defer></script>
   </body>
 </html>

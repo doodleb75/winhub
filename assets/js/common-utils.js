@@ -8,9 +8,8 @@
 import { ScrollTrigger } from "https://esm.sh/gsap/ScrollTrigger";
 import { ScrambleTextPlugin } from "https://esm.sh/gsap/ScrambleTextPlugin";
 
-// [수정] THREE.js 모듈은 이 파일에서 직접 내보내지 않습니다.
-// 각 app 파일(main-app, sub-app)이 필요에 따라 동적으로 직접 import합니다.
-// 이로써 의존성 관리가 명확해지고, 'THREE' 객체가 undefined가 되는 문제를 해결합니다.
+// [개선] THREE.js 모듈은 이 파일에서 직접 내보내지 않습니다.
+// 각 app 파일이 필요에 따라 동적으로 직접 import하여 의존성을 명확히 관리합니다.
 
 if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
@@ -24,6 +23,7 @@ function preventScroll(event) {
     if (isScrollCurrentlyDisabled) event.preventDefault();
 }
 function preventKeyboardScroll(event) {
+
     if (isScrollCurrentlyDisabled && ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.code)) {
         event.preventDefault();
     }
@@ -155,7 +155,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
         const yOffset = 6; 
         const finalCableTop = socketRect.top + yOffset;
         
-        // [색상 수정] 연결 완료(노란색)와 헤더(보라색) 색상을 분리합니다.
         const connectionColor = "#ffc400";
         const headColor = "#903bebff";
 
@@ -163,7 +162,7 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
             // 재방문 시, 연결된 상태의 색상을 바로 적용합니다.
             gsap.set(socketPath, { strokeDashoffset: 0, fill: connectionColor, stroke: connectionColor });
             gsap.set(cableLine, { backgroundColor: connectionColor });
-            gsap.set(cableHeadPath, { fill: headColor }); // 헤더만 보라색으로 설정
+            gsap.set(cableHeadPath, { fill: headColor });
             gsap.set(cableAssembly, { top: finalCableTop, opacity: 1, scale: 1 });
             gsap.set(socket, { opacity: 1, scale: 1 });
             gsap.set(loaderText, { opacity: 1 });
@@ -208,7 +207,6 @@ export function runLoaderSequence(mainContentSelector = '#main-content') {
                 duration: 2,
                 ease: "power2.out" 
             }, "-=1.0")
-            // [색상 수정] 소켓과 라인은 노란색으로, 헤더만 보라색으로 변경합니다.
             .to(socketPath, {
                 fill: connectionColor,
                 stroke: connectionColor,
@@ -346,7 +344,6 @@ export class InteractiveBackgroundSphere {
         }
         
         // [수정] 생성자에서 주입받은 THREE 객체를 사용합니다.
-        // 이 THREE 객체는 undefined가 아니어야 합니다.
         if (!THREE || typeof THREE.Color === 'undefined') {
             console.error("InteractiveBackgroundSphere: THREE.js object is invalid or not provided.");
             this.valid = false;

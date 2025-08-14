@@ -21,7 +21,7 @@ body {
   letter-spacing: -0.05em; white-space: nowrap; color: #fff;
   position: relative; overflow: visible; opacity: 0;
 }
-.headline em.connect { font-style: normal; }
+.headline em { font-style: normal; }
 .com-name-ani {
   position: absolute; top: 0; left: 0; transform: translateY(-100%);
   padding-bottom: 10px; font-size: clamp(2.5rem, 7vw, 8rem);
@@ -91,6 +91,7 @@ body {
   text-align: left; opacity: 0; transform: translateY(30px);
   min-height: 300px; display: flex; flex-direction: column;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform, box-shadow; /* 개선 제안: 애니메이션 성능 향상 */
 }
 .advantage-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); }
 .advantage-icon { font-size: 2.8rem; color: #4dabf7; margin-bottom: 1.2rem; text-align: center; height: 50px; display: flex; align-items: center; justify-content: center; }

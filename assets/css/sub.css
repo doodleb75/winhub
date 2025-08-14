@@ -10,12 +10,36 @@ body.subpage-body {
   color: #fdfefe;
   transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
 }
+.scroll-icon {
+  position: absolute; bottom: 3.75rem; left: 50%; transform: translateX(-50%);
+  width: 2.1875rem; height: 3.125rem; border: 2px solid white; border-radius: 1.5625rem;
+  display: flex; align-items: flex-start; justify-content: center;
+  opacity: 0; visibility: hidden;
+}
+.scroll-icon:before {
+  position: absolute; content: "Scroll"; width: fit-content; bottom: -40px;
+  left: 50%; transform: translateX(-50%); color: #fff; animation: scrollTxtLoop 2s infinite;
+}
+.scroll {
+  width: 0.3125rem; height: 0.625rem; background: white; border-radius: 0.625rem;
+  margin-top: 0.5rem; animation: scrollLoop 2s infinite;
+}
+@keyframes scrollLoop {
+  0% { transform: translateY(0); opacity: 1; }
+  80% { transform: translateY(1.25rem); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes scrollTxtLoop {
+  0% { opacity: 1; }
+  80% { opacity: 0.25; }
+  100% { opacity: 1; }
+}
 .subpage-container {
   position: relative;
   z-index: 2;
 }
 section.content-section {
-    padding-top: 10rem !important;
+    padding-top: 13rem !important;
 }
 .subpage-body .section-content-wrapper {
     max-width: 900px;
@@ -29,14 +53,13 @@ section.content-section {
 .subpage-body .subpage-section {
     width: 100%;
     min-height: 100vh;
-    display: flex
-;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     position: relative;
     overflow: hidden;
-    padding: 3.75rem 1.25rem;
+    padding: 3.75rem 0/* 1.25rem */;
     padding-bottom: 8rem;
     box-sizing: border-box;
 }

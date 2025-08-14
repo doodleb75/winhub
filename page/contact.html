@@ -146,17 +146,17 @@
             if (mapContainer && typeof kakao !== 'undefined' && kakao.maps) {
                 kakao.maps.load(function() {
                     const mapOption = { 
-                        center: new kakao.maps.LatLng(37.647935, 126.908358),
+                        center: new kakao.maps.LatLng(37.64765, 126.90845),
                         level: 3 
                     };
                     const map = new kakao.maps.Map(mapContainer, mapOption); 
-                    const markerPosition  = new kakao.maps.LatLng(37.647935, 126.908358); 
+                    const markerPosition  = new kakao.maps.LatLng(37.64765, 126.90845); 
                     const marker = new kakao.maps.Marker({
                         position: markerPosition
                     });
                     marker.setMap(map);
-                    const iwContent = '<div style="padding:5px; font-size:0.9rem;">WINHUB<br><a href="https://map.kakao.com/link/map/WINHUB,37.647935,126.908358" style="color:blue" target="_blank">큰지도보기</a> <a href="https://map.kakao.com/link/to/WINHUB,37.647935,126.908358" style="color:blue" target="_blank">길찾기</a></div>',
-                          iwPosition = new kakao.maps.LatLng(37.647935, 126.908358);
+                    const iwContent = '<div style="padding:5px; font-size:0.9rem;">WINHUB<br><a href="https://map.kakao.com/link/map/WINHUB,37.64765,126.90845" style="color:blue" target="_blank">큰지도보기</a> <a href="https://map.kakao.com/link/to/WINHUB,37.64765,126.90845" style="color:blue" target="_blank">길찾기</a></div>',
+                          iwPosition = new kakao.maps.LatLng(37.64765, 126.90845);
                     const infowindow = new kakao.maps.InfoWindow({
                         position : iwPosition, 
                         content : iwContent 

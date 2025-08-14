@@ -48,7 +48,27 @@ body.works-detail-page {
     max-width: 900px;
     width: 100%;
     text-align: left;
+    position: relative; /* [수정] 뒤로가기 버튼의 absolute 포지셔닝을 위한 기준점 */
 }
+
+/* [추가] 뒤로가기 버튼 스타일 */
+.back-button {
+    position: absolute;
+    /* h1의 상단 마진(2rem)과 동일하게 설정하여 높이 맞춤 */
+    top: 2.25rem;
+    /* 콘텐츠 영역 밖으로 빼기 */
+    left: -60px;
+    font-size: 2.5rem; /* 데스크탑에서 잘 보이도록 크기 조절 */
+    line-height: 1.4; /* h1과 수직 정렬을 위해 */
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.back-button:hover {
+    color: #007aff;
+}
+
 
 .project-title {
     font-size: clamp(2rem, 5vw, 3rem);
@@ -185,11 +205,38 @@ body.works-detail-page {
         padding: 6rem 1.5rem 3rem 1.5rem;
         align-items: flex-start;
     }
+    
+    /* [수정] 모바일에서 flex 레이아웃으로 변경 */
+    .works-detail-content {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center; /* 버튼과 제목을 수직 중앙 정렬 */
+    }
+
+    /* [수정] 모바일 뒤로가기 버튼 */
+    .back-button {
+        position: static; /* absolute 해제 */
+        font-size: 1.8rem;
+        margin-right: 10px;
+        /* absolute 관련 속성 리셋 */
+        top: auto;
+        left: auto;
+        line-height: 1;
+    }
+
     .project-title {
         font-size: 1.8rem;
         margin-top: 1rem;
         margin-bottom: 2rem;
+        /* flex 아이템으로 동작하므로 너비가 유연해짐 */
     }
+
+    /* [수정] 다른 자식 요소들이 너비를 100% 차지하도록 설정 */
+    .project-meta,
+    .project-overview {
+        flex-basis: 100%;
+    }
+
     .project-meta {
         grid-template-columns: 1fr;
         gap: 1rem;
