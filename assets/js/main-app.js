@@ -769,11 +769,13 @@ function playSplineIntroAnimation() {
 // [성능 개선] 메인 시퀀스: 성능과 애니메이션 순서를 모두 최적화
 async function runMainPageSequence() {
     // 1. 로더를 실행하고, 완료되면 즉시 기본 콘텐츠를 보여줍니다.
-    await runLoaderSequence('.part-container');
     
     // 2. 무거운 에셋 로딩을 백그라운드에서 시작합니다.
     const heavyAssetsPromise = initializeHeavyAssets();
-
+    const fontsPromise = document.fonts.ready;
+    
+    await runLoaderSequence('.part-container');
+    
     // 3. 가벼운 텍스트 인트로 애니메이션을 실행합니다.
     const comNameElement = document.querySelector(".com-name-ani");
     const heroTextBlock = document.querySelector('.hero-text-block');
@@ -789,7 +791,7 @@ async function runMainPageSequence() {
     // 3D 에셋 로딩과 폰트 로딩을 *먼저* 기다립니다.
     // 이렇게 하면 새로고침 시 병목 현상이 사라집니다.
     try {
-        await Promise.all([heavyAssetsPromise, document.fonts.ready]);
+        await Promise.all([heavyAssetsPromise, fontsPromise]);
     } catch (error) {
         console.error("Failed to await heavy assets or fonts, proceeding anyway...", error);
     }
