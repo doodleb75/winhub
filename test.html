@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>icons</title>
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: #0a0a0a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 96px;
+        font-family: system-ui, Segoe UI, Roboto, "Noto Sans KR";
+      }
+      svg {
+        width: 120px;
+        height: 120px;
+        stroke: #fff;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+    </style>
+  </head>
+  <body>
+    <svg id="ico-innovation" viewBox="0 0 100 100">
+      <g id="bulb-group">
+        <path
+          id="bulb-outline"
+          d="M50 18c-10 0-18 8-18 18 0 6 3 11 6 14 1 1 2 2 2 4v6c0 2 2 4 4 4h12c2 0 4-2 4-4v-6c0-2 1-3 2-4 3-3 6-8 6-14 0-10-8-18-18-18z"
+        />
+        <rect
+          id="bulb-base"
+          x="39"
+          y="70"
+          width="22"
+          height="8"
+          rx="2"
+          ry="2"
+        />
+        <g id="rays">
+          <line x1="50" y1="6" x2="50" y2="12" opacity="0.75" />
+          <line x1="68" y1="14" x2="64" y2="18" opacity="0.75" />
+          <line x1="32" y1="14" x2="36" y2="18" opacity="0.75" />
+        </g>
+        <g id="filament" transform="translate(0,0)">
+          <path d="M40 46 Q50 36 60 46" id="fil-path" />
+          <circle id="fil-dot" cx="50" cy="52" r="3" />
+        </g>
+        <g id="gear" transform="translate(50,60)">
+          <circle cx="0" cy="0" r="4" />
+          <path
+            d="M0 -8 L1.5 -11 M6 -4 L9 -5 M8 4 L10 6 M0 8 L1.5 11 M-6 4 L-9 5 M-8 -4 L-10 -6"
+            stroke="#fff"
+          />
+        </g>
+      </g>
+    </svg>
+    <svg id="ico-strategy" viewBox="0 0 100 100">
+      <g id="target-group" transform="translate(0,0)">
+        <circle id="outer" cx="50" cy="50" r="26" opacity="0.85" />
+        <circle id="middle" cx="50" cy="50" r="16" opacity="0.7" />
+        <circle id="center-dot" cx="50" cy="50" r="2" />
+        <g id="arrow-group" transform="translate(0,0)">
+          <path id="arrow-shaft" d="M25 50 L60 50" />
+          <path
+            id="arrow-head"
+            d="M56 46 L62 50 L56 54 L58 50 Z"
+            fill="#0A0A0A"
+            stroke="#fff"
+          />
+        </g>
+      </g>
+    </svg>
+    <svg id="ico-trust" viewBox="0 0 100 100">
+      <g id="board-group">
+        <rect
+          id="board-outline"
+          x="28"
+          y="20"
+          width="44"
+          height="60"
+          rx="6"
+          ry="6"
+        />
+        <path id="check" d="M38 54 L46 62 L66 42" />
+      </g>
+    </svg>
+    <script>
+      gsap.set("#fil-path", { strokeDasharray: 120, strokeDashoffset: 120 });
+      gsap.set("#fil-dot", { scale: 0, transformOrigin: "50% 50%" });
+      gsap
+        .timeline({ repeat: -1, repeatDelay: 0.6 })
+        .to("#fil-path", {
+          strokeDashoffset: 0,
+          duration: 0.6,
+          ease: "power2.out",
+        })
+        .to(
+          "#fil-dot",
+          { scale: 1, duration: 0.3, ease: "back.out(1.4)" },
+          "-=0.15"
+        )
+        .to(
+          "#rays line",
+          {
+            opacity: 1,
+            duration: 0.18,
+            yoyo: true,
+            repeat: 3,
+            ease: "sine.inOut",
+          },
+          "-=0.1"
+        )
+        .to(
+          "#gear",
+          {
+            rotation: 360,
+            transformOrigin: "50% 60%",
+            duration: 2.8,
+            ease: "linear",
+          },
+          0
+        );
+      gsap.set("#arrow-shaft", { strokeDasharray: 100, strokeDashoffset: 100 });
+      gsap.set("#arrow-head", { opacity: 0 });
+      gsap
+        .timeline({ repeat: -1, repeatDelay: 0.6 })
+        .to("#arrow-shaft", {
+          strokeDashoffset: 0,
+          duration: 0.6,
+          ease: "power1.out",
+        })
+        .to("#arrow-group", { x: 0, duration: 0.6, ease: "power2.out" })
+        .to("#arrow-group", {
+          x: -4,
+          duration: 0.6,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: 1,
+        })
+        .to("#arrow-head", { opacity: 1, duration: 0.1 }, "<")
+        .to(
+          "#arrow-shaft",
+          { strokeDashoffset: 100, duration: 0.6, ease: "power2.in" },
+          "+=0.1"
+        )
+        .set("#arrow-head", { opacity: 0 });
+      gsap.set("#check", { strokeDasharray: 140, strokeDashoffset: 140 });
+      gsap
+        .timeline({ repeat: -1, repeatDelay: 0.8 })
+        .to("#board-outline", {
+          strokeDasharray: 300,
+          strokeDashoffset: 300,
+          duration: 0.01,
+        })
+        .to("#check", {
+          strokeDashoffset: 0,
+          duration: 0.9,
+          ease: "power2.out",
+        })
+        .to("#check", { opacity: 1, duration: 0.3 })
+        .to("#check", { opacity: 0, duration: 0.5, ease: "power1.in" }, "+=0.5")
+        .set("#check", { strokeDashoffset: 140, opacity: 1 });
+    </script>
+  </body>
+</html>

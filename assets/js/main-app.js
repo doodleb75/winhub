@@ -67,6 +67,8 @@ function playHeadlineCharsAnimation(animateIn) {
     if (typeof gsap === 'undefined' || typeof SplitText === 'undefined') return;
 
     const headlineDivs = document.querySelectorAll(".headline div");
+    if (headlineDivs.length === 0) return;
+
     if (splitHeadlineChars.length !== headlineDivs.length ||
         (splitHeadlineChars.length > 0 && (!splitHeadlineChars[0] || !splitHeadlineChars[0].chars || !splitHeadlineChars[0].chars.length))) {
         splitHeadlineChars.forEach(st => st?.revert());
@@ -95,7 +97,13 @@ function playHeadlineCharsAnimation(animateIn) {
     if (headlineCharsAnim && headlineCharsAnim.isActive()) {
         headlineCharsAnim.kill();
     }
-    headlineCharsAnim = gsap.timeline();
+    
+    // [수정] will-change 속성을 추가하여 애니메이션 성능을 최적화합니다.
+    // onComplete 콜백으로 애니메이션이 끝나면 속성을 제거합니다.
+    gsap.set(headlineDivs, { willChange: 'transform, opacity' });
+    headlineCharsAnim = gsap.timeline({ 
+        onComplete: () => gsap.set(headlineDivs, { clearProps: 'will-change' }) 
+    });
 
     const emElements = document.querySelectorAll(".headline div em");
 
@@ -772,9 +780,20 @@ async function runMainPageSequence() {
 
     if (!comNameElement || !heroTextBlock) {
         console.error("Missing critical hero text elements for intro animation.");
+        // [수정] 3D 에셋이 로드되길 기다렸다가 완료 처리를 합니다.
         onLightIntroComplete(heavyAssetsPromise); 
         return;
     }
+
+    // [수정] 텍스트 애니메이션을 시작하기 전에
+    // 3D 에셋 로딩과 폰트 로딩을 *먼저* 기다립니다.
+    // 이렇게 하면 새로고침 시 병목 현상이 사라집니다.
+    try {
+        await Promise.all([heavyAssetsPromise, document.fonts.ready]);
+    } catch (error) {
+        console.error("Failed to await heavy assets or fonts, proceeding anyway...", error);
+    }
+    // --------------------------------------------------
     
     gsap.set(comNameElement, { autoAlpha: 0 });
     gsap.set(".headline", { autoAlpha: 0 });
@@ -825,6 +844,9 @@ async function runMainPageSequence() {
         console.error("Failed to split text for animation:", e);
     }
 
+    // [수정] com-name-ani 애니메이션 시작 전 will-change 설정
+    gsap.set(comNameElement, { willChange: 'transform, opacity' });
+
     if (splitComName && splitComName.chars && finalPositions.length === splitComName.chars.length) {
         masterIntroTimeline.from(splitComName.chars, {
             y: -50,
@@ -859,6 +881,11 @@ async function runMainPageSequence() {
         masterIntroTimeline.to(comNameElement, { autoAlpha: 1, duration: 1 });
     }
 
+    // [수정] com-name-ani 애니메이션이 모두 끝난 후 will-change 제거
+    masterIntroTimeline.call(() => {
+        gsap.set(comNameElement, { clearProps: 'will-change' });
+    }, null, ">"); // 바로 직전의 애니메이션이나 콜백이 끝난 직후 실행
+
     const headlineStartTime = ">-0.2";
     masterIntroTimeline
         .set(".headline", { autoAlpha: 1 }, headlineStartTime)
@@ -867,6 +894,9 @@ async function runMainPageSequence() {
 
     const headlineDivs = document.querySelectorAll(".headline div");
     if (headlineDivs.length > 0) {
+        // [수정] 인트로 애니메이션 시작 전 will-change 설정
+        gsap.set(headlineDivs, { willChange: 'transform, opacity' });
+
         splitHeadlineChars.forEach(st => st?.revert());
         splitHeadlineChars = [];
         headlineDivs.forEach((divElement) => {
@@ -895,6 +925,9 @@ async function runMainPageSequence() {
             gsap.set(emElements, {clearProps: "color"});
             masterIntroTimeline.to(emElements, { color: "#FFFF00", duration: 0.3, stagger: 0.05, ease: "power1.inOut" }, ">-0.2");
         }
+        
+        // [수정] 인트로 애니메이션 완료 후 will-change 제거
+        masterIntroTimeline.call(() => gsap.set(headlineDivs, { clearProps: 'will-change' }), null, ">");
     }
 }
 
@@ -904,7 +937,9 @@ async function onLightIntroComplete(heavyAssetsPromise) {
     window.scrollTo(0, 0);
 
     try {
-        // 백그라운드에서 로딩 중이던 무거운 에셋과 폰트가 모두 완료되기를 기다립니다.
+        // [수정] 위에서 이미 await 했지만,
+        // 에러 핸들링이나 로직의 견고함을 위해 여기서 다시 확인/대기합니다.
+        // (이미 완료되었다면 즉시 통과됩니다)
         await Promise.all([heavyAssetsPromise, document.fonts.ready]);
 
         // 배경 구체 애니메이션 시작
