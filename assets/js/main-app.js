@@ -1,6 +1,6 @@
 // assets/js/main-app.js
 
-// GSAP 플러그인들은 정적으로 로드합니다.
+// 플러그인 등록
 import { Draggable } from "https://esm.sh/gsap/Draggable";
 import { SplitText } from "https://esm.sh/gsap/SplitText";
 import { MorphSVGPlugin } from "https://esm.sh/gsap/MorphSVGPlugin";
@@ -12,7 +12,7 @@ if (typeof gsap !== 'undefined') {
     gsap.registerPlugin(Draggable, SplitText, MorphSVGPlugin, Observer);
 }
 
-// common-utils.js에서 스크롤 제어 함수를 포함한 모든 유틸리티를 가져옵니다.
+// 유틸리티 불러오기
 import {
     setupScrollRestoration,
     degToRad,
@@ -28,8 +28,7 @@ import {
     enableScrollInteraction
 } from './common-utils.js';
 
-
-// 모바일 브라우저의 동적 주소창에 대응하여 실제 뷰포트 높이를 계산하고 CSS 변수(--vh)를 설정합니다.
+// 뷰포트 높이 설정
 function setViewportHeight() {
   const vh = window.innerHeight * 0.01;
   document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -39,7 +38,7 @@ window.addEventListener('orientationchange', setViewportHeight);
 document.addEventListener('DOMContentLoaded', setViewportHeight);
 
 
-// --- Global Variables for Main Page ---
+// 전역 변수
 let mainSplineApp = null;
 let winhub = null, cable = null, splineTimelines = [];
 let splitComName, splitSubTitles = [], splitHeadlineChars = [];
@@ -54,7 +53,7 @@ if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
     });
 }
 
-// --- Configuration Variables ---
+// 설정값
 const getScaleConfig = (isDesktopView) => ({ hero: isDesktopView ? 140 : 300, part1: isDesktopView ? 200 : 400, part2: isDesktopView ? 200 : 400, part3: isDesktopView ? 200 : 400 });
 const getTargetWinhubX = (isMobileView) => isMobileView ? responsiveX(70) : responsiveX(65);
 const getTargetWinhubY = (isMobileView) => isMobileView ? responsiveY(-10) : 0;
@@ -62,7 +61,7 @@ const WINHUB_INTRO_END_Z = 0;
 const partBackgroundColors = { hero: "#410b7a", part1: "#0b2c7a", part2: "#0b7a48", part3: "#7a063c" };
 
 
-// --- Animation Functions (기존 함수들 유지) ---
+// 헤드라인 문자 애니메이션
 function playHeadlineCharsAnimation(animateIn) {
     if (typeof gsap === 'undefined' || typeof SplitText === 'undefined') return;
 
@@ -98,8 +97,7 @@ function playHeadlineCharsAnimation(animateIn) {
         headlineCharsAnim.kill();
     }
     
-    // [수정] will-change 속성을 추가하여 애니메이션 성능을 최적화합니다.
-    // onComplete 콜백으로 애니메이션이 끝나면 속성을 제거합니다.
+    // 성능 최적화: will-change 설정
     gsap.set(headlineDivs, { willChange: 'transform, opacity' });
     headlineCharsAnim = gsap.timeline({ 
         onComplete: () => gsap.set(headlineDivs, { clearProps: 'will-change' }) 
@@ -143,6 +141,7 @@ function playHeadlineCharsAnimation(animateIn) {
     }
 }
 
+// 히어로 스크롤 트리거 설정
 function setupHeroHeadlineScrollTrigger() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const heroSection = document.querySelector("#hero");
@@ -161,6 +160,7 @@ function setupHeroHeadlineScrollTrigger() {
     });
 }
 
+// 서브타이틀 애니메이션 설정
 function setupSubTitleAnimation() {
     if (typeof gsap === 'undefined' || typeof SplitText === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const subTitleElements = document.querySelectorAll(".sub-title");
@@ -204,6 +204,7 @@ function setupSubTitleAnimation() {
     });
  }
 
+// 파트3 트리거 토글
 function togglePart3Triggers(enable) {
     const idsToToggle = [
         'splineScrollTrigger-part3',
@@ -234,7 +235,7 @@ function togglePart3Triggers(enable) {
     });
 }
 
-
+// 가로 스크롤 설정
 function setupWorksHorizontalScroll() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const pinTargetElement = document.querySelector("#part2 .part2-info");
@@ -272,6 +273,7 @@ function setupWorksHorizontalScroll() {
     }});
  }
 
+// 워크 아이템 애니메이션 설정
 function setupWorkItemAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
@@ -293,7 +295,7 @@ function setupWorkItemAnimations() {
             start: "left 95%",
             toggleActions: "restart pause resume reverse",
             onEnter: self => {
-                // 개선 사항: 애니메이션이 적용될 것임을 브라우저에 미리 알려 성능을 최적화합니다.
+                // 성능: will-change 추가, 애니메이션 실행
                 gsap.set(self.trigger, { willChange: 'transform, opacity' });
                 gsap.to(self.trigger, {
                     autoAlpha: 1,
@@ -303,7 +305,6 @@ function setupWorkItemAnimations() {
                     duration: 0.6,
                     ease: "back.out(1.4)",
                     overwrite: true,
-                    // 개선 사항: 애니메이션이 끝나면 will-change 속성을 제거합니다.
                     onComplete: () => gsap.set(self.trigger, { clearProps: 'will-change' })
                 });
             },
@@ -324,6 +325,7 @@ function setupWorkItemAnimations() {
     });
 }
 
+// 헤더 로고 트리거 설정
 function setupHeaderLogoScrollAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const headerLogo = document.querySelector("#header-placeholder .com-name-logo");
@@ -344,6 +346,7 @@ function setupHeaderLogoScrollAnimation() {
     });
  }
 
+// 배경 색상 전환 설정
 function setupMainPageBackgroundChangeAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     gsap.set(document.body, { backgroundColor: partBackgroundColors.hero });
@@ -359,6 +362,7 @@ function setupMainPageBackgroundChangeAnimations() {
     });
  }
 
+// spline 애니메이션 설정
 function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     splineTimelines.forEach(tl => tl.kill()); 
@@ -366,7 +370,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     const currentScaleConfig = getScaleConfig(isDesktopView);
     const isMobileView = !isDesktopView;
 
-    // Hero Section Timeline
+    // Hero timeline
     const heroTimeline = gsap.timeline({ 
         scrollTrigger: { 
             id: 'splineScrollTrigger-hero', 
@@ -398,7 +402,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     }, 0);
     splineTimelines.push(heroTimeline);
 
-    // Part 1 Section Timeline
+    // part1 timeline
     if (document.getElementById('part1')) {
         const part1Timeline = gsap.timeline({ 
             scrollTrigger: { 
@@ -428,7 +432,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
         splineTimelines.push(part1Timeline);
     }
 
-    // Part 2 Section Timeline
+    // part2 timeline
     if (document.getElementById('part2')) {
         const part2Timeline = gsap.timeline({ 
             scrollTrigger: { 
@@ -457,7 +461,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
         splineTimelines.push(part2Timeline);
     }
 
-    // Part 3 Section Timeline
+    // part3 timeline
     if (document.getElementById('part3')) {
         const part3Timeline = gsap.timeline({ 
             scrollTrigger: { 
@@ -486,8 +490,7 @@ function setupSplineScrollAnimations(winhubObj, cableObj, isDesktopView) {
     }
 }
 
-
-
+// 어드밴티지 카드 애니메이션
 function setupAdvantageCardAnimations() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const cards = gsap.utils.toArray("#part1 .advantage-card, #part1 .integrated-value-card");
@@ -502,11 +505,10 @@ function setupAdvantageCardAnimations() {
             end: "bottom 15%",
             invalidateOnRefresh: true,
             onEnter: () => {
-                // 개선 사항: will-change 추가
                 gsap.set(card, { willChange: 'transform, opacity' });
                 gsap.to(card, {
                     autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out", delay: index * 0.1, overwrite: true,
-                    onComplete: () => gsap.set(card, { clearProps: 'will-change' }) // 개선 사항: will-change 제거
+                    onComplete: () => gsap.set(card, { clearProps: 'will-change' })
                 });
             },
             onLeave: () => {
@@ -534,6 +536,7 @@ function setupAdvantageCardAnimations() {
     });
 }
 
+// 아웃트로 콘텐츠 애니메이션
 function setupOutroContentAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const outroContentContainer = document.querySelector("#part3 .outro-content"); if (!outroContentContainer) return;
@@ -565,6 +568,7 @@ function setupOutroContentAnimation() {
     });
 }
 
+// 상단 이동 버튼 설정
 function setupScrollToTopButton() {
     const scrollToTopBtn = document.getElementById("scrollToTopBtn");
     if (!scrollToTopBtn) return;
@@ -604,7 +608,7 @@ function setupScrollToTopButton() {
     });
 }
 
-
+// 스크롤 아이콘 트리거 설정
 function setupScrollIconAnimation() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     const scrollIcon = document.querySelector(".scroll-icon");
@@ -624,6 +628,7 @@ function setupScrollIconAnimation() {
     });
  }
 
+// 워크 리스트 생성
 function populateWorksList() {
     const worksListContainer = document.querySelector("#part2 .works-list");
     if (!worksListContainer) {
@@ -667,17 +672,14 @@ function populateWorksList() {
     });
  }
 
-
-// [성능 개선] 무거운 3D 에셋과 라이브러리를 비동기적으로 로드하는 함수
+// 무거운 에셋 비동기 로드
 async function initializeHeavyAssets() {
     try {
-        // 1. 필요한 라이브러리를 동적으로 import 합니다.
         const { Application } = await import('https://unpkg.com/@splinetool/runtime/build/runtime.js');
         const { InteractiveBackgroundSphere, loadSplineScene } = await import('./common-utils.js');
         const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js');
-        window.THREE = THREE; // Spline 런타임이 참조할 수 있도록 전역에 할당
+        window.THREE = THREE;
 
-        // 2. Spline 씬을 로드합니다.
         const splineCanvas = document.getElementById("canvas3d");
         if (splineCanvas) gsap.set(splineCanvas, { autoAlpha: 0 });
 
@@ -692,18 +694,16 @@ async function initializeHeavyAssets() {
             console.error("MAIN-APP: Main Spline App could not be loaded.");
         }
 
-        // 3. 인터랙티브 배경 구체를 인스턴스화합니다. init()은 애니메이션 시작 시점에 호출됩니다.
         mainPageBackgroundSphere = new InteractiveBackgroundSphere('threejs-background-container', THREE);
 
     } catch (error) {
         console.error("Error initializing heavy assets:", error);
-        return Promise.reject(error); // 에셋 로딩 실패 시 Promise를 reject
+        return Promise.reject(error);
     }
 }
 
-// 히어로 인트로 완료 후 호출될 콜백 함수
+// 히어로 인트로 완료 처리
 function onHeroIntroComplete() {
-    // 인트로 애니메이션이 모두 완료된 후 스크롤 트리거를 설정합니다.
     if (!initialSetupDone) {
         setupResponsiveScrollTriggers();
         initialSetupDone = true;
@@ -717,24 +717,19 @@ function onHeroIntroComplete() {
     const scrollIcon = document.querySelector(".scroll-icon");
     if (scrollIcon) gsap.to(scrollIcon, { duration: 0.8, autoAlpha: 1, ease: "power2.out" });
 
-    // ScrollTrigger.refresh()는 setupAllScrollTriggers 내에서 호출되지만,
-    // 모든 것이 안정된 후 마지막으로 한 번 더 호출해주는 것이 안전합니다.
     if (typeof ScrollTrigger !== 'undefined') {
         ScrollTrigger.refresh(true);
     }
     
-    // *** FIX: 헤드라인 재재생 방지를 위해 트리거 활성화를 지연시킵니다. ***
-    // ScrollTrigger.refresh()가 완료된 후 트리거가 활성화되도록 하여, 초기 로드 시 불필요한 재실행을 막습니다.
     gsap.delayedCall(0.1, () => {
         heroHeadlineTriggerEnabled = true;
     });
 }
 
-// Spline 인트로 애니메이션을 별도 함수로 분리
+// Spline 인트로 애니메이션 분리
 function playSplineIntroAnimation() {
     const splineCanvas = document.getElementById("canvas3d");
     if (!splineCanvas || !winhub) {
-        // Spline 로딩 실패 시에도 UI는 활성화되어야 합니다.
         onHeroIntroComplete();
         return;
     }
@@ -766,36 +761,27 @@ function playSplineIntroAnimation() {
             "<");
 }
 
-// [성능 개선] 메인 시퀀스: 성능과 애니메이션 순서를 모두 최적화
+// 메인 시퀀스 실행 (성능 최적화)
 async function runMainPageSequence() {
-    // 1. 로더를 실행하고, 완료되면 즉시 기본 콘텐츠를 보여줍니다.
-    
-    // 2. 무거운 에셋 로딩을 백그라운드에서 시작합니다.
     const heavyAssetsPromise = initializeHeavyAssets();
     const fontsPromise = document.fonts.ready;
     
     await runLoaderSequence('.part-container');
     
-    // 3. 가벼운 텍스트 인트로 애니메이션을 실행합니다.
     const comNameElement = document.querySelector(".com-name-ani");
     const heroTextBlock = document.querySelector('.hero-text-block');
 
     if (!comNameElement || !heroTextBlock) {
         console.error("Missing critical hero text elements for intro animation.");
-        // [수정] 3D 에셋이 로드되길 기다렸다가 완료 처리를 합니다.
         onLightIntroComplete(heavyAssetsPromise); 
         return;
     }
 
-    // [수정] 텍스트 애니메이션을 시작하기 전에
-    // 3D 에셋 로딩과 폰트 로딩을 *먼저* 기다립니다.
-    // 이렇게 하면 새로고침 시 병목 현상이 사라집니다.
     try {
         await Promise.all([heavyAssetsPromise, fontsPromise]);
     } catch (error) {
         console.error("Failed to await heavy assets or fonts, proceeding anyway...", error);
     }
-    // --------------------------------------------------
     
     gsap.set(comNameElement, { autoAlpha: 0 });
     gsap.set(".headline", { autoAlpha: 0 });
@@ -846,7 +832,6 @@ async function runMainPageSequence() {
         console.error("Failed to split text for animation:", e);
     }
 
-    // [수정] com-name-ani 애니메이션 시작 전 will-change 설정
     gsap.set(comNameElement, { willChange: 'transform, opacity' });
 
     if (splitComName && splitComName.chars && finalPositions.length === splitComName.chars.length) {
@@ -883,10 +868,9 @@ async function runMainPageSequence() {
         masterIntroTimeline.to(comNameElement, { autoAlpha: 1, duration: 1 });
     }
 
-    // [수정] com-name-ani 애니메이션이 모두 끝난 후 will-change 제거
     masterIntroTimeline.call(() => {
         gsap.set(comNameElement, { clearProps: 'will-change' });
-    }, null, ">"); // 바로 직전의 애니메이션이나 콜백이 끝난 직후 실행
+    }, null, ">");
 
     const headlineStartTime = ">-0.2";
     masterIntroTimeline
@@ -896,7 +880,6 @@ async function runMainPageSequence() {
 
     const headlineDivs = document.querySelectorAll(".headline div");
     if (headlineDivs.length > 0) {
-        // [수정] 인트로 애니메이션 시작 전 will-change 설정
         gsap.set(headlineDivs, { willChange: 'transform, opacity' });
 
         splitHeadlineChars.forEach(st => st?.revert());
@@ -932,7 +915,6 @@ async function runMainPageSequence() {
         masterIntroTimeline.call(() => gsap.set(headlineDivs, { clearProps: 'will-change' }), null, ">");
     }
 }
-
 
 // 가벼운 인트로 완료 후 호출되는 콜백 함수
 async function onLightIntroComplete(heavyAssetsPromise) {
